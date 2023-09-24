@@ -1,0 +1,22 @@
+{
+  "name": "dev-docs",
+  "version": "0.0.1",
+  "description": "Everything you need to prepare for an interview",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharief007/dev-docs.git"
+  },
+  "author": "shariefmohammad007@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sharief007/dev-docs/issues"
+  },
+  "homepage": "https://github.com/sharief007/dev-docs#readme",
+  "devDependencies": {
+    "gh-pages": "^6.0.0"
+  }
+}
