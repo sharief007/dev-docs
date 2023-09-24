@@ -11,7 +11,7 @@ params:
     displayTitle: true
     displayLogo: false
   editURL:
-    base: "https://github.com/sharief007/my-docs"
+    base: "https://github.com/sharief007/dev-docs"
 
 
 markup:
@@ -29,7 +29,7 @@ menu:
         type: search
     - name: github
       weight: 2
-      url: "https://github.com/sharief007/my-docs"
+      url: "https://github.com/sharief007/dev-docs"
       params:
         icon: github
     - name: linkedin
