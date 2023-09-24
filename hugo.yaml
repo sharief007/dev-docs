@@ -35,8 +35,3 @@ menu:
       url: "https://github.com/sharief007/dev-docs"
       params:
         icon: github
-    - name: linkedin
-      weight: 3
-      url: "https://www.linkedin.com/in/sharief-/"
-      params:
-        icon: discord
