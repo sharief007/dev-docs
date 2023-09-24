@@ -1,4 +1,4 @@
-module github.com/sharief007/my-docs
+module github.com/sharief007/dev-docs
 
 go 1.20
 
