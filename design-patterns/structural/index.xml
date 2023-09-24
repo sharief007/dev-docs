@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Structural Patterns of Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/design-patterns/structural/</link>
+    <description>Recent content in Structural Patterns on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/design-patterns/structural/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Adapter Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</guid>
+      <description>The Adapter design pattern is a structural pattern that allows objects with incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, providing a way for objects to collaborate without modifying their existing code.
+The Adapter pattern involves creating an intermediary class, known as the &amp;ldquo;adapter,&amp;rdquo; which translates one interface into another, making them compatible.
+Participants Target Interface: This is the interface that the client code expects to interact with.</description>
+      <content:encoded><![CDATA[<p>The Adapter design pattern is a structural pattern that allows objects with incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, providing a way for objects to collaborate without modifying their existing code.</p>
+<p>The Adapter pattern involves creating an intermediary class, known as the &ldquo;adapter,&rdquo; which translates one interface into another, making them compatible.</p>
+<h3>Participants<span class="absolute -mt-20" id="participants"></span>
+    <a href="#participants" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
+<li><strong>Target Interface:</strong> This is the interface that the client code expects to interact with. It defines the methods that the client uses to communicate with objects.</li>
+<li><strong>Adaptee:</strong> This is the existing class with an incompatible interface that needs to be integrated or used by the client. The Adaptee class typically has methods that need to be adapted to match the Target Interface.</li>
+<li><strong>Adapter:</strong> This is the class that implements the Target Interface and wraps an instance of the Adaptee. It serves as an intermediary, forwarding calls from the client to the Adaptee and translating the calls as needed.</li>
+</ul>
+<h3>Adapter Variants<span class="absolute -mt-20" id="adapter-variants"></span>
+    <a href="#adapter-variants" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>There are two common variants of the Adapter pattern:</p>
+<ul>
+<li><strong>Class Adapter:</strong> In this variant, the Adapter class inherits from both the Target Interface and the Adaptee class. It &ldquo;adapts&rdquo; the Adaptee&rsquo;s interface to match the Target Interface. Multiple inheritance is typically used in languages that support it.</li>
+<li><strong>Object Adapter:</strong> In this variant, the Adapter class contains an instance of the Adaptee class. It implements the Target Interface and delegates the calls to the Adaptee&rsquo;s methods, performing any necessary translations in the process. This approach is more flexible and can be used in languages that do not support multiple inheritance.</li>
+</ul>
+<h3>Class Based Adapter (Inheritance)<span class="absolute -mt-20" id="class-based-adapter-inheritance"></span>
+    <a href="#class-based-adapter-inheritance" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><pre class="mermaid mt-6">classDiagram
+    class AudioPlayer {
+        +play(audioType: String, filename: String)
+    }
+    
+    class LegacyAudioPlayer {
+        +playAudioFile(filename: String)
+    }
+
+    class AudioPlayerAdapter {
+        +AudioPlayerAdapter()
+        +play(audioType: String, filename: String)
+    }
+    
+    AudioPlayer <|.. AudioPlayerAdapter
+    LegacyAudioPlayer <|.. AudioPlayerAdapter</pre><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// Adaptee
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LegacyAudioPlayer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">playAudioFile</span><span class="o">(</span><span class="n">String</span> <span class="n">filename</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Playing legacy audio file: &#34;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Target Interface
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">AudioPlayer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">play</span><span class="o">(</span><span class="n">String</span> <span class="n">audioType</span><span class="o">,</span> <span class="n">String</span> <span class="n">filename</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// (Class-Based Adapter)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AudioPlayerAdapter</span> <span class="kd">extends</span> <span class="n">LegacyAudioPlayer</span> <span class="kd">implements</span> <span class="n">AudioPlayer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">play</span><span class="o">(</span><span class="n">String</span> <span class="n">audioType</span><span class="o">,</span> <span class="n">String</span> <span class="n">filename</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">audioType</span><span class="o">.</span><span class="na">equalsIgnoreCase</span><span class="o">(</span><span class="s">&#34;legacy&#34;</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">playAudioFile</span><span class="o">(</span><span class="n">filename</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Unsupported audio type: &#34;</span> <span class="o">+</span> <span class="n">audioType</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Client
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AudioPlayerAdapter</span> <span class="n">adapter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AudioPlayerAdapter</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adapter</span><span class="o">.</span><span class="na">play</span><span class="o">(</span><span class="s">&#34;legacy&#34;</span><span class="o">,</span> <span class="s">&#34;old_song.mp3&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Target Interface</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">AudioPlayer</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_type</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Adaptee</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">LegacyAudioPlayer</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">play_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Playing legacy audio file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Adapter</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">AudioPlayerAdapter</span><span class="p">(</span><span class="n">LegacyAudioPlayer</span><span class="p">,</span> <span class="n">AudioPlayer</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_type</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">audio_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&#34;legacy&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">play_audio_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Unsupported audio type: </span><span class="si">{</span><span class="n">audio_type</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Client Code</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adapter</span> <span class="o">=</span> <span class="n">AudioPlayerAdapter</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adapter</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="s2">&#34;legacy&#34;</span><span class="p">,</span> <span class="s2">&#34;old_song.mp3&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">main</span><span class="p">()</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Target Interface
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">AudioPlayer</span> <span class="kd">interface</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Play</span><span class="p">(</span><span class="nx">audioType</span><span class="p">,</span> <span class="nx">filename</span> <span class="kt">string</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Adaptee
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">LegacyAudioPlayer</span> <span class="kd">struct</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">la</span> <span class="o">*</span><span class="nx">LegacyAudioPlayer</span><span class="p">)</span> <span class="nf">PlayAudioFile</span><span class="p">(</span><span class="nx">filename</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Playing legacy audio file: %s\n&#34;</span><span class="p">,</span> <span class="nx">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Adapter
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">AudioPlayerAdapter</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">LegacyAudioPlayer</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">apa</span> <span class="o">*</span><span class="nx">AudioPlayerAdapter</span><span class="p">)</span> <span class="nf">Play</span><span class="p">(</span><span class="nx">audioType</span><span class="p">,</span> <span class="nx">filename</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">audioType</span> <span class="o">==</span> <span class="s">&#34;legacy&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">apa</span><span class="p">.</span><span class="nf">PlayAudioFile</span><span class="p">(</span><span class="nx">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Unsupported audio type: %s\n&#34;</span><span class="p">,</span> <span class="nx">audioType</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Client Code
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">adapter</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">AudioPlayerAdapter</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">adapter</span><span class="p">.</span><span class="nf">Play</span><span class="p">(</span><span class="s">&#34;legacy&#34;</span><span class="p">,</span> <span class="s">&#34;old_song.mp3&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+<h3>Object Based Adapter (Composition)<span class="absolute -mt-20" id="object-based-adapter-composition"></span>
+    <a href="#object-based-adapter-composition" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><pre class="mermaid mt-6">classDiagram
+    class AudioPlayer {
+        +play(audioType: String, filename: String)
+    }
+    
+    class LegacyAudioPlayer {
+        +playAudioFile(filename: String)
+    }
+
+    class AudioPlayerAdapter {
+        +AudioPlayerAdapter(legacyAudioPlayer: LegacyAudioPlayer)
+        +play(audioType: String, filename: String)
+        -legacyAudioPlayer: LegacyAudioPlayer
+    }
+    
+    AudioPlayer <|.. AudioPlayerAdapter
+    AudioPlayerAdapter --> LegacyAudioPlayer</pre><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// Adaptee
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LegacyAudioPlayer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">playAudioFile</span><span class="o">(</span><span class="n">String</span> <span class="n">filename</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Playing legacy audio file: &#34;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Target Interface
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">AudioPlayer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">play</span><span class="o">(</span><span class="n">String</span> <span class="n">audioType</span><span class="o">,</span> <span class="n">String</span> <span class="n">filename</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Object-based Adapter
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">AudioPlayerAdapter</span> <span class="kd">implements</span> <span class="n">AudioPlayer</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">LegacyAudioPlayer</span> <span class="n">legacyAudioPlayer</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="nf">AudioPlayerAdapter</span><span class="o">(</span><span class="n">LegacyAudioPlayer</span> <span class="n">legacyAudioPlayer</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">legacyAudioPlayer</span> <span class="o">=</span> <span class="n">legacyAudioPlayer</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">play</span><span class="o">(</span><span class="n">String</span> <span class="n">audioType</span><span class="o">,</span> <span class="n">String</span> <span class="n">filename</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">audioType</span><span class="o">.</span><span class="na">equalsIgnoreCase</span><span class="o">(</span><span class="s">&#34;legacy&#34;</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">legacyAudioPlayer</span><span class="o">.</span><span class="na">playAudioFile</span><span class="o">(</span><span class="n">filename</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Unsupported audio type: &#34;</span> <span class="o">+</span> <span class="n">audioType</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Client
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">LegacyAudioPlayer</span> <span class="n">legacyPlayer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LegacyAudioPlayer</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AudioPlayerAdapter</span> <span class="n">adapter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AudioPlayerAdapter</span><span class="o">(</span><span class="n">legacyPlayer</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adapter</span><span class="o">.</span><span class="na">play</span><span class="o">(</span><span class="s">&#34;legacy&#34;</span><span class="o">,</span> <span class="s">&#34;old_song.mp3&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Target Interface</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">AudioPlayer</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_type</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">pass</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Adaptee</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">LegacyAudioPlayer</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">play_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Playing legacy audio file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Adapter</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">AudioPlayerAdapter</span><span class="p">(</span><span class="n">AudioPlayer</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">legacy_audio_player</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">_legacy_audio_player</span> <span class="o">=</span> <span class="n">legacy_audio_player</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_type</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">audio_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&#34;legacy&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">_legacy_audio_player</span><span class="o">.</span><span class="n">play_audio_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Unsupported audio type: </span><span class="si">{</span><span class="n">audio_type</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Client Code</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">    <span class="n">legacy_player</span> <span class="o">=</span> <span class="n">LegacyAudioPlayer</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adapter</span> <span class="o">=</span> <span class="n">AudioPlayerAdapter</span><span class="p">(</span><span class="n">legacy_player</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adapter</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="s2">&#34;legacy&#34;</span><span class="p">,</span> <span class="s2">&#34;old_song.mp3&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">main</span><span class="p">()</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Target Interface
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">AudioPlayer</span> <span class="kd">interface</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Play</span><span class="p">(</span><span class="nx">audioType</span><span class="p">,</span> <span class="nx">filename</span> <span class="kt">string</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Adaptee
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">LegacyAudioPlayer</span> <span class="kd">struct</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">la</span> <span class="o">*</span><span class="nx">LegacyAudioPlayer</span><span class="p">)</span> <span class="nf">PlayAudioFile</span><span class="p">(</span><span class="nx">filename</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Playing legacy audio file: %s\n&#34;</span><span class="p">,</span> <span class="nx">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Adapter
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">AudioPlayerAdapter</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">legacyAudioPlayer</span> <span class="o">*</span><span class="nx">LegacyAudioPlayer</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">apa</span> <span class="o">*</span><span class="nx">AudioPlayerAdapter</span><span class="p">)</span> <span class="nf">Play</span><span class="p">(</span><span class="nx">audioType</span><span class="p">,</span> <span class="nx">filename</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">audioType</span> <span class="o">==</span> <span class="s">&#34;legacy&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">apa</span><span class="p">.</span><span class="nx">legacyAudioPlayer</span><span class="p">.</span><span class="nf">PlayAudioFile</span><span class="p">(</span><span class="nx">filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Unsupported audio type: %s\n&#34;</span><span class="p">,</span> <span class="nx">audioType</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Client Code
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">legacyPlayer</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">LegacyAudioPlayer</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">adapter</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">AudioPlayerAdapter</span><span class="p">{</span><span class="nx">legacyAudioPlayer</span><span class="p">:</span> <span class="nx">legacyPlayer</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">adapter</span><span class="p">.</span><span class="nf">Play</span><span class="p">(</span><span class="s">&#34;legacy&#34;</span><span class="p">,</span> <span class="s">&#34;old_song.mp3&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

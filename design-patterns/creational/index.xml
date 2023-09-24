@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Structural Patterns of Dev Docs</title>
+    <title>Creational Patterns of Dev Docs</title>
     <link>https://sharief007.github.io/dev-docs/design-patterns/creational/</link>
-    <description>Recent content in Structural Patterns on Dev Docs</description>
+    <description>Recent content in Creational Patterns on Dev Docs</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/design-patterns/creational/index.xml" rel="self" type="application/rss+xml" />
   </channel>

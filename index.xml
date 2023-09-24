@@ -7,6 +7,17 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Adapter Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</guid>
+      <description>The Adapter design pattern is a structural pattern that allows objects with incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, providing a way for objects to collaborate without modifying their existing code.
+The Adapter pattern involves creating an intermediary class, known as the &amp;ldquo;adapter,&amp;rdquo; which translates one interface into another, making them compatible.
+Participants Target Interface: This is the interface that the client code expects to interact with.</description>
+    </item>
+    
+    <item>
       <title>Chain Of Responsibility</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain_of_responsibility/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
