@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/</link>
+    <description>Recent content on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Chain Of Responsibility</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain_of_responsibility/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain_of_responsibility/</guid>
+      <description>The Chain of Responsibility is a behavioral design pattern that helps in passing a request along a chain of handlers.
+The Chain of Responsibility pattern is like a relay race. In a relay race, each runner passes the baton to the next runner. Similarly, in this pattern, a request is passed along a chain of handlers.
+Each handler decides either to process the request or to pass it along the chain.</description>
+    </item>
+    
+  </channel>
+</rss>
