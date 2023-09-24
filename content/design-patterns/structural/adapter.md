@@ -12,13 +12,13 @@ The Adapter design pattern is a structural pattern that allows objects with inco
 
 The Adapter pattern involves creating an intermediary class, known as the "adapter," which translates one interface into another, making them compatible.
 
-### Participants:
+### Participants
 
 - **Target Interface:** This is the interface that the client code expects to interact with. It defines the methods that the client uses to communicate with objects.
 - **Adaptee:** This is the existing class with an incompatible interface that needs to be integrated or used by the client. The Adaptee class typically has methods that need to be adapted to match the Target Interface.
 - **Adapter:** This is the class that implements the Target Interface and wraps an instance of the Adaptee. It serves as an intermediary, forwarding calls from the client to the Adaptee and translating the calls as needed.
 
-### Adapter Variants:
+### Adapter Variants
 There are two common variants of the Adapter pattern:
 
 - **Class Adapter:** In this variant, the Adapter class inherits from both the Target Interface and the Adaptee class. It "adapts" the Adaptee's interface to match the Target Interface. Multiple inheritance is typically used in languages that support it.
