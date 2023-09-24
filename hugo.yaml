@@ -10,6 +10,9 @@ params:
   navbar:
     displayTitle: true
     displayLogo: false
+  footer:
+    displayCopyright: false
+    displayPoweredBy: false
   editURL:
     base: "https://github.com/sharief007/dev-docs"
 
