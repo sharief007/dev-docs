@@ -1,0 +1,39 @@
+baseURL: https://sharief007.github.io/
+languageCode: en-us
+title: Dev Docs
+
+module:
+  imports:
+    - path: github.com/imfing/hextra
+
+params:
+  navbar:
+    displayTitle: true
+    displayLogo: false
+  editURL:
+    base: "https://github.com/sharief007/my-docs"
+
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+
+menu:
+  main:
+    - name: Search
+      weight: 1
+      params:
+        type: search
+    - name: github
+      weight: 2
+      url: "https://github.com/sharief007/my-docs"
+      params:
+        icon: github
+    - name: linkedin
+      weight: 3
+      url: "https://www.linkedin.com/in/sharief-/"
+      params:
+        icon: discord
