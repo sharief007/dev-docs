@@ -5,6 +5,7 @@ weight: 1
 toc: true
 sidebar:
   open: true
+next: depth-first-search
 params:
   editURL: 
 ---
