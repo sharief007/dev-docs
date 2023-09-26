@@ -11,7 +11,7 @@ params:
 
 {{< cards >}}
   {{< card link="" title="Breadth First Search (BFS)" subtitle="Finds the shortest path from a source vertex to all other vertices in an unweighted graph." >}}
-  {{< card link="" title="Depth First Search (DFS)" subtitle="Explores as far as possible along each branch before backtracking, used to traverse or search in graphs. >}}
+  {{< card link="" title="Depth First Search (DFS)" subtitle="Explores as far as possible along each branch before backtracking, used to traverse or search in graphs." >}}
   {{< card link="" title="Dijkstra's Algorithm" subtitle="Finds the shortest path between nodes in a weighted graph, where the edges have non-negative weights." >}}
   {{< card link="" title="Bellman-Ford Algorithm" subtitle="Finds the shortest path between nodes in a weighted graph, even when the edges have negative weights." >}}
   {{< card link="" title="Floyd-Warshall Algorithm" subtitle="Finds the shortest paths between all pairs of nodes in a weighted graph. It works with both positive and negative edge weights." >}}
