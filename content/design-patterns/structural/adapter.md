@@ -1,6 +1,7 @@
 ---
 title: Adapter Pattern
 type: docs
+weight: 1
 toc: true
 sidebar:
   open: true
