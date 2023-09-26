@@ -18,11 +18,106 @@ Participants Target Interface: This is the interface that the client code expect
     </item>
     
     <item>
-      <title>Chain Of Responsibility</title>
-      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain_of_responsibility/</link>
+      <title>Breadth First Search</title>
+      <link>https://sharief007.github.io/dev-docs/graph-theory/search/breadth-first-search/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain_of_responsibility/</guid>
+      <guid>https://sharief007.github.io/dev-docs/graph-theory/search/breadth-first-search/</guid>
+      <description>Breadth-First Search (BFS) is a graph traversal algorithm that explores a graph level by level, starting from a chosen source node. It visits all the immediate neighbors of the source node first, then moves on to their neighbors, and so forth, until it has visited all reachable nodes.
+Examples let&amp;rsquo;s consider a few different types of graphs and perform BFS on them.
+Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Results starting from node 0:</description>
+    </item>
+    
+    <item>
+      <title>Dijkstra&#39;s Algorithm</title>
+      <link>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</guid>
+      <description>Dijkstra&amp;rsquo;s Algorithm is a method used to find the shortest path from a specified starting point (source) to all other points (nodes) in a weighted graph, where the edge weights represents non-negative distances between nodes. It ensures that the shortest path to each node is determined accurately, considering all possible routes through the graph, and is commonly employed in navigation and network routing applications.
+Examples Simple Weighted Graph: A/ \2 3/ \B-------C\ /1D Initial distances: A: ∞, B: ∞, C: ∞, D: ∞</description>
+    </item>
+    
+    <item>
+      <title>Singleton Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/creational/singleton/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/creational/singleton/</guid>
+      <description>Simple singleton with Draconian synchronization public class Singleton { private static Singleton instance; private Singleton() {} public static synchronized Singleton getInstance() { if(instance == null) { this.instance = new Singleton(); } return this.instance; } } Thread Safe. Locks will be acquired everytime the getInstance method is called. Acquiring and releasing locks unnecessarily could result in performance drawback.
+Singleton with Double Check Locking public class Singleton { private static volatile Singleton Instance; private Singletion(){} public static Singleton getInstance() { if (instance == null) { synchronized(Singleton.</description>
+    </item>
+    
+    <item>
+      <title>Topological Sorting</title>
+      <link>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</guid>
+      <description>Topological sorting is a linear ordering of the vertices in a directed acyclic graph (DAG) such that for every directed edge (u, v), vertex u comes before vertex v in the ordering. In simpler terms, it helps organize tasks or elements in a way that respects the dependencies between them.
+Applications Topological sorting has several practical applications:
+Task Scheduling: In project management, tasks often have dependencies on each other. Topological sorting helps in determining a valid order of execution.</description>
+    </item>
+    
+    <item>
+      <title>Composite Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</guid>
+      <description>The Composite pattern organizes objects into tree structures, making them work together like one. It lets clients treat individual objects and compositions of objects in a similar way.
+This is useful when dealing with things organized in a tree-like structure, such as files and folders in a computer&amp;rsquo;s file system.
+Key Participants: Component: This is the base interface or abstract class that declares the common operations for both leaf objects and composite objects.</description>
+    </item>
+    
+    <item>
+      <title>Depth First Search</title>
+      <link>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</guid>
+      <description>Depth First Search (DFS) is an algorithm for traversing or searching through a tree or graph data structure. It starts at a chosen node and explores as far as possible along each branch before backtracking. This means it goes as deep as possible down one branch before moving to the next branch.
+Examples let&amp;rsquo;s consider a few different types of graphs and perform DFS on them.
+Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Results starting from node 0:</description>
+    </item>
+    
+    <item>
+      <title>Decorator Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</guid>
+      <description>The Decorator design pattern is a structural design pattern that allows you to add behavior or responsibilities to objects dynamically, without altering their code. It is one of the Gang of Four design patterns and is used to achieve flexibility in object composition by allowing behavior to be added or removed from individual objects, rather than modifying the entire class hierarchy.
+This pattern is particularly useful when you have a set of objects with similar functionalities, but you want to provide a way to extend or modify their behavior in a flexible manner.</description>
+    </item>
+    
+    <item>
+      <title>Facade Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</guid>
+      <description>The Facade design pattern is a structural design pattern that provides a simplified interface to a complex system of classes, objects, or subsystems. It acts as a unified interface that hides the complexities of the underlying system and provides a higher-level, easier-to-use interface for the client code.
+This can be particularly useful when dealing with large or intricate systems, as it promotes loose coupling and separation of concerns.
+Key Participants in the Facade Pattern: Facade: This is the central class of the pattern, acting as an entry point for client code.</description>
+    </item>
+    
+    <item>
+      <title>Proxy Pattern</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</guid>
+      <description>The Proxy design pattern is a structural design pattern that provides a surrogate or placeholder for another object to control access to it. In other words, the Proxy pattern is all about controlling access to an object and adding some extra functionality while keeping the interface consistent.
+Participants: Subject: This is the interface that both the RealSubject (the actual object) and the Proxy implement. It defines the common operations that the RealSubject and the Proxy can perform.</description>
+    </item>
+    
+    <item>
+      <title>Chain Of Responsibility</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</guid>
       <description>The Chain of Responsibility is a behavioral design pattern that helps in passing a request along a chain of handlers.
 The Chain of Responsibility pattern is like a relay race. In a relay race, each runner passes the baton to the next runner. Similarly, in this pattern, a request is passed along a chain of handlers.
 Each handler decides either to process the request or to pass it along the chain.</description>

@@ -2,17 +2,39 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/graph-theory/search/breadth-first-search/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/creational/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/graph-theory/search/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/creational/singleton/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/graph-theory/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</loc>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/categories/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain_of_responsibility/</loc>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/</loc>
   </url><url>
