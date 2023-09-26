@@ -8,3 +8,7 @@ toc: true
 params:
   editURL: 
 ---
+
+{{< cards >}}
+    {{< card link="chain-of-responsibility" title="Chain of Responsibility" >}}
+{{< /cards >}}
