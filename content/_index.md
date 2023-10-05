@@ -16,4 +16,5 @@ Welcome to DevDocs: Your Ultimate Resource Hub for Documentation, Gists, and Mor
 {{< cards >}}
     {{< card link="design-patterns" title="Design Patterns" subtitle="Architecting Solutions for Sustainable Software" >}}
     {{< card link="graph-theory" title="Graph Theory" subtitle="Exploring the Fundamentals of Graph Theory" >}}
+    {{< card link="system-design" title="System Design" subtitle="Crafting Scalable and Resilient Systems" >}}
 {{< /cards >}}
