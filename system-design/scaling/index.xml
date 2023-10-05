@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Application Scaling of Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/system-design/scaling/</link>
+    <description>Recent content in Application Scaling on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/system-design/scaling/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Horizontal Scaling</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</guid>
+      <description>Horizontal scaling, also known as scaling out, involves increasing the capacity of a system by adding more machines to a network. This approach is widely used to handle increased workloads and ensure high availability.
+Pros and Cons of Horizontal Scaling: Pros:
+Improved Performance: Horizontal scaling allows for the distribution of the load across multiple machines, which can significantly improve the overall performance and response times of a system.
+High Availability: In the event of a hardware failure or maintenance, the system remains operational as traffic is distributed across multiple servers.</description>
+      <content:encoded><![CDATA[<p>Horizontal scaling, also known as scaling out, involves increasing the capacity of a system by adding more machines to a network. This approach is widely used to handle increased workloads and ensure high availability.</p>
+<h3>Pros and Cons of Horizontal Scaling:<span class="absolute -mt-20" id="pros-and-cons-of-horizontal-scaling"></span>
+    <a href="#pros-and-cons-of-horizontal-scaling" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>Pros:</strong></p>
+<ol>
+<li>
+<p><strong>Improved Performance:</strong> Horizontal scaling allows for the distribution of the load across multiple machines, which can significantly improve the overall performance and response times of a system.</p>
+</li>
+<li>
+<p><strong>High Availability:</strong> In the event of a hardware failure or maintenance, the system remains operational as traffic is distributed across multiple servers. This ensures high availability and reduces downtime.</p>
+</li>
+<li>
+<p><strong>Cost-Efficiency:</strong> Scaling horizontally is often more cost-effective as it involves adding commodity hardware. This can be less expensive than upgrading to more powerful, and therefore more expensive, individual machines.</p>
+</li>
+</ol>
+<p><strong>Cons:</strong></p>
+<ol>
+<li>
+<p><strong>Complexity in Data Management:</strong> Managing data consistency across multiple machines can be more challenging in a horizontally scaled system compared to vertical scaling (scaling up).</p>
+</li>
+<li>
+<p><strong>Network Overheads:</strong> There may be additional overhead for network communication between the different nodes. This can lead to increased latency in some scenarios.</p>
+</li>
+</ol>
+<h3>Load Balancers:<span class="absolute -mt-20" id="load-balancers"></span>
+    <a href="#load-balancers" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Load balancing is a critical component of horizontal scaling.  It involves distributing incoming network traffic or requests across multiple servers to ensure that no single server becomes overwhelmed. They serve as the entry point for clients.</p>
+<p>There are hardware-based load balancers and software-based load balancers. Hardware load balancers are dedicated devices, while software load balancers are implemented using software on standard servers.</p>
+<p>Here are some key points about load balancing:</p>
+<h4>Algorithms for Load Balancing:<span class="absolute -mt-20" id="algorithms-for-load-balancing"></span>
+    <a href="#algorithms-for-load-balancing" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Load balancers use various algorithms to distribute traffic. Common ones include:</p>
+<ul>
+<li>Round Robin: Requests are distributed in a circular sequence to each server.</li>
+<li>Least Connections: Traffic is sent to the server with the fewest active connections.</li>
+<li>IP Hash: Based on the client&rsquo;s IP address, requests are sent to a specific server, ensuring that a client&rsquo;s requests always go to the same server.</li>
+</ul>
+<h4>Health Checks<span class="absolute -mt-20" id="health-checks"></span>
+    <a href="#health-checks" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Load balancers should regularly check the health of the servers to ensure that they are responsive. Unresponsive servers should be temporarily taken out of rotation.</p>
+<h4>Scalability<span class="absolute -mt-20" id="scalability"></span>
+    <a href="#scalability" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>The load balancer itself should be scalable. This can be achieved by using a combination of techniques such as DNS-based load balancing or deploying multiple load balancers in an active-passive or active-active configuration.</p>
+<h4>SSL Termination<span class="absolute -mt-20" id="ssl-termination"></span>
+    <a href="#ssl-termination" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>If SSL encryption is used, the load balancer can handle SSL termination to offload the decryption process from the application servers, improving performance.</p>
+<h3>Handling Deployments:<span class="absolute -mt-20" id="handling-deployments"></span>
+    <a href="#handling-deployments" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Deploying updates in a horizontally scaled environment requires careful planning to ensure minimal downtime and service disruption. Best practices include:</p>
+<ol>
+<li>
+<p><strong>Rolling Deployments:</strong> Gradually update servers one at a time, ensuring that there is no noticeable service disruption. This can be done by taking nodes out of the load balancer, updating them, and then adding them back.</p>
+</li>
+<li>
+<p><strong>Canary Releases:</strong> Deploy new versions to a small subset of servers first to validate that the update is stable before rolling it out to the entire fleet.</p>
+</li>
+<li>
+<p><strong>Blue-Green Deployments:</strong> Maintain two identical production environments, one active (blue) and one inactive (green). Deploy updates to the inactive environment, test thoroughly, and then switch traffic to the updated environment.</p>
+</li>
+</ol>
+<p>In conclusion, horizontal scaling offers numerous benefits, including improved performance, high availability, and cost-efficiency. However, it also introduces complexities in data management and application design. Load balancers are crucial for evenly distributing traffic, and proper session management is essential for maintaining user state. Thoughtful deployment strategies help minimize downtime and ensure a smooth update process. Adhering to these best practices can help organizations effectively scale their systems horizontally.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Session Management in Horizontal Scaling</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</guid>
+      <description>Session management becomes more complex in a horizontally scaled environment. Here are some best practices:
+Session Affinity Sticky sessions (also known as Session Affinity) involve associating a user&amp;rsquo;s session with a specific server for the duration of their session. When a user makes an initial request, the load balancer determines which server to send them to, and subsequent requests from that user are directed to the same server.
+Session persistence is typically configured on the load balancer itself.</description>
+      <content:encoded><![CDATA[<p>Session management becomes more complex in a horizontally scaled environment. Here are some best practices:</p>
+<h4>Session Affinity<span class="absolute -mt-20" id="session-affinity"></span>
+    <a href="#session-affinity" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Sticky sessions (also known as Session Affinity) involve associating a user&rsquo;s session with a specific server for the duration of their session. When a user makes an initial request, the load balancer determines which server to send them to, and subsequent requests from that user are directed to the same server.</p>
+<p>Session persistence is typically configured on the load balancer itself. Most modern load balancers provide settings to enable and configure session affinity. When using session persistence, it&rsquo;s important to ensure that the load balancer itself is redundant and scalable. This prevents it from becoming a single point of failure.</p>
+<p>It&rsquo;s important to <strong>consider session timeout settings</strong>. If a session lasts too long, it can lead to uneven server load distribution. Conversely, if it&rsquo;s too short, users may experience session expirations.</p>
+<p>However, it can also introduce some challenges, especially if a server becomes unavailable. In this case, the load balancer needs to have a mechanism to handle failover or session reassignment.</p>
+<p><strong>Techniques for Implementing Session Persistence:</strong></p>
+<ul>
+<li>
+<p><strong>Cookie-Based Persistence:</strong> The load balancer sets a cookie on the client&rsquo;s browser containing a unique identifier. This identifier is used to associate subsequent requests with a specific server.</p>
+</li>
+<li>
+<p><strong>URL Rewriting:</strong> In some cases, the load balancer can append a session ID to the URL, allowing it to determine which server to route the request to.</p>
+</li>
+<li>
+<p><strong>IP-Based Affinity:</strong> The load balancer can use the client&rsquo;s IP address to ensure requests from the same client are sent to the same server.</p>
+</li>
+</ul>
+<h4>Session State Externalization<span class="absolute -mt-20" id="session-state-externalization"></span>
+    <a href="#session-state-externalization" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Store session data in a centralized and easily accessible location, such as a distributed cache or a database, rather than on individual servers. This ensures session continuity even if a user&rsquo;s request is routed to a different server.</p>
+<p>Without externalization, if a user&rsquo;s subsequent request is directed to a different server, the session data would be lost, leading to inconsistencies and potentially disrupting the user experience.</p>
+<p>Choose a storage solution that can handle the expected load and provides low-latency access to session data. In-memory caches like Redis or Memcached are often preferred for session state externalization due to their high-speed read and write operations.</p>
+<p><strong>Considerations</strong></p>
+<ul>
+<li>
+<p><strong>Serialization and Deserialization:</strong> The session data needs to be serialized (converted into a format that can be stored) and deserialized (converted back into usable data) when read from or written to the centralized storage. If session data contains sensitive information, ensure it is encrypted when stored in the external storage system.</p>
+</li>
+<li>
+<p><strong>Data Consistency:</strong> Depending on the storage solution, additional measures may be needed to ensure data consistency. For example, distributed caches often have mechanisms for handling concurrent access.</p>
+</li>
+</ul>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li>
+<p><strong>Session Continuity:</strong> Externalizing session state ensures that even if a user&rsquo;s request is directed to a different server, their session data remains intact, providing a seamless and consistent user experience.</p>
+</li>
+<li>
+<p><strong>Load Balancing Flexibility:</strong> Load balancers can distribute requests more freely because they don&rsquo;t need to consider session affinity. This allows for better resource utilization across the server pool.</p>
+</li>
+<li>
+<p><strong>Failover and Redundancy:</strong> If a server becomes unavailable or fails, the session data is still accessible from other servers. This enhances system resilience.</p>
+</li>
+</ul>
+<h4>Use Stateless Authentication Tokens<span class="absolute -mt-20" id="use-stateless-authentication-tokens"></span>
+    <a href="#use-stateless-authentication-tokens" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>When dealing with horizontal scaling, it&rsquo;s indeed advisable to lean towards stateless application design. Stateless applications don&rsquo;t rely on server-side session storage, which can be problematic in a horizontally scaled environment where requests might be handled by different servers.</p>
+<p>Stateless authentication tokens, like JWT, are one of the techniques that facilitate stateless application design, specifically for handling authentication. A JWT typically contains information about the user (such as their user ID or username) and any relevant claims (permissions, roles, etc.) that is passed between the client and the server with each request. Since the token itself contains all the necessary information for authentication, the server does not need to store any session data. This makes it easier to scale horizontally.</p>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>
