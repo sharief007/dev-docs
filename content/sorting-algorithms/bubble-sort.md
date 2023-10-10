@@ -33,8 +33,8 @@ graph LR
     C --> D[2]
     D --> E[1]
 
-    style A fill: grey
-    style B fill: grey
+    style A fill: #4287f5
+    style B fill: #4287f5
 ```
 
 ```mermaid
@@ -44,8 +44,8 @@ graph LR
     C --> D[2]
     D --> E[1]
 
-    style B fill: grey
-    style C fill: grey
+    style B fill: #4287f5
+    style C fill: #4287f5
 ```
 
 ```mermaid
@@ -55,8 +55,8 @@ graph LR
     C --> D[2]
     D --> E[1]
 
-    style C fill: grey
-    style D fill: grey
+    style C fill: #4287f5
+    style D fill: #4287f5
 ```
 
 ```mermaid
@@ -66,8 +66,8 @@ graph LR
     C --> D[5]
     D --> E[1]
 
-    style D fill: grey
-    style E fill: grey
+    style D fill: #4287f5
+    style E fill: #4287f5
 ```
 
 **After the first pass:**
