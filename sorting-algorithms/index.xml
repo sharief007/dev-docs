@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Sorting Algorithms of Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/sorting-algorithms/</link>
+    <description>Recent content in Sorting Algorithms on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/sorting-algorithms/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bubble Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</guid>
+      <description>Bubble sort is a simple comparison-based sorting algorithm. It works by repeatedly swapping adjacent elements if they are in the wrong order. The pass through the list is repeated until the list is sorted.
+Example Consider a sample array: [5, 4, 3, 2, 1]:
+graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]Now, let&amp;rsquo;s go through one pass of the bubble sort algorithm:
+graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style A fill: #4287f5style B fill: #4287f5graph LRA[4] --&gt; B[5]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style B fill: #4287f5style C fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[5]C --&gt; D[2]D --&gt; E[1]style C fill: #4287f5style D fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[2]C --&gt; D[5]D --&gt; E[1]style D fill: #4287f5style E fill: #4287f5After the first pass:</description>
+      <content:encoded><![CDATA[<p><strong>Bubble sort</strong> is a simple comparison-based sorting algorithm. It works by repeatedly swapping adjacent elements if they are in the wrong order. The pass through the list is repeated until the list is sorted.</p>
+<h3>Example<span class="absolute -mt-20" id="example"></span>
+    <a href="#example" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Consider a sample array:  <code>[5, 4, 3, 2, 1]</code>:</p>
+<pre class="mermaid mt-6">graph LR
+    A[5] --> B[4]
+    B --> C[3]
+    C --> D[2]
+    D --> E[1]</pre><p>Now, let&rsquo;s go through one pass of the bubble sort algorithm:</p>
+<pre class="mermaid mt-6">graph LR
+    A[5] --> B[4]
+    B --> C[3]
+    C --> D[2]
+    D --> E[1]
+
+    style A fill: #4287f5
+    style B fill: #4287f5</pre><pre class="mermaid mt-6">graph LR
+    A[4] --> B[5]
+    B --> C[3]
+    C --> D[2]
+    D --> E[1]
+
+    style B fill: #4287f5
+    style C fill: #4287f5</pre><pre class="mermaid mt-6">graph LR
+    A[4] --> B[3]
+    B --> C[5]
+    C --> D[2]
+    D --> E[1]
+
+    style C fill: #4287f5
+    style D fill: #4287f5</pre><pre class="mermaid mt-6">graph LR
+    A[4] --> B[3]
+    B --> C[2]
+    C --> D[5]
+    D --> E[1]
+
+    style D fill: #4287f5
+    style E fill: #4287f5</pre><p><strong>After the first pass:</strong></p>
+<pre class="mermaid mt-6">graph LR
+    A[4] --> B[3]
+    B --> C[2]
+    C --> D[1]
+    D --> E[5]
+
+    style E fill: green</pre><p><strong>After the second pass:</strong></p>
+<pre class="mermaid mt-6">graph LR
+    A[3] --> B[2]
+    B --> C[1]
+    C --> D[4]
+    D --> E[5]
+
+    style D fill: green
+    style E fill: green</pre><p><strong>After the third pass:</strong></p>
+<pre class="mermaid mt-6">graph LR
+    A[2] --> B[1]
+    B --> C[3]
+    C --> D[4]
+    D --> E[5]
+
+    style C fill: green
+    style D fill: green
+    style E fill: green</pre><p><strong>After the fourth pass:</strong></p>
+<pre class="mermaid mt-6">graph LR
+    A[1] --> B[2]
+    B --> C[3]
+    C --> D[4]
+    D --> E[5]
+
+    style B fill: green
+    style C fill: green
+    style D fill: green
+    style E fill: green</pre><p><strong>After the fifth pass (final pass):</strong></p>
+<pre class="mermaid mt-6">graph LR
+    A[1] --> B[2]
+    B --> C[3]
+    C --> D[4]
+    D --> E[5]
+
+    style A fill: green
+    style B fill: green
+    style C fill: green
+    style D fill: green
+    style E fill: green</pre><h3>Flow chart<span class="absolute -mt-20" id="flow-chart"></span>
+    <a href="#flow-chart" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><pre class="mermaid mt-6">graph TB
+  A[Start] --> B1((i=0, j=0))
+  B1 --> B2{j < n-i-1}
+  B2 -->|Yes| B3("Swap if arr[j] > arr[j+1]")
+  B2 -->|No| B4(Increment j)
+  B3 --> B4
+  B4 -->|j < n-i-1| B2
+  B4 -->|j = n-i-1| B5(Increment i, Reset j)
+  B5 -->|i < n-1| B1
+  B5 -->|i = n-1| C[End]</pre><h3>Implementation<span class="absolute -mt-20" id="implementation"></span>
+    <a href="#implementation" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BubbleSort</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">bubbleSort</span><span class="o">(</span><span class="kt">int</span> <span class="n">arr</span><span class="o">[])</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">boolean</span> <span class="n">swapped</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">-</span><span class="n">1</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">swapped</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">1</span><span class="o">;</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">&gt;</span> <span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">+</span><span class="n">1</span><span class="o">])</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">// Swap arr[j] and arr[j+1]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">+</span><span class="n">1</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">+</span><span class="n">1</span><span class="o">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">swapped</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// If no two elements were swapped, break the loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">if</span> <span class="o">(!</span><span class="n">swapped</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">args</span><span class="o">[])</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">arr</span><span class="o">[]</span> <span class="o">=</span> <span class="o">{</span><span class="n">64</span><span class="o">,</span> <span class="n">34</span><span class="o">,</span> <span class="n">25</span><span class="o">,</span> <span class="n">12</span><span class="o">,</span> <span class="n">22</span><span class="o">,</span> <span class="n">11</span><span class="o">,</span> <span class="n">90</span><span class="o">};</span>
+</span></span><span class="line"><span class="cl">        <span class="n">bubbleSort</span><span class="o">(</span><span class="n">arr</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Sorted array:&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="s">&#34; &#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">bubble_sort</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># Initialize swapped to False</span>
+</span></span><span class="line"><span class="cl">        <span class="n">swapped</span> <span class="o">=</span> <span class="kc">False</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">                <span class="c1"># Swap arr[j] and arr[j+1]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="n">swapped</span> <span class="o">=</span> <span class="kc">True</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># If no two elements were swapped, break the loop</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="n">swapped</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">arr</span> <span class="o">=</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">90</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">bubble_sort</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Sorted array:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">bubbleSort</span><span class="p">(</span><span class="nx">arr</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">n</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">swapped</span> <span class="o">:=</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="o">-</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// Swap arr[j] and arr[j+1]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">swapped</span> <span class="p">=</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// If no two elements were swapped, break the loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">!</span><span class="nx">swapped</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">arr</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">64</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">90</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bubbleSort</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Sorted array:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+<p>These implementations use an optimized version of the Bubble Sort algorithm with a flag (<code>swapped</code>) that helps break out of the loop early if the array is already sorted. This reduces the time complexity in cases where the array is mostly sorted.</p>
+<h3>Complexity Analysis<span class="absolute -mt-20" id="complexity-analysis"></span>
+    <a href="#complexity-analysis" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>For the optimized Bubble Sort implementation:</p>
+<p><strong>Time Complexity</strong></p>
+<ul>
+<li><strong>Worst-case Time Complexity</strong>: O(n^2)</li>
+<li><strong>Best-case Time Complexity</strong>: O(n)</li>
+<li><strong>Average-case Time Complexity</strong>: O(n^2)</li>
+</ul>
+<p><strong>Space Complexity</strong></p>
+<ul>
+<li><strong>Space Complexity</strong>: O(1)</li>
+</ul>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Selection Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</guid>
+      <description>Selection sort is a simple comparison-based sorting algorithm. It works by dividing the input list into two parts: the sorted portion on the left and the unsorted portion on the right. Initially, the sorted portion is empty, and the unsorted portion contains the entire list.
+The algorithm repeatedly finds the smallest (or largest, depending on the sorting order) element from the unsorted portion and swaps it with the first element in the unsorted portion.</description>
+      <content:encoded><![CDATA[<p>Selection sort is a simple comparison-based sorting algorithm. It works by dividing the input list into two parts: the sorted portion on the left and the unsorted portion on the right. Initially, the sorted portion is empty, and the unsorted portion contains the entire list.</p>
+<p>The algorithm repeatedly finds the smallest (or largest, depending on the sorting order) element from the unsorted portion and swaps it with the first element in the unsorted portion. This effectively extends the sorted portion by one element. The process is repeated until the entire list is sorted.</p>
+<p>Here&rsquo;s a step-by-step explanation of how the selection sort algorithm works:</p>
+<ol>
+<li><strong>Step 1</strong>: Find the smallest element in the unsorted portion of the list.</li>
+<li><strong>Step 2</strong>: Swap it with the first element in the unsorted portion.</li>
+<li><strong>Step 3</strong>: Move the boundary between the sorted and unsorted portions one element to the right.</li>
+</ol>
+<p>Repeat steps 1-3 until the entire list is sorted.</p>
+<pre class="mermaid mt-6">graph TD
+    A[Step 1: Find the smallest element] -->|Found| B[Step 2: Swap with first element]
+    B --> C[Step 3: Move boundary]
+    C -->|Continue| A
+    C -->|Finished| D[Done]</pre><h3>Example<span class="absolute -mt-20" id="example"></span>
+    <a href="#example" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Consider a sample array:  <code>[64, 25, 12, 22, 11]</code>:</p>
+<pre class="mermaid mt-6">graph LR
+  A[64] --> B[25]
+  B --> C[12]
+  C --> D[22]
+  D --> E[11]</pre><p>Find the smallest element and swap it with the first element</p>
+<pre class="mermaid mt-6">graph
+  subgraph X[unsorted]
+      A[64] --> B[25]
+      B --> C[12]
+      C --> D[22]
+      D --> E[11]
+  end
+  style A fill: Grey
+  style E fill: #4287f5   </pre><pre class="mermaid mt-6">graph LR
+  subgraph Z[sorted]
+    A[11] 
+  end
+  subgraph Y[unsorted]
+      A --> B[25]
+      B --> C[12]
+      C --> D[22]
+      D --> E[64]
+  end</pre><p>Find the smallest element and swap it with the first element</p>
+<pre class="mermaid mt-6">graph LR
+  subgraph Z[sorted]
+    A[11] 
+  end
+  subgraph Y[unsorted]
+      A --> B[25]
+      B --> C[12]
+      C --> D[22]
+      D --> E[64]
+  end
+
+  style B fill: Grey
+  style C fill: #4287f5 </pre><pre class="mermaid mt-6">graph LR
+    subgraph Z[sorted]
+      A[11] --> B[12]
+    end
+    subgraph Y[unsorted]
+        B --> C[25]
+        C --> D[22]
+        D --> E[64]
+    end</pre><p>Find the smallest element and swap it with the first element</p>
+<pre class="mermaid mt-6">graph LR
+  subgraph Z[sorted]
+      A[11] --> B[12]
+    end
+    subgraph Y[unsorted]
+        B --> C[25]
+        C --> D[22]
+        D --> E[64]
+    end
+    
+  style C fill: Grey
+  style D fill: #4287f5 </pre><pre class="mermaid mt-6">graph LR
+    subgraph Z[sorted]
+      A[11] --> B[12]
+      B --> C[22]
+    end
+    subgraph Y[unsorted]
+        C --> D[25]
+        D --> E[64]
+    end</pre><p>Find the smallest element and swap it with the first element</p>
+<pre class="mermaid mt-6">graph LR
+  subgraph Z[sorted]
+      A[11] --> B[12]
+      B --> C[22]
+    end
+    subgraph Y[unsorted]
+        C --> D[25]
+        D --> E[64]
+    end
+  style D fill: green </pre><pre class="mermaid mt-6">graph LR
+    subgraph Z[sorted]
+      A[11] --> B[12]
+      B --> C[22]
+      C --> D[25]
+    end
+    subgraph Y[unsorted]
+        D --> E[64]
+    end</pre><p>Find the smallest element and swap it with the first element</p>
+<pre class="mermaid mt-6">graph LR
+  subgraph Z[sorted]
+      A[11] --> B[12]
+      B --> C[22]
+      C --> D[25]
+    end
+    subgraph Y[unsorted]
+        D --> E[64]
+    end
+  style E fill: green </pre><pre class="mermaid mt-6">graph
+    subgraph Z[sorted]
+      A[11] --> B[12]
+      B --> C[22]
+      C --> D[25]
+      D --> E[64]
+    end</pre><h3>Implementation<span class="absolute -mt-20" id="implementation"></span>
+    <a href="#implementation" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+  <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SelectionSort</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">selectionSort</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">-</span><span class="n">1</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">          <span class="kt">int</span> <span class="n">minIndex</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          <span class="c1">// Find the minimum element in the unsorted portion
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="n">1</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">              <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">[</span><span class="n">minIndex</span><span class="o">])</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                  <span class="n">minIndex</span> <span class="o">=</span> <span class="n">j</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">              <span class="o">}</span>
+</span></span><span class="line"><span class="cl">          <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          <span class="c1">// Swap the found minimum element with the first element
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="n">minIndex</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">          <span class="n">arr</span><span class="o">[</span><span class="n">minIndex</span><span class="o">]</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">          <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">      <span class="o">}</span>
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kt">int</span><span class="o">[]</span> <span class="n">arr</span> <span class="o">=</span> <span class="o">{</span><span class="n">64</span><span class="o">,</span> <span class="n">25</span><span class="o">,</span> <span class="n">12</span><span class="o">,</span> <span class="n">22</span><span class="o">,</span> <span class="n">11</span><span class="o">};</span>
+</span></span><span class="line"><span class="cl">      <span class="n">selectionSort</span><span class="o">(</span><span class="n">arr</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="s">&#34;Sorted Array: &#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">num</span> <span class="o">:</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">num</span> <span class="o">+</span> <span class="s">&#34; &#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">      <span class="o">}</span>
+</span></span><span class="line"><span class="cl">  <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+  <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">selection_sort</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">  <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">      <span class="n">min_index</span> <span class="o">=</span> <span class="n">i</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="c1"># Find the minimum element in the unsorted portion</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">min_index</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">              <span class="n">min_index</span> <span class="o">=</span> <span class="n">j</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="c1"># Swap the found minimum element with the first element</span>
+</span></span><span class="line"><span class="cl">      <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">min_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">min_index</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Example Usage</span>
+</span></span><span class="line"><span class="cl"><span class="n">arr</span> <span class="o">=</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="n">selection_sort</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Sorted Array: </span><span class="si">{</span><span class="n">arr</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+  <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">selectionSort</span><span class="p">(</span><span class="nx">arr</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">n</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">minIndex</span> <span class="o">:=</span> <span class="nx">i</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Find the minimum element in the unsorted portion
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">minIndex</span><span class="p">]</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">minIndex</span> <span class="p">=</span> <span class="nx">j</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Swap the found minimum element with the first element
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">minIndex</span><span class="p">]</span> <span class="p">=</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">minIndex</span><span class="p">],</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">arr</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">64</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">11</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">selectionSort</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Print</span><span class="p">(</span><span class="s">&#34;Sorted Array: &#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">num</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">arr</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span> <span class="nx">num</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Insertion Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</guid>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Merge Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</guid>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Quick Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/quick-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/quick-sort/</guid>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Heap Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/heap-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/heap-sort/</guid>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Radix Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</guid>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Counting Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</guid>
+      <description></description>
+      <content:encoded><![CDATA[]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

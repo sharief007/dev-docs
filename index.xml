@@ -29,6 +29,18 @@ Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Result
     </item>
     
     <item>
+      <title>Bubble Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</guid>
+      <description>Bubble sort is a simple comparison-based sorting algorithm. It works by repeatedly swapping adjacent elements if they are in the wrong order. The pass through the list is repeated until the list is sorted.
+Example Consider a sample array: [5, 4, 3, 2, 1]:
+graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]Now, let&amp;rsquo;s go through one pass of the bubble sort algorithm:
+graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style A fill: #4287f5style B fill: #4287f5graph LRA[4] --&gt; B[5]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style B fill: #4287f5style C fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[5]C --&gt; D[2]D --&gt; E[1]style C fill: #4287f5style D fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[2]C --&gt; D[5]D --&gt; E[1]style D fill: #4287f5style E fill: #4287f5After the first pass:</description>
+    </item>
+    
+    <item>
       <title>Dijkstra&#39;s Algorithm</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -82,6 +94,16 @@ Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Result
     </item>
     
     <item>
+      <title>Selection Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</guid>
+      <description>Selection sort is a simple comparison-based sorting algorithm. It works by dividing the input list into two parts: the sorted portion on the left and the unsorted portion on the right. Initially, the sorted portion is empty, and the unsorted portion contains the entire list.
+The algorithm repeatedly finds the smallest (or largest, depending on the sorting order) element from the unsorted portion and swaps it with the first element in the unsorted portion.</description>
+    </item>
+    
+    <item>
       <title>Decorator Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -89,6 +111,15 @@ Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Result
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</guid>
       <description>The Decorator design pattern is a structural design pattern that allows you to add behavior or responsibilities to objects dynamically, without altering their code. It is one of the Gang of Four design patterns and is used to achieve flexibility in object composition by allowing behavior to be added or removed from individual objects, rather than modifying the entire class hierarchy.
 This pattern is particularly useful when you have a set of objects with similar functionalities, but you want to provide a way to extend or modify their behavior in a flexible manner.</description>
+    </item>
+    
+    <item>
+      <title>Insertion Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</guid>
+      <description></description>
     </item>
     
     <item>
@@ -103,6 +134,15 @@ Key Participants in the Facade Pattern: Facade: This is the central class of the
     </item>
     
     <item>
+      <title>Merge Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Proxy Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -110,6 +150,42 @@ Key Participants in the Facade Pattern: Facade: This is the central class of the
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</guid>
       <description>The Proxy design pattern is a structural design pattern that provides a surrogate or placeholder for another object to control access to it. In other words, the Proxy pattern is all about controlling access to an object and adding some extra functionality while keeping the interface consistent.
 Participants: Subject: This is the interface that both the RealSubject (the actual object) and the Proxy implement. It defines the common operations that the RealSubject and the Proxy can perform.</description>
+    </item>
+    
+    <item>
+      <title>Quick Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/quick-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/quick-sort/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Heap Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/heap-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/heap-sort/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Radix Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Counting Sort</title>
+      <link>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</guid>
+      <description></description>
     </item>
     
     <item>
