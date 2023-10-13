@@ -6,7 +6,7 @@ toc: true
 sidebar:
   open: true
 prev: insertion-sort
-next: merge-sort
+next: quick-sort
 params:
   editURL:
 ---

@@ -1,5 +1,6 @@
 ---
 title: 'Bubble Sort'
+weight: 1
 type: docs
 toc: true
 sidebar:
