@@ -222,5 +222,15 @@ Session Affinity Sticky sessions (also known as Session Affinity) involve associ
 Session persistence is typically configured on the load balancer itself.</description>
     </item>
     
+    <item>
+      <title>Travelling Salesman Problem</title>
+      <link>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</guid>
+      <description>The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.
+Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hamiltonian path in a graph is a path that visits each vertex exactly once.</description>
+    </item>
+    
   </channel>
 </rss>

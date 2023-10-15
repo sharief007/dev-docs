@@ -857,5 +857,261 @@ Task Scheduling: In project management, tasks often have dependencies on each ot
 ]]></content:encoded>
     </item>
     
+    <item>
+      <title>Travelling Salesman Problem</title>
+      <link>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</guid>
+      <description>The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.
+Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hamiltonian path in a graph is a path that visits each vertex exactly once.</description>
+      <content:encoded><![CDATA[<p>The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.</p>
+<h2>Pre Requisities<span class="absolute -mt-20" id="pre-requisities"></span>
+    <a href="#pre-requisities" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>Hamiltonian Path and Hamiltonian Cycle:<span class="absolute -mt-20" id="hamiltonian-path-and-hamiltonian-cycle"></span>
+    <a href="#hamiltonian-path-and-hamiltonian-cycle" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>Hamiltonian Path:</strong>
+A Hamiltonian path in a graph is a path that visits each vertex exactly once. In other words, it&rsquo;s a way to traverse the graph such that every node is visited once and only once. If a Hamiltonian path exists that starts at one vertex and ends at another, it is known as a Hamiltonian circuit.</p>
+<p><strong>Hamiltonian Cycle:</strong>
+A Hamiltonian cycle is a special case of a Hamiltonian path. It is a cycle that visits each vertex exactly once, and it returns to the starting vertex, forming a closed loop.</p>
+<h2>Real World Problem Statement:<span class="absolute -mt-20" id="real-world-problem-statement"></span>
+    <a href="#real-world-problem-statement" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>A real-world problem related to Hamiltonian paths and cycles could be the <strong>Delivery Route Problem</strong>:</p>
+<p><strong>Problem Statement:</strong>
+Imagine a delivery person needs to visit a set of locations (represented as nodes in a graph) to drop off packages. The goal is to find the shortest route that starts and ends at the same location, while visiting each location exactly once.</p>
+<p>In this problem, the locations can be represented as nodes in a graph, and the connections between them (representing valid paths) are the edges. The graph would be <strong>undirected</strong> because the delivery person can travel in both directions along a road.</p>
+<h3>Assumptions<span class="absolute -mt-20" id="assumptions"></span>
+    <a href="#assumptions" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The Traveling Salesman Problem (TSP) is typically formulated with several assumptions:</p>
+<ol>
+<li>
+<p><strong>Complete Graph</strong>: In the standard formulation, it is assumed that there is a direct connection (i.e., a path) between every pair of cities. This implies that the problem is defined on a complete graph, where every city is directly reachable from every other city.</p>
+</li>
+<li>
+<p><strong>Symmetric Distances</strong>: The distance or cost of traveling between two cities is assumed to be the same regardless of the direction. This means that the distance from City A to City B is the same as the distance from City B to City A.</p>
+</li>
+<li>
+<p><strong>Triangle Inequality</strong>: In the context of TSP, this means that the direct path between any two cities must be shorter than or equal to the sum of the direct paths through any other city. In other words, <code>AB &lt;= AC + CB</code>.</p>
+</li>
+<li>
+<p><strong>Non-Negative Distances</strong>: Distances or costs between cities are non-negative. This is a practical assumption, as distances cannot be negative in real-world scenarios.</p>
+</li>
+<li>
+<p><strong>Single Salesman</strong>: There is only one salesman who is responsible for visiting all the cities.</p>
+</li>
+</ol>
+<pre class="mermaid mt-6">graph LR
+    A ---|20| B
+    A ---|42| C
+    A ---|25| D
+    B ---|30| C
+    B ---|34| D
+    C ---|10| D</pre><h2>Brute Force Approach<span class="absolute -mt-20" id="brute-force-approach"></span>
+    <a href="#brute-force-approach" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><strong>What Needs to Be Found Out</strong></p>
+<p>The objective is to find a <strong>Hamiltonian cycle with minimum weight</strong> in this context. This would be the optimal route for the delivery person to visit all locations exactly once and return to the starting point.</p>
+<p><strong>Hamiltonian Cycle vs TSP</strong></p>
+<p>In this case, Hamiltonian tour exists (because the graph is complete) and in fact, many such tours exist, the problem is to find the minimum weight Hamiltonian cycle.</p>
+<p>The Path <code>A - B - C - D - A</code> is a hamiltonian cycle. There exists many such cycles. Since this is a complete graph, there are <code>n!</code> possibilities.</p>
+<h3>Starting from Node A:<span class="absolute -mt-20" id="starting-from-node-a"></span>
+    <a href="#starting-from-node-a" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Path</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>A -&gt; B -&gt; C -&gt; D -&gt; A</td>
+<td>85</td>
+</tr>
+<tr>
+<td>2</td>
+<td>A -&gt; B -&gt; D -&gt; C -&gt; A</td>
+<td>106</td>
+</tr>
+<tr>
+<td>3</td>
+<td>A -&gt; C -&gt; B -&gt; D -&gt; A</td>
+<td>131</td>
+</tr>
+<tr>
+<td>4</td>
+<td>A -&gt; C -&gt; D -&gt; B -&gt; A</td>
+<td>106</td>
+</tr>
+<tr>
+<td>5</td>
+<td>A -&gt; D -&gt; B -&gt; C -&gt; A</td>
+<td>131</td>
+</tr>
+<tr>
+<td>6</td>
+<td>A -&gt; D -&gt; C -&gt; B -&gt; A</td>
+<td>85</td>
+</tr>
+</tbody>
+</table>
+<h3>Starting from Node B:<span class="absolute -mt-20" id="starting-from-node-b"></span>
+    <a href="#starting-from-node-b" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Path</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7</td>
+<td>B -&gt; A -&gt; C -&gt; D -&gt; B</td>
+<td>106</td>
+</tr>
+<tr>
+<td>8</td>
+<td>B -&gt; A -&gt; D -&gt; C -&gt; B</td>
+<td>85</td>
+</tr>
+<tr>
+<td>9</td>
+<td>B -&gt; C -&gt; A -&gt; D -&gt; B</td>
+<td>131</td>
+</tr>
+<tr>
+<td>10</td>
+<td>B -&gt; C -&gt; D -&gt; A -&gt; B</td>
+<td>85</td>
+</tr>
+<tr>
+<td>11</td>
+<td>B -&gt; D -&gt; A -&gt; C -&gt; B</td>
+<td>131</td>
+</tr>
+<tr>
+<td>12</td>
+<td>B -&gt; D -&gt; C -&gt; A -&gt; B</td>
+<td>106</td>
+</tr>
+</tbody>
+</table>
+<h3>Starting from Node C:<span class="absolute -mt-20" id="starting-from-node-c"></span>
+    <a href="#starting-from-node-c" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Path</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>13</td>
+<td>C -&gt; A -&gt; B -&gt; D -&gt; C</td>
+<td>106</td>
+</tr>
+<tr>
+<td>14</td>
+<td>C -&gt; A -&gt; D -&gt; B -&gt; C</td>
+<td>131</td>
+</tr>
+<tr>
+<td>15</td>
+<td>C -&gt; B -&gt; A -&gt; D -&gt; C</td>
+<td>85</td>
+</tr>
+<tr>
+<td>16</td>
+<td>C -&gt; B -&gt; D -&gt; A -&gt; C</td>
+<td>131</td>
+</tr>
+<tr>
+<td>17</td>
+<td>C -&gt; D -&gt; A -&gt; B -&gt; C</td>
+<td>85</td>
+</tr>
+<tr>
+<td>18</td>
+<td>C -&gt; D -&gt; B -&gt; A -&gt; C</td>
+<td>106</td>
+</tr>
+</tbody>
+</table>
+<h3>Starting from Node D:<span class="absolute -mt-20" id="starting-from-node-d"></span>
+    <a href="#starting-from-node-d" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Path</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>19</td>
+<td>D -&gt; A -&gt; B -&gt; C -&gt; D</td>
+<td>85</td>
+</tr>
+<tr>
+<td>20</td>
+<td>D -&gt; A -&gt; C -&gt; B -&gt; D</td>
+<td>131</td>
+</tr>
+<tr>
+<td>21</td>
+<td>D -&gt; B -&gt; A -&gt; C -&gt; D</td>
+<td>106</td>
+</tr>
+<tr>
+<td>22</td>
+<td>D -&gt; B -&gt; C -&gt; A -&gt; D</td>
+<td>131</td>
+</tr>
+<tr>
+<td>23</td>
+<td>D -&gt; C -&gt; A -&gt; B -&gt; D</td>
+<td>106</td>
+</tr>
+<tr>
+<td>24</td>
+<td>D -&gt; C -&gt; B -&gt; A -&gt; D</td>
+<td>85</td>
+</tr>
+</tbody>
+</table>
+<p>If we know the starting node,  the total number of Hamiltonian paths in a complete graph with n nodes can be calculated as: <code>(n−1) × (n−2) × (n−3) × … × 1</code>, which is equivalent to <code>(n−1)!</code>. Note that the weight of a Hamiltonian cycle is equal to that of its reverse due to symmetrical distances. So, the complexity of this approach is <code>(n-1)! / 2</code></p>
+<h3>Recursion Tree<span class="absolute -mt-20" id="recursion-tree"></span>
+    <a href="#recursion-tree" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><pre class="mermaid mt-6">graph TB
+  subgraph S["min(85, 106, 85) = 85"]
+    direction TB
+    A -->|"min(65, 86) = 65 \n 20 + 65 = 85"| B
+    A -->|"min(89, 64) = 64 \n 42 + 64 = 106"| C
+    A -->|"min(106, 60) = 60 \n 25 + 60 = 85"| D
+
+    B -->|"30 + 35 = 65"| C1[C]
+    B -->|"34 + 52 = 86"| D1[D]
+
+    C -->|"30 + 59 = 89"| B1[B]
+    C -->|"10 + 54 = 64"| D2[D]
+
+    D -->|"34 + 72 = 106"| B2[B]
+    D -->|"10 + 50 = 60"| C2[C]
+
+    C1 -->|"10 + 25 = 35"| D3[D]
+    D1 -->|"10 + 42 = 52"| C3[C]
+
+    B1 -->|"34 + 25 = 59"| D4[D]
+    D2 -->|"34 + 20 = 54"| B3[B]
+
+    B2 -->|"30 + 42 = 72"| C4[C]
+    C2 -->|"30 + 20 = 50"| B4[B]
+
+    D3 -.25.-> A1[A]
+    C3 -.42.-> A2[A]
+    D4 -.25.-> A3[A]
+    B3 -.20.-> A4[A]
+    C4 -.42.-> A5[A]
+    B4 -.20.-> A6[A]
+  end</pre><h3>Implementation<span class="absolute -mt-20" id="implementation"></span>
+    <a href="#implementation" class="subheading-anchor" aria-label="Permalink for this section"></a></h3>]]></content:encoded>
+    </item>
+    
   </channel>
 </rss>
