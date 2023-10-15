@@ -1,0 +1,2 @@
+Resources
+http://highscalability.com/blog/2023/2/22/consistent-hashing-algorithm.html
