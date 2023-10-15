@@ -28,7 +28,7 @@ Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hami
 <meta itemprop="description" content="The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.
 Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hamiltonian path in a graph is a path that visits each vertex exactly once.">
 
-<meta itemprop="wordCount" content="1076">
+<meta itemprop="wordCount" content="3427">
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Travelling Salesman Problem"/>
 <meta name="twitter:description" content="The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.
@@ -200,6 +200,18 @@ Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hami
                 href="#brute-force-approach"
                 class="flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border flex gap-2 before:opacity-25 before:content-['#'] text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
               >Brute Force Approach</a>
+            </li>
+          <li>
+              <a
+                href="#dynamic-programming"
+                class="flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border flex gap-2 before:opacity-25 before:content-['#'] text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
+              >Dynamic Programming</a>
+            </li>
+          <li>
+              <a
+                href="#bit-masking"
+                class="flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border flex gap-2 before:opacity-25 before:content-['#'] text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
+              >Bit Masking</a>
             </li>
           </ul>
   
@@ -535,6 +547,30 @@ Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hami
       <li class="my-2 scroll-my-6 scroll-py-6">
         <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#implementation">Implementation
         </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#complexity-analysis">Complexity Analysis
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="font-semibold inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#dynamic-programming">Dynamic Programming
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="font-semibold inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#bit-masking">Bit Masking
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#implementation-1">Implementation
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#complexity-analysis-1">Complexity Analysis
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#dp-with-bit-mask">Dp with Bit Mask
+        </a>
       </li></ul>
       <div class="mt-8 border-t bg-white pt-8 shadow-[0_-12px_16px_white] dark:bg-dark dark:shadow-[0_-12px_16px_#111] sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400"></div>
     </div>
@@ -567,7 +603,7 @@ Imagine a delivery person needs to visit a set of locations (represented as node
     <a href="#assumptions" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The Traveling Salesman Problem (TSP) is typically formulated with several assumptions:</p>
 <ol>
 <li>
-<p><strong>Complete Graph</strong>: In the standard formulation, it is assumed that there is a direct connection (i.e., a path) between every pair of cities. This implies that the problem is defined on a complete graph, where every city is directly reachable from every other city.</p>
+<p><strong>Complete Graph</strong>: This implies that the problem is defined on a complete graph, where every city is directly reachable from every other city.</p>
 </li>
 <li>
 <p><strong>Symmetric Distances</strong>: The distance or cost of traveling between two cities is assumed to be the same regardless of the direction. This means that the distance from City A to City B is the same as the distance from City B to City A.</p>
@@ -796,7 +832,709 @@ Imagine a delivery person needs to visit a set of locations (represented as node
     C4 -.42.-> A5[A]
     B4 -.20.-> A6[A]
   end</pre><h3>Implementation<span class="absolute -mt-20" id="implementation"></span>
-    <a href="#implementation" class="subheading-anchor" aria-label="Permalink for this section"></a></h3>
+    <a href="#implementation" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TSP</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Recursive function to find the minimum cost of a Hamiltonian cycle
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">tsp</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span><span class="o">,</span> <span class="kt">boolean</span><span class="o">[]</span> <span class="n">visited</span><span class="o">,</span> <span class="kt">int</span> <span class="n">current</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Base case: If all nodes have been visited 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">count</span> <span class="o">==</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">0</span><span class="o">]</span> <span class="o">&gt;</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// Return the total cost of the path from current node to starting node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">return</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">0</span><span class="o">];</span> 
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">visited</span><span class="o">[</span><span class="n">current</span><span class="o">]</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span> <span class="c1">// Mark the node as visited
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">int</span> <span class="n">minCost</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">;</span> <span class="c1">// Initialize minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Try visiting each unvisited node from the current node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="o">(!</span><span class="n">visited</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">newCost</span> <span class="o">=</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="n">tsp</span><span class="o">(</span><span class="n">graph</span><span class="o">,</span> <span class="n">visited</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">count</span> <span class="o">+</span> <span class="n">1</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">// Update minimum cost if a shorter path is found
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="n">minCost</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">minCost</span><span class="o">,</span> <span class="n">newCost</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Backtrack: Mark the node as unvisited
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">visited</span><span class="o">[</span><span class="n">current</span><span class="o">]</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">minCost</span><span class="o">;</span> <span class="c1">// Return the minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Main function to solve TSP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">solveTSP</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="c1">// Get the number of nodes in the graph
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">boolean</span><span class="o">[]</span> <span class="n">visited</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">boolean</span><span class="o">[</span><span class="n">n</span><span class="o">];</span> <span class="c1">// Array to keep track of visited nodes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// Initialize all nodes as unvisited
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// Arrays.fill(visited, false); 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Call the recursive function to find minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">int</span> <span class="n">minCost</span> <span class="o">=</span> <span class="n">tsp</span><span class="o">(</span><span class="n">graph</span><span class="o">,</span> <span class="n">visited</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">1</span><span class="o">);</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">// Print the results
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Minimum Cost: &#34;</span> <span class="o">+</span> <span class="n">minCost</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span> <span class="o">=</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">0</span><span class="o">,</span> <span class="n">20</span><span class="o">,</span> <span class="n">42</span><span class="o">,</span> <span class="n">25</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">20</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">30</span><span class="o">,</span> <span class="n">34</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">42</span><span class="o">,</span> <span class="n">30</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">10</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">25</span><span class="o">,</span> <span class="n">34</span><span class="o">,</span> <span class="n">10</span><span class="o">,</span> <span class="n">0</span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">solveTSP</span><span class="o">(</span><span class="n">graph</span><span class="o">);</span> <span class="c1">// Call the function to solve TSP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Base case: If all nodes have been visited and there is a valid edge back to the starting node</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Return the total cost of the path from current node to starting node</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">visited</span><span class="p">[</span><span class="n">current</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Mark the current node as visited</span>
+</span></span><span class="line"><span class="cl">    <span class="n">min_cost</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>  <span class="c1"># Initialize minimum cost to a very large value</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Try visiting each unvisited node from the current node</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="n">visited</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">new_cost</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1"># Update minimum cost if a shorter path is found</span>
+</span></span><span class="line"><span class="cl">            <span class="n">min_cost</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_cost</span><span class="p">,</span> <span class="n">new_cost</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">visited</span><span class="p">[</span><span class="n">current</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Backtrack: Mark the current node as unvisited</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">min_cost</span>  <span class="c1"># Return the minimum cost</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">solve_tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>  <span class="c1"># Get the number of nodes in the graph</span>
+</span></span><span class="line"><span class="cl">    <span class="n">visited</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="n">n</span>  <span class="c1"># Initialize an array to keep track of visited nodes</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Call the recursive function to find minimum cost</span>
+</span></span><span class="line"><span class="cl">    <span class="n">min_cost</span> <span class="o">=</span> <span class="n">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Print the minimum cost</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Minimum Cost: </span><span class="si">{</span><span class="n">min_cost</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Define the graph as an adjacency matrix</span>
+</span></span><span class="line"><span class="cl"><span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Call the function to solve TSP</span>
+</span></span><span class="line"><span class="cl"><span class="n">solve_tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;math&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Function to find the minimum cost of a Hamiltonian cycle using recursion
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">visited</span> <span class="p">[]</span><span class="kt">bool</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Base case: If all nodes have been visited and there is a valid edge back to the starting node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="nx">n</span> <span class="o">&amp;&amp;</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c1">// Return the total cost of the path from current node to starting node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">visited</span><span class="p">[</span><span class="nx">current</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span> <span class="c1">// Mark the current node as visited
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">minCost</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nx">MaxInt64</span> <span class="c1">// Initialize minimum cost to a very large value
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Try visiting each unvisited node from the current node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">!</span><span class="nx">visited</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">newCost</span> <span class="o">:=</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span> <span class="o">+</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span><span class="p">,</span> <span class="nx">visited</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">count</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">// Update minimum cost if a shorter path is found
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">if</span> <span class="nx">newCost</span> <span class="p">&lt;</span> <span class="nx">minCost</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">minCost</span> <span class="p">=</span> <span class="nx">newCost</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">visited</span><span class="p">[</span><span class="nx">current</span><span class="p">]</span> <span class="p">=</span> <span class="kc">false</span> <span class="c1">// Backtrack: Mark the current node as unvisited
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="nx">minCost</span> <span class="c1">// Return the minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Function to solve the TSP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">solveTSP</span><span class="p">(</span><span class="nx">graph</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">n</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">graph</span><span class="p">)</span> <span class="c1">// Get the number of nodes in the graph
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">visited</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">bool</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span> <span class="c1">// Initialize an array to keep track of visited nodes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Call the recursive function to find minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">minCost</span> <span class="o">:=</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span><span class="p">,</span> <span class="nx">visited</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Print the minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Minimum Cost: %d\n&#34;</span><span class="p">,</span> <span class="nx">minCost</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">graph</span> <span class="o">:=</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">25</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">42</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">25</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Call the function to solve TSP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">solveTSP</span><span class="p">(</span><span class="nx">graph</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+<h3>Complexity Analysis<span class="absolute -mt-20" id="complexity-analysis"></span>
+    <a href="#complexity-analysis" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>Time Complexity</strong></p>
+<ul>
+<li>The time complexity of this approach is <strong>O(n^2 * 2^n)</strong>. Here, n is the number of nodes in the graph.</li>
+</ul>
+<p><strong>Space Complexity</strong></p>
+<ul>
+<li>The space complexity is O(n * 2^n). This is due to the space required for the recursion stack (which can have at most n levels deep), and the additional space used for the visited array which keeps track of visited nodes.</li>
+</ul>
+<h2>Dynamic Programming<span class="absolute -mt-20" id="dynamic-programming"></span>
+    <a href="#dynamic-programming" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p>From the above implementation it is clear that we are depending on two variables i.e., <code>visited</code> and <code>current</code>. Using a straightforward approach, we might need a 2D array to store the state of all possible subsets of nodes. This can be extremely memory-intensive and impractical for large graphs.</p>
+<div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-2"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// visited it self is an array
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">dp</span> <span class="o">[</span><span class="n">visited</span><span class="o">][</span><span class="n">current</span><span class="o">]</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-2">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+<p><a href="#bit-masking" ><strong>Bit masking</strong></a> is used to efficiently represent and track the state of visited nodes in a more memory-efficient manner. By using bit masking, we can represent the set of visited nodes as a binary number. Each bit corresponds to a node, where 1 indicates the node has been visited and 0 indicates it hasn&rsquo;t. This representation significantly reduces the memory footprint compared to a 2D array.</p>
+<h2>Bit Masking<span class="absolute -mt-20" id="bit-masking"></span>
+    <a href="#bit-masking" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><strong>Bit Masking</strong> is a technique used in programming where we manipulate individual bits of a number. It involves performing bitwise operations (like AND, OR, XOR) on binary representations of numbers.</p>
+<p>In the context of the Traveling Salesman Problem (TSP), we can use bit masking to represent the visited nodes. Instead of using an array of booleans to keep track of visited nodes, we can use an integer where each bit represents the visited status of a node.</p>
+<p>For example, if we have 4 nodes, we can represent the visited status as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Visited Array</th>
+<th>Binary Representation</th>
+<th>Bitmask Num</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[0, 0, 0, 0]</td>
+<td>0000</td>
+<td>0</td>
+<td>All nodes unvisited</td>
+</tr>
+<tr>
+<td>[0, 0, 0, 1]</td>
+<td>0001</td>
+<td>1</td>
+<td>Only node A is visited</td>
+</tr>
+<tr>
+<td>[0, 0, 1, 0]</td>
+<td>0010</td>
+<td>2</td>
+<td>Only node B is visted</td>
+</tr>
+<tr>
+<td>[0, 0, 1, 1]</td>
+<td>0011</td>
+<td>3</td>
+<td>Nodes A and B are visited</td>
+</tr>
+<tr>
+<td>[1, 1, 1, 1]</td>
+<td>1111</td>
+<td>15</td>
+<td>All nodes are visited</td>
+</tr>
+</tbody>
+</table>
+<p>Using bit masking in TSP reduces the space complexity, especially when dealing with a large number of nodes.</p>
+<h3>Implementation<span class="absolute -mt-20" id="implementation-1"></span>
+    <a href="#implementation-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TSPBitMasking</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Recursive function to find the minimum cost of a Hamiltonian cycle using bit masking
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">tsp</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visited</span><span class="o">,</span> <span class="kt">int</span> <span class="n">current</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// Base case: If all nodes have been visited and there is a valid edge back to the starting node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="o">(</span><span class="n">count</span> <span class="o">==</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">visited</span> <span class="o">&amp;</span> <span class="n">1</span><span class="o">)</span> <span class="o">==</span> <span class="n">1</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">0</span><span class="o">];</span>  <span class="c1">// Return the total cost of the path from current node to starting node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">minCost</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// Check if node &#39;i&#39; has not been visited and there exists an edge from &#39;current&#39; to &#39;i&#39;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">if</span> <span class="o">((</span><span class="n">visited</span> <span class="o">&amp;</span> <span class="o">(</span><span class="n">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="o">))</span> <span class="o">==</span> <span class="n">0</span> <span class="o">&amp;&amp;</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">!=</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">newMask</span> <span class="o">=</span> <span class="n">visited</span> <span class="o">|</span> <span class="o">(</span><span class="n">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="o">);</span>  <span class="c1">// Update the visited nodes using bitwise OR
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="kt">int</span> <span class="n">newCost</span> <span class="o">=</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="n">tsp</span><span class="o">(</span><span class="n">graph</span><span class="o">,</span> <span class="n">newMask</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">count</span> <span class="o">+</span> <span class="n">1</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">minCost</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">minCost</span><span class="o">,</span> <span class="n">newCost</span><span class="o">);</span>  <span class="c1">// Update minimum cost if a shorter path is found
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">minCost</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// Function to solve the TSP using bit masking
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">solveTSP</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>  <span class="c1">// Get the number of nodes in the graph
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">int</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">1</span><span class="o">;</span>  <span class="c1">// Initialize the bitmask with the starting node (node 0)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="kt">int</span> <span class="n">minCost</span> <span class="o">=</span> <span class="n">tsp</span><span class="o">(</span><span class="n">graph</span><span class="o">,</span> <span class="n">mask</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">1</span><span class="o">);</span>  <span class="c1">// Call the recursive function to find minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Minimum Cost: &#34;</span> <span class="o">+</span> <span class="n">minCost</span><span class="o">);</span>  <span class="c1">// Print the minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span> <span class="o">=</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">0</span><span class="o">,</span> <span class="n">20</span><span class="o">,</span> <span class="n">42</span><span class="o">,</span> <span class="n">25</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">20</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">30</span><span class="o">,</span> <span class="n">34</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">42</span><span class="o">,</span> <span class="n">30</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">10</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">25</span><span class="o">,</span> <span class="n">34</span><span class="o">,</span> <span class="n">10</span><span class="o">,</span> <span class="n">0</span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">solveTSP</span><span class="o">(</span><span class="n">graph</span><span class="o">);</span>  <span class="c1">// Call the function to solve TSP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Base case: If all nodes have been visited and there is a valid edge back to the starting node</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">visited</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Return the total cost of the path from current node to starting node</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">min_cost</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># Check if node &#39;i&#39; has not been visited and there exists an edge from &#39;current&#39; to &#39;i&#39;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">visited</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">))</span> <span class="ow">and</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">new_mask</span> <span class="o">=</span> <span class="n">visited</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">)</span>  <span class="c1"># Update the visited nodes using bitwise OR</span>
+</span></span><span class="line"><span class="cl">            <span class="n">new_cost</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">new_mask</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">min_cost</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_cost</span><span class="p">,</span> <span class="n">new_cost</span><span class="p">)</span>  <span class="c1"># Update minimum cost if a shorter path is found</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">min_cost</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">solve_tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>  <span class="c1"># Get the number of nodes in the graph</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mask</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Initialize the bitmask with the starting node (node 0)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">min_cost</span> <span class="o">=</span> <span class="n">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Call the recursive function to find minimum cost</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Minimum Cost: </span><span class="si">{</span><span class="n">min_cost</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>  <span class="c1"># Print the minimum cost</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">solve_tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>  <span class="c1"># Call the function to solve TSP</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Function to find the minimum cost of a Hamiltonian cycle using bit masking
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">visited</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="nx">n</span> <span class="o">&amp;&amp;</span> <span class="nx">visited</span><span class="o">&amp;</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">minCost</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(^</span><span class="nb">uint</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">// Initialize minimum cost to maximum possible value
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// Try visiting each unvisited node from the current node
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">visited</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="nx">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">newMask</span> <span class="o">:=</span> <span class="nx">visited</span> <span class="p">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="nx">i</span><span class="p">)</span>      <span class="c1">// Update the visited nodes using bitwise OR
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="nx">newCost</span> <span class="o">:=</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span> <span class="o">+</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span><span class="p">,</span> <span class="nx">newMask</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">count</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// Calculate new cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="k">if</span> <span class="nx">newCost</span> <span class="p">&lt;</span> <span class="nx">minCost</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">minCost</span> <span class="p">=</span> <span class="nx">newCost</span>  <span class="c1">// Update minimum cost if a shorter path is found
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">minCost</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Function to solve the TSP using bit masking
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="nf">solveTSP</span><span class="p">(</span><span class="nx">graph</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">n</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">graph</span><span class="p">)</span> <span class="c1">// Get the number of nodes in the graph
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">mask</span> <span class="o">:=</span> <span class="mi">1</span>       <span class="c1">// Initialize the bitmask with the starting node (node 0)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">minCost</span> <span class="o">:=</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span><span class="p">,</span> <span class="nx">mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">// Call the recursive function to find minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Minimum Cost: %d\n&#34;</span><span class="p">,</span> <span class="nx">minCost</span><span class="p">)</span> <span class="c1">// Print the minimum cost
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">graph</span> <span class="o">:=</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">25</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">42</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">25</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">solveTSP</span><span class="p">(</span><span class="nx">graph</span><span class="p">)</span> <span class="c1">// Call the function to solve TSP
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+<h3>Complexity Analysis<span class="absolute -mt-20" id="complexity-analysis-1"></span>
+    <a href="#complexity-analysis-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>This implementation has a similar time complexity of <strong>O(n^2 * 2^n)</strong>, but the space complexity is improved to <strong>O(n * 2^n)</strong> due to the reduced space required for the bitmask.</p>
+<h3>Dp with Bit Mask<span class="absolute -mt-20" id="dp-with-bit-mask"></span>
+    <a href="#dp-with-bit-mask" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="mt-4 flex w-max min-w-full border-b border-gray-200 pb-px dark:border-neutral-800"><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-0"
+      aria-selected="true"
+      tabindex="0"
+      data-state="selected"
+    >java</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-1"
+      
+      
+      
+    > python</button><button
+      class="tabs-toggle data-[state=selected]:border-primary-500 data-[state=selected]:text-primary-600 mr-2 rounded-t p-2 font-medium leading-5 transition-colors -mb-0.5 select-none border-b-2 border-transparent text-gray-600 hover:border-gray-200 hover:text-black dark:text-gray-200 dark:hover:border-neutral-800 dark:hover:text-white"
+      role="tab"
+      type="button"
+      aria-controls="tabs-panel-2"
+      
+      
+      
+    > go</button></div>
+<div>
+  
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-0"
+  role="tabpanel"
+  tabindex="0"
+  data-state="selected"
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TSPMemoization</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">tsp</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visited</span><span class="o">,</span> <span class="kt">int</span> <span class="n">current</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">,</span> <span class="kt">int</span><span class="o">[][]</span> <span class="n">memo</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">count</span> <span class="o">==</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">visited</span> <span class="o">&amp;</span> <span class="n">1</span><span class="o">)</span> <span class="o">==</span> <span class="n">1</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">0</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">memo</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">visited</span><span class="o">]</span> <span class="o">!=</span> <span class="o">-</span><span class="n">1</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">memo</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">visited</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">minCost</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="o">((</span><span class="n">visited</span> <span class="o">&amp;</span> <span class="o">(</span><span class="n">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="o">))</span> <span class="o">==</span> <span class="n">0</span> <span class="o">&amp;&amp;</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">!=</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">newMask</span> <span class="o">=</span> <span class="n">visited</span> <span class="o">|</span> <span class="o">(</span><span class="n">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">newCost</span> <span class="o">=</span> <span class="n">graph</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="n">tsp</span><span class="o">(</span><span class="n">graph</span><span class="o">,</span> <span class="n">newMask</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">count</span> <span class="o">+</span> <span class="n">1</span><span class="o">,</span> <span class="n">memo</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">minCost</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">minCost</span><span class="o">,</span> <span class="n">newCost</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">memo</span><span class="o">[</span><span class="n">current</span><span class="o">][</span><span class="n">visited</span><span class="o">]</span> <span class="o">=</span> <span class="n">minCost</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">minCost</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">solveTSP</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">1</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span><span class="o">[][]</span> <span class="n">memo</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">n</span><span class="o">][</span><span class="n">1</span> <span class="o">&lt;&lt;</span> <span class="n">n</span><span class="o">];</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">row</span> <span class="o">:</span> <span class="n">memo</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Arrays</span><span class="o">.</span><span class="na">fill</span><span class="o">(</span><span class="n">row</span><span class="o">,</span> <span class="o">-</span><span class="n">1</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">minCost</span> <span class="o">=</span> <span class="n">tsp</span><span class="o">(</span><span class="n">graph</span><span class="o">,</span> <span class="n">mask</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">1</span><span class="o">,</span> <span class="n">memo</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;Minimum Cost: &#34;</span> <span class="o">+</span> <span class="n">minCost</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span><span class="o">[][]</span> <span class="n">graph</span> <span class="o">=</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">0</span><span class="o">,</span> <span class="n">20</span><span class="o">,</span> <span class="n">42</span><span class="o">,</span> <span class="n">25</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">20</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">30</span><span class="o">,</span> <span class="n">34</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">42</span><span class="o">,</span> <span class="n">30</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">10</span><span class="o">},</span>
+</span></span><span class="line"><span class="cl">            <span class="o">{</span><span class="n">25</span><span class="o">,</span> <span class="n">34</span><span class="o">,</span> <span class="n">10</span><span class="o">,</span> <span class="n">0</span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">solveTSP</span><span class="o">(</span><span class="n">graph</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-1"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">visited</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># check if already computed</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">memo</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">visited</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">memo</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">visited</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">min_cost</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">visited</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">))</span> <span class="ow">and</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">new_mask</span> <span class="o">=</span> <span class="n">visited</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">new_cost</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">new_mask</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">memo</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">min_cost</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_cost</span><span class="p">,</span> <span class="n">new_cost</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># update the memo cache</span>
+</span></span><span class="line"><span class="cl">    <span class="n">memo</span><span class="p">[</span><span class="n">current</span><span class="p">][</span><span class="n">visited</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_cost</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">min_cost</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">solve_tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mask</span> <span class="o">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="n">memo</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">n</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">min_cost</span> <span class="o">=</span> <span class="n">tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">memo</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;Minimum Cost: </span><span class="si">{</span><span class="n">min_cost</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&#34;__main__&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">        <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">solve_tsp</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+    <div
+  class="tabs-panel rounded pt-6 hidden data-[state=selected]:block"
+  id="tabs-panel-2"
+  role="tabpanel"
+  
+  
+>
+  <div class="code-block relative mt-6 first:mt-0 group/code"><div id="code-block-0"><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span> <span class="nx">main</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="s">&#34;fmt&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">visited</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">memo</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="nx">n</span> <span class="o">&amp;&amp;</span> <span class="nx">visited</span><span class="o">&amp;</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// check if already computed
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">memo</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">visited</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nx">memo</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">visited</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">minCost</span> <span class="o">:=</span> <span class="nb">int</span><span class="p">(^</span><span class="nb">uint</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">visited</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="nx">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">newMask</span> <span class="o">:=</span> <span class="nx">visited</span> <span class="p">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="nx">i</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">newCost</span> <span class="o">:=</span> <span class="nx">graph</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">i</span><span class="p">]</span> <span class="o">+</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span><span class="p">,</span> <span class="nx">newMask</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">count</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nx">memo</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="nx">newCost</span> <span class="p">&lt;</span> <span class="nx">minCost</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">minCost</span> <span class="p">=</span> <span class="nx">newCost</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// update the cache
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nx">memo</span><span class="p">[</span><span class="nx">current</span><span class="p">][</span><span class="nx">visited</span><span class="p">]</span> <span class="p">=</span> <span class="nx">minCost</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">minCost</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">solveTSP</span><span class="p">(</span><span class="nx">graph</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">n</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">graph</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">mask</span> <span class="o">:=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">memo</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">memo</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">memo</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="nx">n</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">memo</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">memo</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="o">-</span><span class="mi">1</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">minCost</span> <span class="o">:=</span> <span class="nf">tsp</span><span class="p">(</span><span class="nx">graph</span><span class="p">,</span> <span class="nx">mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">memo</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;Minimum Cost: %d\n&#34;</span><span class="p">,</span> <span class="nx">minCost</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">graph</span> <span class="o">:=</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">25</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">34</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">42</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">25</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">solveTSP</span><span class="p">(</span><span class="nx">graph</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="opacity-0 transition group-hover/code:opacity-100 flex gap-1 absolute m-[11px] right-0 top-0">
+    <button class="code-copy-btn group/copybtn transition-all active:opacity-50 bg-primary-700/5 border border-black/5 text-gray-600 hover:text-gray-900 rounded-md p-1.5 dark:bg-primary-300/10 dark:border-white/10 dark:text-gray-400 dark:hover:text-gray-50" title="Copy code" data-clipboard-target="#code-block-0">
+      <svg class="group-[.copied]/copybtn:hidden pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      <svg class="hidden group-[.copied]/copybtn:block success-icon pointer-events-none h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+
+
         </div>
         <div class="mt-16"></div>
         <div class="mb-8 flex items-center border-t pt-8 dark:border-neutral-800 contrast-more:border-neutral-400 dark:contrast-more:border-neutral-400 print:hidden"><a
