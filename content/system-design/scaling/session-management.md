@@ -1,11 +1,12 @@
 ---
 title: 'Session Management in Horizontal Scaling'
+weight: 3
 type: docs
 toc: true
 sidebar:
   open: true
 prev: horizontal-scaling
-next: 
+next: database-bottleneck
 params:
   editURL:
 ---

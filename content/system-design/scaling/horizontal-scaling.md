@@ -1,11 +1,12 @@
 ---
 title: 'Horizontal Scaling'
+weight: 2
 type: docs
 toc: true
 sidebar:
   open: true
 prev: scaling
-next:
+next: session-management
 params:
   editURL:
 ---
