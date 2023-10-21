@@ -94,6 +94,18 @@ Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Result
     </item>
     
     <item>
+      <title>Horizontal Scaling</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</guid>
+      <description>Horizontal scaling, also known as scaling out, involves increasing the capacity of a system by adding more machines to a network. This approach is widely used to handle increased workloads and ensure high availability.
+Pros and Cons of Horizontal Scaling: Pros:
+Improved Performance: Horizontal scaling allows for the distribution of the load across multiple machines, which can significantly improve the overall performance and response times of a system.
+High Availability: In the event of a hardware failure or maintenance, the system remains operational as traffic is distributed across multiple servers.</description>
+    </item>
+    
+    <item>
       <title>Selection Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -120,6 +132,17 @@ This pattern is particularly useful when you have a set of objects with similar 
       
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</guid>
       <description></description>
+    </item>
+    
+    <item>
+      <title>Session Management in Horizontal Scaling</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</guid>
+      <description>Session management becomes more complex in a horizontally scaled environment. Here are some best practices:
+Session Affinity Sticky sessions (also known as Session Affinity) involve associating a user&amp;rsquo;s session with a specific server for the duration of their session. When a user makes an initial request, the load balancer determines which server to send them to, and subsequent requests from that user are directed to the same server.
+Session persistence is typically configured on the load balancer itself.</description>
     </item>
     
     <item>
@@ -200,26 +223,25 @@ Each handler decides either to process the request or to pass it along the chain
     </item>
     
     <item>
-      <title>Horizontal Scaling</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</link>
+      <title>Database Bottleneck</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</guid>
-      <description>Horizontal scaling, also known as scaling out, involves increasing the capacity of a system by adding more machines to a network. This approach is widely used to handle increased workloads and ensure high availability.
-Pros and Cons of Horizontal Scaling: Pros:
-Improved Performance: Horizontal scaling allows for the distribution of the load across multiple machines, which can significantly improve the overall performance and response times of a system.
-High Availability: In the event of a hardware failure or maintenance, the system remains operational as traffic is distributed across multiple servers.</description>
+      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/</guid>
+      <description>Scaling an application, especially in relation to the database, comes with its own set of challenges.
+Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&amp;rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
+Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically.</description>
     </item>
     
     <item>
-      <title>Session Management in Horizontal Scaling</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</link>
+      <title>Database Replication</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</guid>
-      <description>Session management becomes more complex in a horizontally scaled environment. Here are some best practices:
-Session Affinity Sticky sessions (also known as Session Affinity) involve associating a user&amp;rsquo;s session with a specific server for the duration of their session. When a user makes an initial request, the load balancer determines which server to send them to, and subsequent requests from that user are directed to the same server.
-Session persistence is typically configured on the load balancer itself.</description>
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/</guid>
+      <description>Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
+Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.</description>
     </item>
     
     <item>

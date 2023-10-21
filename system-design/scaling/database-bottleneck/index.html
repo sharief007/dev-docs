@@ -11,19 +11,32 @@
 <link rel="apple-touch-icon" href="/dev-docs/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/dev-docs/site.webmanifest" rel="manifest" />
 
-  <title>Behavioral Patterns – Dev Docs</title>
-  <meta name="description" content=" Chain of Responsibility " />
+  <title>Database Bottleneck – Dev Docs</title>
+  <meta name="description" content="Scaling an application, especially in relation to the database, comes with its own set of challenges.
+Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&amp;rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
+Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically." />
   
 
-<meta property="og:title" content="Behavioral Patterns" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://sharief007.github.io/dev-docs/design-patterns/behavioral/" />
+<meta property="og:title" content="Database Bottleneck" />
+<meta property="og:description" content="Scaling an application, especially in relation to the database, comes with its own set of challenges.
+Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
+Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/" /><meta property="article:section" content="system-design" />
 
-  <meta itemprop="name" content="Behavioral Patterns">
-<meta itemprop="description" content=""><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Behavioral Patterns"/>
-<meta name="twitter:description" content=""/>
+
+
+  <meta itemprop="name" content="Database Bottleneck">
+<meta itemprop="description" content="Scaling an application, especially in relation to the database, comes with its own set of challenges.
+Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
+Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically.">
+
+<meta itemprop="wordCount" content="818">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Database Bottleneck"/>
+<meta name="twitter:description" content="Scaling an application, especially in relation to the database, comes with its own set of challenges.
+Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
+Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically."/>
 
     <link rel="preload" href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" as="style" />
     <link href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" rel="stylesheet" integrity="sha256-Zhfltp8MA2nFH5xu3/vqmToVjsLZ9B76G4tz3YFQjG8=" />
@@ -256,13 +269,12 @@
       </div>
             </li><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
     href="/dev-docs/design-patterns/behavioral/"
     
   >Behavioral Patterns
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a>
-  
               <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
@@ -385,11 +397,20 @@
               
             </li><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
+      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
     href="/dev-docs/system-design/scaling/database-bottleneck/"
     
   >Database Bottleneck
     </a>
+  
+    <ul class='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'><li>
+              <a
+                href="#"
+                class="flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border flex gap-2 before:opacity-25 before:content-['#'] text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
+              ></a>
+            </li>
+          </ul>
+  
               
             </li></ul>
       </div>
@@ -421,85 +442,51 @@
         <li class="open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/creational/"
+    href="/dev-docs/system-design/scaling/"
     
-  >Creational Patterns
+  >Application Scaling
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/creational/singleton/"
+    href="/dev-docs/system-design/scaling/horizontal-scaling/"
     
-  >Singleton Pattern
-    </a>
-              
-            </li></ul>
-      </div></li>
-        <li class="open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/"
-    
-  >Structural Patterns
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
-    </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/adapter/"
-    
-  >Adapter Pattern
+  >Horizontal Scaling
     </a>
               
             </li><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/composite/"
+    href="/dev-docs/system-design/scaling/session-management/"
     
-  >Composite Pattern
+  >Session Management in Horizontal Scaling
     </a>
               
             </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/decorator/"
-    
-  >Decorator Pattern
-    </a>
-              
-            </li><li class="flex flex-col gap-1 "><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/facade/"
-    
-  >Facade Pattern
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/proxy/"
-    
-  >Proxy Pattern
-    </a>
-              
-            </li></ul>
-      </div></li>
-        <li class="open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
-    href="/dev-docs/design-patterns/behavioral/"
+    href="/dev-docs/system-design/scaling/database-bottleneck/"
     
-  >Behavioral Patterns
+  >Database Bottleneck
+    </a>
+              
+            </li></ul>
+      </div></li>
+        <li class="open"><a
+    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
+    href="/dev-docs/system-design/database/"
+    
+  >Database
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/behavioral/chain-of-responsibility/"
+    href="/dev-docs/system-design/database/replication/"
     
-  >Chain Of Responsibility
+  >Database Replication
     </a>
               
             </li></ul>
@@ -528,8 +515,28 @@
 
 
 <nav class="hextra-toc order-last hidden w-64 shrink-0 xl:block print:hidden px-4" aria-label="table of contents">
-    <div class="hextra-scrollbar sticky top-16 overflow-y-auto pr-4 pt-6 text-sm [hyphens:auto] max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:-mr-4 rtl:-ml-4">
-      <div class=" sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400"></div>
+    <div class="hextra-scrollbar sticky top-16 overflow-y-auto pr-4 pt-6 text-sm [hyphens:auto] max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:-mr-4 rtl:-ml-4"><p class="mb-4 font-semibold tracking-tight">On this page</p><ul>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#key-challenges">Key Challenges
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#strategies-to-alleviate-database-bottlenecks">Strategies to Alleviate Database Bottlenecks
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#scaling-database">Scaling Database
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#database-sharding">Database Sharding
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#replication">Replication
+        </a>
+      </li></ul>
+      <div class="mt-8 border-t bg-white pt-8 shadow-[0_-12px_16px_white] dark:bg-dark dark:shadow-[0_-12px_16px_#111] sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400"></div>
     </div>
   </nav>
 
@@ -538,29 +545,122 @@
       <main class="w-full min-w-0 max-w-6xl px-6 pt-4 md:px-12">
         <div class="mt-1.5 flex items-center gap-1 overflow-hidden text-sm text-gray-500 dark:text-gray-400 contrast-more:text-current">
       <div class="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis hover:text-gray-900 dark:hover:text-gray-100">
-        <a href="https://sharief007.github.io/dev-docs/design-patterns/">Design Patterns</a>
-      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="whitespace-nowrap transition-colors font-medium text-gray-700 contrast-more:font-bold contrast-more:text-current dark:text-gray-100 contrast-more:dark:text-current">Behavioral Patterns</div>
+        <a href="https://sharief007.github.io/dev-docs/system-design/">System Design</a>
+      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      <div class="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis hover:text-gray-900 dark:hover:text-gray-100">
+        <a href="https://sharief007.github.io/dev-docs/system-design/scaling/">Application Scaling</a>
+      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="whitespace-nowrap transition-colors font-medium text-gray-700 contrast-more:font-bold contrast-more:text-current dark:text-gray-100 contrast-more:dark:text-current">Database Bottleneck</div>
 </div>
 
         <div class="content">
-          <h1>Behavioral Patterns</h1>
-          
-
-<div class="hextra-cards mt-4 gap-4 grid not-prose" style="--rows: 3;">
-  
-    
-    <a
-      class="hextra-card group flex flex-col justify-start overflow-hidden rounded-lg border border-gray-200 text-current no-underline dark:shadow-none hover:shadow-gray-100 dark:hover:shadow-none shadow-gray-100 active:shadow-sm active:shadow-gray-200 transition-all duration-200 hover:border-gray-300 bg-transparent shadow-sm dark:border-neutral-800 hover:bg-slate-50 hover:shadow-md dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
-      href="chain-of-responsibility"><span class="flex font-semibold items-start gap-2 p-4 text-gray-700 hover:text-gray-900 dark:text-neutral-200 dark:hover:text-neutral-50">Chain of Responsibility</span></a>
-
-
-</div>
-
+          <h1>Database Bottleneck</h1>
+          <p>Scaling an application, especially in relation to the database, comes with its own set of challenges.</p>
+<h3>Key Challenges<span class="absolute -mt-20" id="key-challenges"></span>
+    <a href="#key-challenges" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>Database Bottlenecks:</strong>
+The database can become a bottleneck if it can&rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.</p>
+<p><strong>Increased Load on the Database:</strong>
+As your application gains popularity, the number of concurrent users and requests can increase dramatically. This puts strain on the database, potentially leading to slower response times and even downtime. As the number of concurrent users increases, the <strong>latency and response time</strong> of database operations can increase.</p>
+<p><strong>Data Volume and Complexity:</strong>
+As your dataset grows, managing and querying large volumes of data can become challenging. Performing complex join operations on large datasets can be resource-intensive. In some cases, it may be necessary to denormalize data or perform joins in the application code.</p>
+<p><strong>Data Consistency and Integrity:</strong>
+Maintaining data consistency across multiple servers or nodes in a distributed environment can be complex. Ensuring that updates are applied correctly and in a timely manner is crucial.</p>
+<h3>Strategies to Alleviate Database Bottlenecks<span class="absolute -mt-20" id="strategies-to-alleviate-database-bottlenecks"></span>
+    <a href="#strategies-to-alleviate-database-bottlenecks" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>When dealing with horizontal scaling and potential database bottlenecks, there are several strategies you can employ at the coding and application server level to reduce the load before making significant design or architectural changes.</p>
+<p><strong>Connection Pooling</strong>:
+Implement connection pooling to reuse database connections rather than opening a new connection for each request. This reduces the overhead of establishing new connections.</p>
+<p><strong>Query Optimization</strong>:
+Ensure that your database queries are well-optimized. Use appropriate indexes, avoid unnecessary joins, and consider using database-specific features like stored procedures or materialized views for performance gains.</p>
+<ul>
+<li>
+<p><strong>Optimized Data Retrieval</strong>: Retrieve only the data you need. Avoid fetching unnecessary columns or rows from the database. Use projections to select specific fields.</p>
+</li>
+<li>
+<p><strong>Optimistic Concurrency Control</strong>: Use techniques like optimistic locking to handle concurrent updates efficiently. This can prevent unnecessary conflicts and retries.</p>
+</li>
+</ul>
+<p><strong>Data Denormalization</strong>:
+In some cases, denormalizing your data (combining related data into a single table) can lead to performance improvements, especially for read-heavy workloads. However, this should be done carefully to avoid data consistency issues.</p>
+<p><strong>Batch Processing</strong>:
+Consider processing data in batches rather than individually. This can significantly reduce the number of database transactions and improve overall throughput.</p>
+<p><strong>Caching</strong>:
+Implement caching mechanisms to store frequently accessed data in memory. This can reduce the need for repeated database queries. Consider using tools like Redis or Memcached for caching.</p>
+<h3>Scaling Database<span class="absolute -mt-20" id="scaling-database"></span>
+    <a href="#scaling-database" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>When server or code level optimizations are no longer sufficient to handle the load, it&rsquo;s time to consider scaling the database itself. In the context of horizontal scaling, here are some strategies you can employ:</p>
+<h4>Database Sharding<span class="absolute -mt-20" id="database-sharding"></span>
+    <a href="#database-sharding" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Divide the database into smaller, more manageable pieces (shards) and distribute them across multiple servers. Each shard is responsible for a subset of the data. This helps distribute the load and improve performance.</p>
+<h4>Replication<span class="absolute -mt-20" id="replication"></span>
+    <a href="#replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Use <a href="/dev-docs/system-design/database/replication/" >database replication</a> to create multiple copies (replicas) of the database. Read requests can be directed to the replicas, reducing the load on the primary database server.</p>
+<ol start="3">
+<li>
+<p><strong>Partitioning</strong>:</p>
+<ul>
+<li>Divide large tables into smaller, more manageable pieces (partitions) based on a defined criterion (e.g., range, list, hash). This can improve query performance and manageability.</li>
+</ul>
+</li>
+<li>
+<p><strong>Federated Databases</strong>:</p>
+<ul>
+<li>Create a federation of databases where each database manages a specific subset of the data. Queries are then distributed to the appropriate database in the federation.</li>
+</ul>
+</li>
+<li>
+<p><strong>Consistent Hashing</strong>:</p>
+<ul>
+<li>Implement a consistent hashing algorithm to distribute data across a cluster of database servers. This ensures that each piece of data is assigned to a specific server consistently.</li>
+</ul>
+</li>
+<li>
+<p><strong>NoSQL Databases</strong>:</p>
+<ul>
+<li>Consider using NoSQL databases that are designed for horizontal scalability. They are often better suited for handling large volumes of data and high traffic loads.</li>
+</ul>
+</li>
+<li>
+<p><strong>Database Clustering</strong>:</p>
+<ul>
+<li>Set up a cluster of database servers that work together to manage the data. Clustering provides redundancy and can distribute the load across multiple nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Distributed Databases</strong>:</p>
+<ul>
+<li>Use a distributed database system that allows data to be spread across multiple nodes or servers. These systems are designed for horizontal scalability from the ground up.</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Caching Layers</strong>:</p>
+<ul>
+<li>Introduce caching layers like Redis or Memcached to reduce the load on the database. Cached data can be served quickly without hitting the database.</li>
+</ul>
+</li>
+<li>
+<p><strong>Content Delivery Networks (CDNs)</strong>:</p>
+<ul>
+<li>Utilize CDNs to cache and serve static content, reducing the need for frequent database queries, especially for read-heavy applications.</li>
+</ul>
+</li>
+<li>
+<p><strong>Optimizing Data Access Patterns</strong>:</p>
+<ul>
+<li>Ensure that your application&rsquo;s data access patterns are well-suited for horizontal scaling. This may involve restructuring how data is stored and accessed.</li>
+</ul>
+</li>
+<li>
+<p><strong>Monitoring and Auto-Scaling</strong>:</p>
+<ul>
+<li>Implement monitoring solutions that can detect spikes in traffic and automatically scale the database resources (e.g., adding more nodes) as needed.</li>
+</ul>
+</li>
+</ol>
+<p>When implementing any of these strategies, it&rsquo;s important to thoroughly test and monitor the system to ensure it meets your performance requirements and maintains data integrity. Additionally, consider the specific characteristics and requirements of your application to determine which scaling approach is most appropriate.</p>
 
         </div>
         <div class="mt-16"></div>
-        <div class="mt-16"></div>
-        
+        <div class="mb-8 flex items-center border-t pt-8 dark:border-neutral-800 contrast-more:border-neutral-400 dark:contrast-more:border-neutral-400 print:hidden"><a
+        href="/dev-docs/system-design/scaling/horizontal-scaling/"
+        title="Horizontal Scaling"
+        class="flex max-w-[50%] items-center gap-1 py-4 text-base font-medium text-gray-600 transition-colors [word-break:break-word] hover:text-primary-600 dark:text-gray-300 md:text-lg ltr:pr-4 rtl:pl-4"
+      ><svg class="inline h-5 shrink-0 ltr:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>Horizontal Scaling</a></div>
       </main>
     </article>
   </div>

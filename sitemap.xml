@@ -4,11 +4,15 @@
   <url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/search/breadth-first-search/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/creational/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</loc>
   </url><url>
@@ -24,6 +28,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/</loc>
@@ -33,6 +39,8 @@
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</loc>
   </url><url>
@@ -48,19 +56,17 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/</loc>
-  </url><url>
     <loc>https://sharief007.github.io/dev-docs/categories/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/</loc>
-  </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</loc>
-  </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/</loc>
   </url><url>

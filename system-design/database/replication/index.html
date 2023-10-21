@@ -11,19 +11,32 @@
 <link rel="apple-touch-icon" href="/dev-docs/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/dev-docs/site.webmanifest" rel="manifest" />
 
-  <title>Behavioral Patterns – Dev Docs</title>
-  <meta name="description" content=" Chain of Responsibility " />
+  <title>Database Replication – Dev Docs</title>
+  <meta name="description" content="Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
+Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance." />
   
 
-<meta property="og:title" content="Behavioral Patterns" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://sharief007.github.io/dev-docs/design-patterns/behavioral/" />
+<meta property="og:title" content="Database Replication" />
+<meta property="og:description" content="Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
+Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sharief007.github.io/dev-docs/system-design/database/replication/" /><meta property="article:section" content="system-design" />
 
-  <meta itemprop="name" content="Behavioral Patterns">
-<meta itemprop="description" content=""><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Behavioral Patterns"/>
-<meta name="twitter:description" content=""/>
+
+
+  <meta itemprop="name" content="Database Replication">
+<meta itemprop="description" content="Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
+Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.">
+
+<meta itemprop="wordCount" content="725">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Database Replication"/>
+<meta name="twitter:description" content="Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
+Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance."/>
 
     <link rel="preload" href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" as="style" />
     <link href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" rel="stylesheet" integrity="sha256-Zhfltp8MA2nFH5xu3/vqmToVjsLZ9B76G4tz3YFQjG8=" />
@@ -256,13 +269,12 @@
       </div>
             </li><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
     href="/dev-docs/design-patterns/behavioral/"
     
   >Behavioral Patterns
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a>
-  
               <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
@@ -404,11 +416,20 @@
               <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
+      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
     href="/dev-docs/system-design/database/replication/"
     
   >Database Replication
     </a>
+  
+    <ul class='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'><li>
+              <a
+                href="#"
+                class="flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border flex gap-2 before:opacity-25 before:content-['#'] text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
+              ></a>
+            </li>
+          </ul>
+  
               
             </li></ul>
       </div>
@@ -421,17 +442,33 @@
         <li class="open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/creational/"
+    href="/dev-docs/system-design/scaling/"
     
-  >Creational Patterns
+  >Application Scaling
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/creational/singleton/"
+    href="/dev-docs/system-design/scaling/horizontal-scaling/"
     
-  >Singleton Pattern
+  >Horizontal Scaling
+    </a>
+              
+            </li><li class="flex flex-col gap-1 open"><a
+    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
+    href="/dev-docs/system-design/scaling/session-management/"
+    
+  >Session Management in Horizontal Scaling
+    </a>
+              
+            </li><li class="flex flex-col gap-1 open"><a
+    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
+    href="/dev-docs/system-design/scaling/database-bottleneck/"
+    
+  >Database Bottleneck
     </a>
               
             </li></ul>
@@ -439,67 +476,17 @@
         <li class="open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/"
+    href="/dev-docs/system-design/database/"
     
-  >Structural Patterns
+  >Database
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/adapter/"
-    
-  >Adapter Pattern
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/composite/"
-    
-  >Composite Pattern
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/decorator/"
-    
-  >Decorator Pattern
-    </a>
-              
-            </li><li class="flex flex-col gap-1 "><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/facade/"
-    
-  >Facade Pattern
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/structural/proxy/"
-    
-  >Proxy Pattern
-    </a>
-              
-            </li></ul>
-      </div></li>
-        <li class="open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
-    href="/dev-docs/design-patterns/behavioral/"
+    href="/dev-docs/system-design/database/replication/"
     
-  >Behavioral Patterns
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
-    </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/design-patterns/behavioral/chain-of-responsibility/"
-    
-  >Chain Of Responsibility
+  >Database Replication
     </a>
               
             </li></ul>
@@ -528,8 +515,44 @@
 
 
 <nav class="hextra-toc order-last hidden w-64 shrink-0 xl:block print:hidden px-4" aria-label="table of contents">
-    <div class="hextra-scrollbar sticky top-16 overflow-y-auto pr-4 pt-6 text-sm [hyphens:auto] max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:-mr-4 rtl:-ml-4">
-      <div class=" sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400"></div>
+    <div class="hextra-scrollbar sticky top-16 overflow-y-auto pr-4 pt-6 text-sm [hyphens:auto] max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:-mr-4 rtl:-ml-4"><p class="mb-4 font-semibold tracking-tight">On this page</p><ul>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#benefits-of-database-replication">Benefits of Database Replication
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#types-of-replication">Types of Replication
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#master-slave-replication">Master-Slave Replication
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#multi-master-replication">Multi-Master Replication
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#master-master-circular-replication">Master-Master (Circular) Replication
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#consistency-models">Consistency Models
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#synchronous-consistency">Synchronous Consistency
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-8 rtl:pr-8 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#asynchronous-consistency">Asynchronous Consistency
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#challenges-and-considerations">Challenges and Considerations
+        </a>
+      </li></ul>
+      <div class="mt-8 border-t bg-white pt-8 shadow-[0_-12px_16px_white] dark:bg-dark dark:shadow-[0_-12px_16px_#111] sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400"></div>
     </div>
   </nav>
 
@@ -538,27 +561,73 @@
       <main class="w-full min-w-0 max-w-6xl px-6 pt-4 md:px-12">
         <div class="mt-1.5 flex items-center gap-1 overflow-hidden text-sm text-gray-500 dark:text-gray-400 contrast-more:text-current">
       <div class="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis hover:text-gray-900 dark:hover:text-gray-100">
-        <a href="https://sharief007.github.io/dev-docs/design-patterns/">Design Patterns</a>
-      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="whitespace-nowrap transition-colors font-medium text-gray-700 contrast-more:font-bold contrast-more:text-current dark:text-gray-100 contrast-more:dark:text-current">Behavioral Patterns</div>
+        <a href="https://sharief007.github.io/dev-docs/system-design/">System Design</a>
+      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      <div class="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis hover:text-gray-900 dark:hover:text-gray-100">
+        <a href="https://sharief007.github.io/dev-docs/system-design/database/">Database</a>
+      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="whitespace-nowrap transition-colors font-medium text-gray-700 contrast-more:font-bold contrast-more:text-current dark:text-gray-100 contrast-more:dark:text-current">Database Replication</div>
 </div>
 
         <div class="content">
-          <h1>Behavioral Patterns</h1>
-          
-
-<div class="hextra-cards mt-4 gap-4 grid not-prose" style="--rows: 3;">
-  
-    
-    <a
-      class="hextra-card group flex flex-col justify-start overflow-hidden rounded-lg border border-gray-200 text-current no-underline dark:shadow-none hover:shadow-gray-100 dark:hover:shadow-none shadow-gray-100 active:shadow-sm active:shadow-gray-200 transition-all duration-200 hover:border-gray-300 bg-transparent shadow-sm dark:border-neutral-800 hover:bg-slate-50 hover:shadow-md dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
-      href="chain-of-responsibility"><span class="flex font-semibold items-start gap-2 p-4 text-gray-700 hover:text-gray-900 dark:text-neutral-200 dark:hover:text-neutral-50">Chain of Responsibility</span></a>
-
-
-</div>
-
+          <h1>Database Replication</h1>
+          <p>Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.</p>
+<h3>Benefits of Database Replication<span class="absolute -mt-20" id="benefits-of-database-replication"></span>
+    <a href="#benefits-of-database-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>High Availability</strong>:
+Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.</p>
+<p><strong>Load Distribution</strong>:
+Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.</p>
+<p><strong>Redundancy</strong>:
+Replicas serve as backups in case of data loss or corruption on the master database.</p>
+<p><strong>Geographic Distribution</strong>:
+Replicas can be located in different geographic regions, providing lower latency access for users in different parts of the world.</p>
+<h3>Types of Replication<span class="absolute -mt-20" id="types-of-replication"></span>
+    <a href="#types-of-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><h4>Master-Slave Replication<span class="absolute -mt-20" id="master-slave-replication"></span>
+    <a href="#master-slave-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.</p>
+<p><strong>Challenges</strong></p>
+<p><strong>Replication Lag:</strong> There may be a delay between the time a change is made on the master and when it&rsquo;s replicated to the slaves.</p>
+<p><strong>Limited Scalability:</strong> Doesn&rsquo;t inherently address high write loads; scaling writes may require additional strategies.</p>
+<h4>Multi-Master Replication<span class="absolute -mt-20" id="multi-master-replication"></span>
+    <a href="#multi-master-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>This configuration allows multiple databases to accept both read and write operations. Changes made in any of the databases are propagated to the other nodes.</p>
+<p><strong>Challenges</strong></p>
+<p><strong>Consistency:</strong> Requires a robust conflict resolution mechanism in case of concurrent writes to the same data.</p>
+<p><strong>Complexity:</strong> Setting up and managing multi-master configurations can be more complex than other models.</p>
+<h4>Master-Master (Circular) Replication<span class="absolute -mt-20" id="master-master-circular-replication"></span>
+    <a href="#master-master-circular-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>This is a form of multi-master replication where each node can accept both read and write operations. Changes are propagated in a circular fashion to all nodes.</p>
+<p><strong>Challenges</strong></p>
+<p><strong>Consistency:</strong> Similar to multi-master replication, requires a robust conflict resolution strategy.
+<strong>Complexity:</strong> Configuring and maintaining a circular replication setup can be complex.</p>
+<h3>Consistency Models<span class="absolute -mt-20" id="consistency-models"></span>
+    <a href="#consistency-models" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Consistency models in database systems define how changes made to data by concurrent transactions are visible to other transactions. There are two main consistency models: <strong>Strong Consistency</strong> and <strong>Eventual Consistency</strong>.</p>
+<h4>Synchronous Consistency<span class="absolute -mt-20" id="synchronous-consistency"></span>
+    <a href="#synchronous-consistency" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In a strongly consistent system, once a write operation is acknowledged, all subsequent read operations will reflect that write. This means that all nodes in the system will have an up-to-date view of the data.</p>
+<p><strong>Benefits</strong></p>
+<p><strong>Data Integrity</strong>: Ensures that all nodes have the most up-to-date information at all times.
+<strong>Predictable Behavior</strong>: The behavior of the system is more straightforward and easier to reason about.</p>
+<p><strong>Challenges</strong></p>
+<p><strong>Potentially Slower</strong>: Achieving strong consistency may introduce higher latency, especially in distributed systems where nodes are geographically dispersed.</p>
+<p><strong>More Resource Intensive</strong>: Maintaining strong consistency may require more resources, such as increased network traffic and processing power.</p>
+<h4>Asynchronous Consistency<span class="absolute -mt-20" id="asynchronous-consistency"></span>
+    <a href="#asynchronous-consistency" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In an eventually consistent system, there is no guarantee that all nodes will immediately reflect the most recent write. However, given enough time and assuming no further updates, all nodes will eventually converge to a consistent state.</p>
+<p><strong>Benefits</strong></p>
+<p><strong>Lower Latency</strong>: Generally, eventual consistency can lead to lower latency as nodes do not need to wait for acknowledgment from all other nodes before proceeding.</p>
+<p><strong>Improved Availability</strong>: In scenarios where network partitions or node failures are common, eventual consistency can provide better availability.</p>
+<p><strong>Challenges</strong></p>
+<p><strong>Potential for Temporary Inconsistencies</strong>: During periods of high write activity or network partitions, some nodes may have temporarily outdated data.</p>
+<p><strong>Complex Conflict Resolution</strong>: Applications need to implement conflict resolution strategies to handle cases where multiple nodes receive conflicting updates.</p>
+<h3>Challenges and Considerations<span class="absolute -mt-20" id="challenges-and-considerations"></span>
+    <a href="#challenges-and-considerations" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>Conflict Resolution</strong>:
+In multi-master setups, conflicts can arise when the same data is modified on different nodes. Conflict resolution strategies need to be in place.</p>
+<p><strong>Network Latency</strong>:
+Replication can introduce network overhead, especially in synchronous replication setups.</p>
+<p><strong>Monitoring and Maintenance</strong>:
+Replicas need to be monitored to ensure they are up-to-date and functioning properly. Regular maintenance, such as backup validation, is also important.</p>
+<p><strong>Data Integrity</strong>:
+It&rsquo;s crucial to ensure that replicated data remains consistent and accurate across all nodes.</p>
+<p><strong>Scalability</strong>:
+Replication alone may not be sufficient for handling extremely high traffic loads. Other techniques like sharding or partitioning may also be necessary.</p>
+<p>Database replication is a powerful tool for enhancing the availability and performance of database systems. However, it&rsquo;s important to carefully plan and configure replication to match the specific requirements of your application. Additionally, regular testing and monitoring are essential to ensure the reliability of the replicated system.</p>
 
         </div>
-        <div class="mt-16"></div>
         <div class="mt-16"></div>
         
       </main>
