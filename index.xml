@@ -41,6 +41,17 @@ graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style A fill
     </item>
     
     <item>
+      <title>Database Replication</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/</guid>
+      <description>Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
+Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.</description>
+    </item>
+    
+    <item>
       <title>Dijkstra&#39;s Algorithm</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -80,6 +91,16 @@ Task Scheduling: In project management, tasks often have dependencies on each ot
       <description>The Composite pattern organizes objects into tree structures, making them work together like one. It lets clients treat individual objects and compositions of objects in a similar way.
 This is useful when dealing with things organized in a tree-like structure, such as files and folders in a computer&amp;rsquo;s file system.
 Key Participants: Component: This is the base interface or abstract class that declares the common operations for both leaf objects and composite objects.</description>
+    </item>
+    
+    <item>
+      <title>Database Clustering</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/clustering/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/clustering/</guid>
+      <description>Database clustering is a method used to enhance the performance, availability, and scalability of databases. It involves creating multiple copies of a database, called nodes, and distributing the workload across them. This not only increases the capacity to handle more requests but also provides fault tolerance in case one node fails.
+Types of Database Clustering: Shared-Nothing Clustering In this type, each node has its own storage and processing power, and they do not share any components.</description>
     </item>
     
     <item>
@@ -212,6 +233,18 @@ Participants: Subject: This is the interface that both the RealSubject (the actu
     </item>
     
     <item>
+      <title></title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/clustering-vs-replication/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/clustering-vs-replication/</guid>
+      <description>Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&amp;rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.
+Database Clustering: Definition:
+Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them. Shared Resources:
+In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage.</description>
+    </item>
+    
+    <item>
       <title>Chain Of Responsibility</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -231,17 +264,6 @@ Each handler decides either to process the request or to pass it along the chain
       <description>Scaling an application, especially in relation to the database, comes with its own set of challenges.
 Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&amp;rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
 Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically.</description>
-    </item>
-    
-    <item>
-      <title>Database Replication</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/</guid>
-      <description>Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
-Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
-Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.</description>
     </item>
     
     <item>
