@@ -305,22 +305,6 @@ This graph contains a cycle, so topological sorting is not possible.
 
 Kahn's Algorithm for topological sorting has a time complexity of O(V + E), where V is the number of vertices and E is the number of edges in the graph.
 
-1. **Initialization and In-Degree Calculation:**
-   - For each vertex, we initialize the in-degree to 0, which takes O(V) operations.
-   - Then, we iterate through the edges to calculate the in-degrees. This takes O(E) operations.
-
-2. **Finding Nodes with No Incoming Edges:**
-   - In the worst case, all vertices could have no incoming edges, which would take O(V) operations.
-
-3. **Performing Topological Sorting:**
-   - In the worst case, we process each edge once, which takes O(E) operations.
-   - For each edge, we may add a node to the result list and update the in-degrees, which takes constant time.
-
-4. **Checking if Topological Sorting is Possible:**
-   - After the loop, we check if the result list contains all vertices, which takes O(V) operations.
-
-Overall, the time complexity is dominated by the calculations involving the edges, giving us a total time complexity of O(V + E).
-
 The space complexity of Kahn's Algorithm is O(V), primarily due to the data structures used to store in-degrees and the queue.
 
 
