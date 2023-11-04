@@ -11,6 +11,8 @@ params:
   editURL:
 ---
 
+**Counting Sort** is a non-comparison based sorting algorithm that works efficiently when you have a limited range of input values. It counts the frequency of each element and uses that information to place them in the correct sorted position. This makes it a highly efficient sorting method for scenarios with a small range of possible values.
+
 {{< tabs items="java, python, go" >}}
 {{< tab >}}
 ```java
