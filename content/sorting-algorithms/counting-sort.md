@@ -11,6 +11,8 @@ params:
   editURL:
 ---
 
+**Counting Sort** is a non-comparison based sorting algorithm that works efficiently when you have a limited range of input values. It counts the frequency of each element and uses that information to place them in the correct sorted position. This makes it a highly efficient sorting method for scenarios with a small range of possible values.
+
 {{< tabs items="java, python, go" >}}
 {{< tab >}}
 ```java
@@ -127,3 +129,9 @@ func main() {
 ```
 {{< /tab >}}
 {{< /tabs >}}
+
+### Complexity Analysis
+
+The time complexity of Counting Sort is O(n + k), where n is the number of elements in the input array and k is the range of the non-negative key values in the input.
+
+The space complexity is O(k), where k is the range of values. This additional space is used to create the count array.
