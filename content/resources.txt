@@ -5,3 +5,9 @@ http://highscalability.com/blog/2023/2/22/consistent-hashing-algorithm.html
 
 binary search
 https://leetcode.com/discuss/interview-question/4203773/binary-search-variations
+
+
+Interviews
+
+Salesforce MTS
+https://leetcode.com/discuss/interview-experience/4266617/Salesforce-or-MTS-or-In-Person-Interview-or-November-4
