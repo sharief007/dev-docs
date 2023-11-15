@@ -6,6 +6,9 @@ http://highscalability.com/blog/2023/2/22/consistent-hashing-algorithm.html
 binary search
 https://leetcode.com/discuss/interview-question/4203773/binary-search-variations
 
+graph algorithms
+https://leetcode.com/discuss/study-guide/4283222/graph-beginners-to-advanced-all-algorithms-python
+
 
 Interviews
 
