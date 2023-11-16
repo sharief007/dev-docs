@@ -9,6 +9,11 @@ https://leetcode.com/discuss/interview-question/4203773/binary-search-variations
 graph algorithms
 https://leetcode.com/discuss/study-guide/4283222/graph-beginners-to-advanced-all-algorithms-python
 
+bit manipulation
+https://leetcode.com/discuss/study-guide/4282051/all-types-of-patterns-for-bits-manipulations-and-how-to-use-it
+
+OOPs interview questions
+https://leetcode.com/discuss/interview-question/3828150/OOPS-Cheatsheet-for-Interviews-or-30-questions
 
 Interviews
 
