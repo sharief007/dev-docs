@@ -10,6 +10,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/creational/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/</loc>
@@ -18,6 +20,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/search/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/creational/singleton/</loc>
@@ -25,6 +29,8 @@
     <loc>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/clustering/</loc>
   </url><url>
@@ -44,6 +50,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</loc>
@@ -59,8 +67,6 @@
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</loc>
-  </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/clustering-vs-replication/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/categories/</loc>
   </url><url>

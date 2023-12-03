@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Database Replication of Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/system-design/database/replication/</link>
+    <description>Recent content in Database Replication on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/system-design/database/replication/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Master Slave Replication</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</guid>
+      <description>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica.</description>
+      <content:encoded><![CDATA[<p>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.</p>
+<pre class="mermaid mt-6">graph TD;
+  subgraph Master Slave Replication
+  direction LR
+    A[Client] -->|Write Request| B[Master]
+    B -->|Replicate| C[Slave 1]
+    B -->|Replicate| D[Slave 2]
+  end
+
+  style A fill:#F9EBB2
+  style B fill:#AED6F1</pre><p>Each node that stores a copy of the database is called a <strong>replica</strong>. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a <strong>replication log</strong> or <strong>change stream</strong>.</p>
+<h3>Setting up new followers<span class="absolute -mt-20" id="setting-up-new-followers"></span>
+    <a href="#setting-up-new-followers" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>From time to time, you need to set up new followers—perhaps to increase the number of replicas, or to replace failed nodes. However, a straightforward copy-paste of data files from one node to another isn&rsquo;t usually enough. Clients are frequently writing to the database, and the data is always changing. Simply moving files around might result in inconsistencies.</p>
+<p>Ensuring consistency by locking the database (making it temporarily unavailable for writes) is an option, but it contradicts our aim of maintaining high availability.</p>
+<ol>
+<li>
+<p>Capture a consistent snapshot of the leader&rsquo;s database, ideally without locking the entire database—commonly available in databases for backup purposes.</p>
+</li>
+<li>
+<p>Transfer the captured snapshot to the new follower node.</p>
+</li>
+<li>
+<p>The follower connects to the leader, requesting all data changes since the snapshot, referencing a specific position in the leader&rsquo;s replication log (e.g., log sequence number in PostgreSQL or binlog coordinates in MySQL).</p>
+</li>
+<li>
+<p>Once the follower processes the backlog of changes since the snapshot, it is considered caught up and can seamlessly continue processing real-time data changes from the leader.</p>
+</li>
+</ol>
+<h3>Follower Failure<span class="absolute -mt-20" id="follower-failure"></span>
+    <a href="#follower-failure" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The follower, aware of the last processed transaction before the fault, reconnects to the leader and requests all data changes that took place during its disconnection period.</p>
+<h3>Leader Failure<span class="absolute -mt-20" id="leader-failure"></span>
+    <a href="#leader-failure" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In the event of a leader failure, a follower must be promoted to the new leader.</p>
+<p>Selecting a new leader often involves an election process. The ideal candidate is typically the replica with the most recent data changes from the old leader to minimize potential data loss. Achieving consensus among all nodes on the choice of a new leader constitutes a consensus problem.</p>
+<ul>
+<li>Clients must be reconfigured to direct writes to the new leader and</li>
+<li>Other followers should start consuming data changes from the new leader.</li>
+</ul>
+<p>This process is known as <strong>failover</strong>.</p>
+<h4>Challenges in Failover<span class="absolute -mt-20" id="challenges-in-failover"></span>
+    <a href="#challenges-in-failover" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Data Loss</strong>: In asynchronous replication, the new leader might lack all writes from the old leader before its failure. Upon the old leader rejoining after a new leader is chosen, handling conflicting writes becomes a challenge. A common solution is discarding unreplicated writes from the old leader, potentially conflicting with clients&rsquo; durability expectations.</p>
+<p><strong>Split Brain</strong>: In fault scenarios, specifically in a split brain situation where two nodes believe they are the leader, there&rsquo;s a risk of data loss or corruption if both leaders accept writes without conflict resolution Some systems shuts down one node upon detecting two leaders. However, poorly designed mechanisms may result in both nodes being shut down.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Consistency Models</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</guid>
+      <description>Synchronous Replication Client does not receive success message until all replicas complete the write query. This is referred as Strong Consistency.
+sequenceDiagramactor c as clientparticipant m as master replicaparticipant s1 as slave replicaparticipant s2 as slave replicac -&gt;&gt; +m: Read Write Queriesm --&gt;&gt; s1: Replication Requestm --&gt;&gt; s2: Replication Requests1 --&gt;&gt; m: Acknowledgements2 --&gt;&gt; m: Acknowledgementm -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
+      <content:encoded><![CDATA[<h3>Synchronous Replication<span class="absolute -mt-20" id="synchronous-replication"></span>
+    <a href="#synchronous-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Client does not receive success message until all replicas complete the write query. This is referred as <strong>Strong Consistency</strong>.</p>
+<pre class="mermaid mt-6">sequenceDiagram
+  actor c as client
+  participant m as master replica
+  participant s1 as slave replica
+  participant s2 as slave replica
+
+  c ->> +m: Read Write Queries
+  m -->> s1: Replication Request
+  m -->> s2: Replication Request
+  s1 -->> m: Acknowledgement
+  s2 -->> m: Acknowledgement
+  m ->> -c: Query Response</pre><h4>Benefits<span class="absolute -mt-20" id="benefits"></span>
+    <a href="#benefits" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Data Integrity</strong>: Ensures that all nodes have the most up-to-date information at all times.</p>
+<h4>Draw Backs<span class="absolute -mt-20" id="draw-backs"></span>
+    <a href="#draw-backs" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Single point of failure</strong>: If the synchronous follower becomes unresponsive (due to a crash, network fault, etc.), the leader is forced to halt all write operations, patiently waiting until the synchronous replica is operational again before processing any writes.</p>
+<p><strong>High Latency</strong>: Achieving strong consistency may introduce higher latency, especially in distributed systems where nodes are geographically dispersed.</p>
+<h3>Asynchronous Replication<span class="absolute -mt-20" id="asynchronous-replication"></span>
+    <a href="#asynchronous-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Client receives success message the second that master completes the write query. This is referred as <strong>Eventual Consistency</strong>.</p>
+<pre class="mermaid mt-6">sequenceDiagram
+  actor c as client
+  participant m as master replica
+  participant s1 as slave replica
+  participant s2 as slave replica
+
+  c ->> +m: Read Write Queries
+  m ->> -c: Query Response
+  m -->> s1: Replication Request
+  m -->> s2: Replication Request
+  s1 -->> m: Acknowledgement
+  s2 -->> m: Acknowledgement</pre><h4>Benefits<span class="absolute -mt-20" id="benefits-1"></span>
+    <a href="#benefits-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Lower Latency</strong>: Nodes do not need to wait for acknowledgment from all other nodes before proceeding.</p>
+<p><strong>Availability</strong>: In scenarios where network partitions or node failures are common, eventual consistency can provide better availability. The leader can continue processing writes, even if all followers have fallen behind.</p>
+<h4>Challenges<span class="absolute -mt-20" id="challenges"></span>
+    <a href="#challenges" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Durability</strong>: If the leader fails and is unrecoverable, any writes not yet replicated to followers are lost. Despite client confirmation, durability of the write is not guaranteed.</p>
+<p><strong>Stale Reads</strong>: If an application reads from an asynchronous follower, it may see outdated information if the follower has fallen behind.</p>
+<p>This inconsistency is just a temporary state—if you stop writing to the database and wait a while, the followers will eventually catch up and become consistent with the leader. For that reason, this effect is known as eventual consistency.</p>
+<h3>Hybrid Replication<span class="absolute -mt-20" id="hybrid-replication"></span>
+    <a href="#hybrid-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>The Hybrid Replication Model, also known as Semi-Synchronous Replication, combines features of both synchronous and asynchronous replication. In this model, the system processes a write operation synchronously to at least one replica (ensuring immediate acknowledgment to the client) while asynchronously replicating the write to other replicas.</p>
+<pre class="mermaid mt-6">sequenceDiagram
+  actor c as client
+  participant m as master replica
+  participant s1 as slave replica
+  participant s2 as slave replica
+
+  c ->> +m: Read Write Queries
+  m -->> s1: Replication Request
+  m -->> s2: Replication Request
+  s1 -->> m: Acknowledgement
+  m ->> -c: Query Response
+  s2 -->> m: Acknowledgement</pre>]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Replication Lag</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</guid>
+      <description>The delay, known as replication lag, between a write occurring on the leader and being reflected on a follower may be minimal, often just a fraction of a second, making it practically imperceptible.
+Scaling the architecture is achievable by adding more follower nodes. However, this scalability is typically viable with asynchronous replication. Attempting synchronous replication to all followers could render the entire system unavailable for writing in the event of a single node failure or network outage.</description>
+      <content:encoded><![CDATA[<p>The delay, known as <strong>replication lag</strong>, between a write occurring on the leader and being reflected on a follower may be minimal, often just a fraction of a second, making it practically imperceptible.</p>
+<p>Scaling the architecture is achievable by adding more follower nodes. However, this scalability is typically viable with asynchronous replication. Attempting synchronous replication to all followers could render the entire system unavailable for writing in the event of a single node failure or network outage.</p>
+<p>The term &ldquo;eventually consistency&rdquo; is ambiguous. In general, there is no strict limit to how far a replica can lag behind. However, operational conditions, such as a system nearing capacity or network issues, can cause the lag to extend to several seconds or even minutes.</p>
+<h2>Problems with Replication Lag<span class="absolute -mt-20" id="problems-with-replication-lag"></span>
+    <a href="#problems-with-replication-lag" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>Reading Your Own Writes<span class="absolute -mt-20" id="reading-your-own-writes"></span>
+    <a href="#reading-your-own-writes" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>If the user views the data shortly after making a write, the new data may not yet have reached the replica. For example, user updated their social media profile information and immediately reloads the page.</p>
+<pre class="mermaid mt-6">sequenceDiagram
+  actor c as client
+  participant m as master replica
+  participant s1 as slave replica
+  participant s2 as slave replica
+
+  c ->> +m: Update profile information
+  m ->> -c: Update successful
+  m -->> s1: Replication Request
+  c ->> s2: Read profile information
+  s1 -->> m: Acknowledgement
+  m -->> s2: Replication Request
+  s2 ->> c: Stale response
+  s2 -->> m: Acknowledgement</pre><p>This can be solved using <strong>read-after-write consistency</strong>, also known as <strong>read-your-writes consistency</strong>.</p>
+<h4>Implementation Strategies<span class="absolute -mt-20" id="implementation-strategies"></span>
+    <a href="#implementation-strategies" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><ul>
+<li>
+<p>When reading data that could be modified by the user, retrieve it from the leader. For instance, user profiles on a social network are typically editable only by the profile owner. Therefore, a straightforward guideline is to read the user&rsquo;s own profile from the leader and read other users&rsquo; profiles from a follower.</p>
+</li>
+<li>
+<p>The client can store the timestamp of its latest write, allowing the system to guarantee that the replica serving reads for that user reflects updates at least until that timestamp. If a replica is not sufficiently up-to-date, the read can be directed to another replica, or the query can wait until the replica catches up. The timestamp could be either a logical timestamp (indicating the order of writes, like a log sequence number) or the system&rsquo;s actual clock.</p>
+</li>
+<li>
+<p>Complications arise when a user accesses the service from multiple devices. Approaches relying on remembering the user&rsquo;s last update timestamp become challenging, as the code on one device lacks knowledge of updates on the other device. Centralizing this metadata becomes necessary to address such challenges.</p>
+</li>
+</ul>
+<h3>Monotonic Reads<span class="absolute -mt-20" id="monotonic-reads"></span>
+    <a href="#monotonic-reads" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>It’s possible for a user to see things <code>moving backward in time</code>. This can happen if a user makes several reads from different replicas.</p>
+<pre class="mermaid mt-6">sequenceDiagram
+  actor u1 as user1
+  actor u2 as user2
+  participant m as master replica
+  participant s1 as slave replica
+  participant s2 as slave replica
+
+  u1 ->> +m: Added a comment c1
+  m ->> -u1: insert successful
+  m -->> s1: Replication Request
+  s1 -->> m: Acknowledgement
+  u2 ->> s1: Read the comment c1
+  s1 ->> u2: read successful
+  u2 ->> s2: Read the comment c1
+  s2 ->> u2: Comment C1 not found
+  m -->> s2: Replication Request
+  s2 -->> m: Acknowledgement
+
+  note right of u2: But i just saw the comment</pre><p><strong>Monotonic reads</strong> ensure prevention of certain anomalies. While it offers a lesser guarantee than strong consistency, it is stronger than eventual consistency.</p>
+<p>One approach to achieving monotonic reads is to ensure each user consistently reads from the same replica (while different users can read from different replicas). For instance, the replica can be chosen based on a hash of the user ID rather than randomly. However, in the event of replica failure, the user&rsquo;s queries will need to be redirected to an alternative replica.</p>
+<h3>Consistent Prefix Reads<span class="absolute -mt-20" id="consistent-prefix-reads"></span>
+    <a href="#consistent-prefix-reads" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Consider the following conversation.</p>
+<ul>
+<li>User1: What is your name?</li>
+<li>User2: My name is Elon Musk.</li>
+</ul>
+<p>These records have dependency on each other. The order of the records matter here. Now, imagine User3 is observing this conversation from a follower may see the response as follows.</p>
+<ul>
+<li>User2: My Name is Elon Musk.</li>
+<li>User1: What is your name?</li>
+</ul>
+<pre class="mermaid mt-6">sequenceDiagram
+	actor u3 as User3
+	
+	participant f1 as follower
+	participant l1 as leader
+
+	actor u1 as User1
+	actor u2 as User2
+	
+
+	participant l2 as leader
+	participant f2 as follower
+
+
+	u1 ->> l1: What is your name? (record 1)
+	u2 ->> l1: Read the question
+	u2 ->> l2: My name is Elon Musk. (record 2)
+	u1 ->> l2: Read the answer
+	
+	l2 -->> f2: Replication (record 2)
+	u3 ->> f2: Read the answer (record 2)
+	l1 -->> f1: Replication (record 1)
+	u3 ->> f1: Read the question (record 1)</pre><p>Preventing this anomaly necessitates a different guarantee: <strong>consistent prefix reads</strong>. This guarantee asserts that if a sequence of writes occurs in a specific order, any reader observing those writes will perceive them in the same order.</p>
+<p>This challenge is particularly pronounced in partitioned (sharded) databases. One solution is to ensure that causally related writes are stored in the same partition. However, in certain applications, achieving this efficiently may pose challenges.</p>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

@@ -5,276 +5,239 @@
     <link>https://sharief007.github.io/dev-docs/</link>
     <description>Recent content on Dev Docs</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <atom:link href="https://sharief007.github.io/dev-docs/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Adapter Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/adapter/</guid>
       <description>The Adapter design pattern is a structural pattern that allows objects with incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, providing a way for objects to collaborate without modifying their existing code.
 The Adapter pattern involves creating an intermediary class, known as the &amp;ldquo;adapter,&amp;rdquo; which translates one interface into another, making them compatible.
 Participants Target Interface: This is the interface that the client code expects to interact with.</description>
     </item>
-    
     <item>
       <title>Breadth First Search</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/search/breadth-first-search/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/graph-theory/search/breadth-first-search/</guid>
       <description>Breadth-First Search (BFS) is a graph traversal algorithm that explores a graph level by level, starting from a chosen source node. It visits all the immediate neighbors of the source node first, then moves on to their neighbors, and so forth, until it has visited all reachable nodes.
 Examples let&amp;rsquo;s consider a few different types of graphs and perform BFS on them.
 Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Results starting from node 0:</description>
     </item>
-    
     <item>
       <title>Bubble Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</guid>
       <description>Bubble sort is a simple comparison-based sorting algorithm. It works by repeatedly swapping adjacent elements if they are in the wrong order. The pass through the list is repeated until the list is sorted.
 Example Consider a sample array: [5, 4, 3, 2, 1]:
 graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]Now, let&amp;rsquo;s go through one pass of the bubble sort algorithm:
 graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style A fill: #4287f5style B fill: #4287f5graph LRA[4] --&gt; B[5]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style B fill: #4287f5style C fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[5]C --&gt; D[2]D --&gt; E[1]style C fill: #4287f5style D fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[2]C --&gt; D[5]D --&gt; E[1]style D fill: #4287f5style E fill: #4287f5After the first pass:</description>
     </item>
-    
     <item>
-      <title>Database Replication</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/</link>
+      <title>Checksum</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/</guid>
-      <description>Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
-Benefits of Database Replication High Availability: Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
-Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.</description>
+      <guid>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</guid>
+      <description>In computer science, a checksum is a value derived from the data contained in a data packet or a file. It is a small-sized piece of data that is calculated from the original data and is used to ensure the integrity of the data during transmission or storage. The purpose of a checksum is to detect errors that may have occurred during data transmission or storage.
+The checksum is typically calculated using a mathematical algorithm, often a hash function or a cyclic redundancy check (CRC).</description>
     </item>
-    
     <item>
       <title>Dijkstra&#39;s Algorithm</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</guid>
       <description>Dijkstra&amp;rsquo;s Algorithm is a method used to find the shortest path from a specified starting point (source) to all other points (nodes) in a weighted graph, where the edge weights represents non-negative distances between nodes. It ensures that the shortest path to each node is determined accurately, considering all possible routes through the graph, and is commonly employed in navigation and network routing applications.
 Examples Simple Weighted Graph: A/ \2 3/ \B-------C\ /1D Initial distances: A: ∞, B: ∞, C: ∞, D: ∞</description>
     </item>
-    
+    <item>
+      <title>Master Slave Replication</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</guid>
+      <description>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica.</description>
+    </item>
     <item>
       <title>Singleton Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/creational/singleton/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/creational/singleton/</guid>
       <description>Simple singleton with Draconian synchronization public class Singleton { private static Singleton instance; private Singleton() {} public static synchronized Singleton getInstance() { if(instance == null) { this.instance = new Singleton(); } return this.instance; } } Thread Safe. Locks will be acquired everytime the getInstance method is called. Acquiring and releasing locks unnecessarily could result in performance drawback.
 Singleton with Double Check Locking public class Singleton { private static volatile Singleton Instance; private Singletion(){} public static Singleton getInstance() { if (instance == null) { synchronized(Singleton.</description>
     </item>
-    
     <item>
       <title>Topological Sorting</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</guid>
       <description>Topological sorting is a linear ordering of the vertices in a directed acyclic graph (DAG) such that for every directed edge (u, v), vertex u comes before vertex v in the ordering. In simpler terms, it helps organize tasks or elements in a way that respects the dependencies between them.
 Applications Topological sorting has several practical applications:
 Task Scheduling: In project management, tasks often have dependencies on each other. Topological sorting helps in determining a valid order of execution.</description>
     </item>
-    
     <item>
       <title>Composite Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</guid>
       <description>The Composite pattern organizes objects into tree structures, making them work together like one. It lets clients treat individual objects and compositions of objects in a similar way.
 This is useful when dealing with things organized in a tree-like structure, such as files and folders in a computer&amp;rsquo;s file system.
 Key Participants: Component: This is the base interface or abstract class that declares the common operations for both leaf objects and composite objects.</description>
     </item>
-    
+    <item>
+      <title>Consistency Models</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</guid>
+      <description>Synchronous Replication Client does not receive success message until all replicas complete the write query. This is referred as Strong Consistency.
+sequenceDiagramactor c as clientparticipant m as master replicaparticipant s1 as slave replicaparticipant s2 as slave replicac -&gt;&gt; +m: Read Write Queriesm --&gt;&gt; s1: Replication Requestm --&gt;&gt; s2: Replication Requests1 --&gt;&gt; m: Acknowledgements2 --&gt;&gt; m: Acknowledgementm -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
+    </item>
     <item>
       <title>Database Clustering</title>
       <link>https://sharief007.github.io/dev-docs/system-design/database/clustering/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/system-design/database/clustering/</guid>
       <description>Database clustering is a method used to enhance the performance, availability, and scalability of databases. It involves creating multiple copies of a database, called nodes, and distributing the workload across them. This not only increases the capacity to handle more requests but also provides fault tolerance in case one node fails.
 Types of Database Clustering: Shared-Nothing Clustering In this type, each node has its own storage and processing power, and they do not share any components.</description>
     </item>
-    
     <item>
       <title>Depth First Search</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</guid>
       <description>Depth First Search (DFS) is an algorithm for traversing or searching through a tree or graph data structure. It starts at a chosen node and explores as far as possible along each branch before backtracking. This means it goes as deep as possible down one branch before moving to the next branch.
 Examples let&amp;rsquo;s consider a few different types of graphs and perform DFS on them.
 Graph 1: Undirected Unweighted Graph 0 -- 1 -- 2| | |3 -- 4 5 Traversal Results starting from node 0:</description>
     </item>
-    
     <item>
       <title>Horizontal Scaling</title>
       <link>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</guid>
       <description>Horizontal scaling, also known as scaling out, involves increasing the capacity of a system by adding more machines to a network. This approach is widely used to handle increased workloads and ensure high availability.
 Pros and Cons of Horizontal Scaling: Pros:
 Improved Performance: Horizontal scaling allows for the distribution of the load across multiple machines, which can significantly improve the overall performance and response times of a system.
 High Availability: In the event of a hardware failure or maintenance, the system remains operational as traffic is distributed across multiple servers.</description>
     </item>
-    
     <item>
       <title>Selection Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</guid>
       <description>Selection sort is a simple comparison-based sorting algorithm. It works by dividing the input list into two parts: the sorted portion on the left and the unsorted portion on the right. Initially, the sorted portion is empty, and the unsorted portion contains the entire list.
 The algorithm repeatedly finds the smallest (or largest, depending on the sorting order) element from the unsorted portion and swaps it with the first element in the unsorted portion.</description>
     </item>
-    
     <item>
       <title>Decorator Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</guid>
       <description>The Decorator design pattern is a structural design pattern that allows you to add behavior or responsibilities to objects dynamically, without altering their code. It is one of the Gang of Four design patterns and is used to achieve flexibility in object composition by allowing behavior to be added or removed from individual objects, rather than modifying the entire class hierarchy.
 This pattern is particularly useful when you have a set of objects with similar functionalities, but you want to provide a way to extend or modify their behavior in a flexible manner.</description>
     </item>
-    
     <item>
       <title>Insertion Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</guid>
       <description></description>
     </item>
-    
+    <item>
+      <title>Replication Lag</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</guid>
+      <description>The delay, known as replication lag, between a write occurring on the leader and being reflected on a follower may be minimal, often just a fraction of a second, making it practically imperceptible.
+Scaling the architecture is achievable by adding more follower nodes. However, this scalability is typically viable with asynchronous replication. Attempting synchronous replication to all followers could render the entire system unavailable for writing in the event of a single node failure or network outage.</description>
+    </item>
     <item>
       <title>Session Management in Horizontal Scaling</title>
       <link>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</guid>
       <description>Session management becomes more complex in a horizontally scaled environment. Here are some best practices:
 Session Affinity Sticky sessions (also known as Session Affinity) involve associating a user&amp;rsquo;s session with a specific server for the duration of their session. When a user makes an initial request, the load balancer determines which server to send them to, and subsequent requests from that user are directed to the same server.
 Session persistence is typically configured on the load balancer itself.</description>
     </item>
-    
     <item>
       <title>Facade Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</guid>
       <description>The Facade design pattern is a structural design pattern that provides a simplified interface to a complex system of classes, objects, or subsystems. It acts as a unified interface that hides the complexities of the underlying system and provides a higher-level, easier-to-use interface for the client code.
 This can be particularly useful when dealing with large or intricate systems, as it promotes loose coupling and separation of concerns.
 Key Participants in the Facade Pattern: Facade: This is the central class of the pattern, acting as an entry point for client code.</description>
     </item>
-    
     <item>
       <title>Merge Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Proxy Pattern</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</guid>
       <description>The Proxy design pattern is a structural design pattern that provides a surrogate or placeholder for another object to control access to it. In other words, the Proxy pattern is all about controlling access to an object and adding some extra functionality while keeping the interface consistent.
 Participants: Subject: This is the interface that both the RealSubject (the actual object) and the Proxy implement. It defines the common operations that the RealSubject and the Proxy can perform.</description>
     </item>
-    
     <item>
       <title>Quick Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/quick-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/quick-sort/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Heap Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/heap-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/heap-sort/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Radix Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/radix-sort/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>Counting Sort</title>
       <link>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</guid>
-      <description></description>
+      <description>Counting Sort is a non-comparison based sorting algorithm that works efficiently when you have a limited range of input values. It counts the frequency of each element and uses that information to place them in the correct sorted position. This makes it a highly efficient sorting method for scenarios with a small range of possible values.
+java python go import java.util.Arrays; public class CountingSort { public static void countingSort(int[] arr, int max) { int[] countArray = new int[max + 1]; // Create a count array to store frequencies // Step 1: Count the frequency of each element for (int num : arr) { countArray[num]++; } // Step 2: Calculate cumulative frequencies for (int i = 1; i &amp;lt;= max; i++) { countArray[i] += countArray[i - 1]; } int[] outputArray = new int[arr.</description>
     </item>
-    
-    <item>
-      <title></title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/clustering-vs-replication/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/clustering-vs-replication/</guid>
-      <description>Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&amp;rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.
-Database Clustering: Definition:
-Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them. Shared Resources:
-In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage.</description>
-    </item>
-    
     <item>
       <title>Chain Of Responsibility</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</guid>
       <description>The Chain of Responsibility is a behavioral design pattern that helps in passing a request along a chain of handlers.
 The Chain of Responsibility pattern is like a relay race. In a relay race, each runner passes the baton to the next runner. Similarly, in this pattern, a request is passed along a chain of handlers.
 Each handler decides either to process the request or to pass it along the chain.</description>
     </item>
-    
     <item>
       <title>Database Bottleneck</title>
       <link>https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/</guid>
       <description>Scaling an application, especially in relation to the database, comes with its own set of challenges.
 Key Challenges Database Bottlenecks: The database can become a bottleneck if it can&amp;rsquo;t handle a high volume of concurrent connections or queries. This is particularly true for relational databases in scenarios with heavy read and write loads.
 Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically.</description>
     </item>
-    
     <item>
       <title>Travelling Salesman Problem</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
       <guid>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</guid>
       <description>The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.
 Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hamiltonian path in a graph is a path that visits each vertex exactly once.</description>
     </item>
-    
   </channel>
 </rss>
