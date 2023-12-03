@@ -57,7 +57,7 @@ Examples Simple Weighted Graph: A/ \2 3/ \B-------C\ /1D Initial distance
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</guid>
       <description>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
-graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica.</description>
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.</description>
     </item>
     <item>
       <title>Singleton Pattern</title>

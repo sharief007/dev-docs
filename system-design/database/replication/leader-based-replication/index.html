@@ -12,12 +12,12 @@
 <link fetchpriority="low" href="/dev-docs/site.webmanifest" rel="manifest" />
 
   <title>Master Slave Replication – Dev Docs</title>
-  <meta name="description" content="In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies. graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica." />
+  <meta name="description" content="In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies. graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream." />
   
 
 <meta property="og:title" content="Master Slave Replication" />
 <meta property="og:description" content="In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
-graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica." />
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/" /><meta property="article:section" content="system-design" />
 
@@ -25,13 +25,13 @@ graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write 
 
   <meta itemprop="name" content="Master Slave Replication">
 <meta itemprop="description" content="In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
-graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica.">
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.">
 
-<meta itemprop="wordCount" content="516">
+<meta itemprop="wordCount" content="510">
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Master Slave Replication"/>
 <meta name="twitter:description" content="In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
-graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] end style A fill:#F9EBB2 style B fill:#AED6F1Each node that stores a copy of the database is called a replica."/>
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream."/>
 
     <link rel="preload" href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" as="style" />
     <link href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" rel="stylesheet" integrity="sha256-Zhfltp8MA2nFH5xu3/vqmToVjsLZ9B76G4tz3YFQjG8=" />
@@ -640,10 +640,7 @@ graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write 
     A[Client] -->|Write Request| B[Master]
     B -->|Replicate| C[Slave 1]
     B -->|Replicate| D[Slave 2]
-  end
-
-  style A fill:#F9EBB2
-  style B fill:#AED6F1</pre><p>Each node that stores a copy of the database is called a <strong>replica</strong>. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a <strong>replication log</strong> or <strong>change stream</strong>.</p>
+  end</pre><p>Each node that stores a copy of the database is called a <strong>replica</strong>. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a <strong>replication log</strong> or <strong>change stream</strong>.</p>
 <h3>Setting up new followers<span class="absolute -mt-20" id="setting-up-new-followers"></span>
     <a href="#setting-up-new-followers" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>From time to time, you need to set up new followers—perhaps to increase the number of replicas, or to replace failed nodes. However, a straightforward copy-paste of data files from one node to another isn&rsquo;t usually enough. Clients are frequently writing to the database, and the data is always changing. Simply moving files around might result in inconsistencies.</p>
 <p>Ensuring consistency by locking the database (making it temporarily unavailable for writes) is an option, but it contradicts our aim of maintaining high availability.</p>
