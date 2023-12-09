@@ -17,7 +17,7 @@ In statement-based replication, the leader records and shares every executed wri
 
 #### Challenges:
 
-**Nondeterministic Functions:** Statements calling functions like NOW() or RAND() may produce different results on each replica.
+**Nondeterministic Functions:** Statements calling functions like `NOW()` or `RAND()` may produce different results on each replica.
 
 Workaround: The leader can replace nondeterministic function calls with a fixed return value in the statement log for consistency across followers.
 
