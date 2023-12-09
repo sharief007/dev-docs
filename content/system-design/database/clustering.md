@@ -1,6 +1,6 @@
 ---
 title: 'Database Clustering'
-weight: 2
+weight: 3
 type: docs
 toc: true
 sidebar:
