@@ -13,7 +13,7 @@
       
       <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</guid>
       <description>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
-graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.</description>
+graph TD;subgraph Master Slave Replicationdirection LRA[Client] --&gt;|Write Request| B[Master]B --&gt;|Replicate| C[Slave 1]B --&gt;|Replicate| D[Slave 2]endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.</description>
       <content:encoded><![CDATA[<p>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.</p>
 <pre class="mermaid mt-6">graph TD;
   subgraph Master Slave Replication
@@ -214,6 +214,68 @@ Scaling the architecture is achievable by adding more follower nodes. However, t
 	l1 -->> f1: Replication (record 1)
 	u3 ->> f1: Read the question (record 1)</pre><p>Preventing this anomaly necessitates a different guarantee: <strong>consistent prefix reads</strong>. This guarantee asserts that if a sequence of writes occurs in a specific order, any reader observing those writes will perceive them in the same order.</p>
 <p>This challenge is particularly pronounced in partitioned (sharded) databases. One solution is to ensure that causally related writes are stored in the same partition. However, in certain applications, achieving this efficiently may pose challenges.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Replication Implementations</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</guid>
+      <description>Statement-Based Replication: In statement-based replication, the leader records and shares every executed write request (statement) with its followers. Each follower processes these statements, such as INSERT, UPDATE, or DELETE, similar to client-generated SQL statements.
+Challenges: Nondeterministic Functions: Statements calling functions like NOW() or RAND() may produce different results on each replica.
+Workaround: The leader can replace nondeterministic function calls with a fixed return value in the statement log for consistency across followers.</description>
+      <content:encoded><![CDATA[<h3>Statement-Based Replication:<span class="absolute -mt-20" id="statement-based-replication"></span>
+    <a href="#statement-based-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In statement-based replication, the leader records and shares every executed write request (statement) with its followers. Each follower processes these statements, such as INSERT, UPDATE, or DELETE, similar to client-generated SQL statements.</p>
+<h4>Challenges:<span class="absolute -mt-20" id="challenges"></span>
+    <a href="#challenges" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Nondeterministic Functions:</strong> Statements calling functions like <code>NOW()</code> or <code>RAND()</code> may produce different results on each replica.</p>
+<p>Workaround: The leader can replace nondeterministic function calls with a fixed return value in the statement log for consistency across followers.</p>
+<p><strong>Side Effects from Statements:</strong>  Statements with side effects (e.g., triggers, stored procedures) may generate varied results on different replicas. Resolving inconsistencies in side effects can be complex and may require specific handling.</p>
+<p>Due to numerous edge cases and potential challenges in maintaining consistency, statement-based replication is often considered less preferable in favor of alternative replication methods.</p>
+<h3>Write-Ahead Log (WAL) Shipping:<span class="absolute -mt-20" id="write-ahead-log-wal-shipping"></span>
+    <a href="#write-ahead-log-wal-shipping" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In scenarios involving structures like B-trees, where individual disk blocks are overwritten, modifications are initially recorded in a write-ahead log (WAL). This practice ensures that the index can be restored to a consistent state following a crash.</p>
+<h4>Replication Process:<span class="absolute -mt-20" id="replication-process"></span>
+    <a href="#replication-process" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Log Shipping:</strong></p>
+<ul>
+<li>The leader not only writes the log to disk but also transmits it across the network to its followers.</li>
+<li>The follower, upon receiving the log, reconstructs identical data structures as those on the leader.</li>
+</ul>
+<p><strong>Log Contents:</strong></p>
+<ul>
+<li>The WAL contains details about which bytes were altered in specific disk blocks.</li>
+<li>This close coupling with the storage engine makes replication intricately linked to the underlying storage format.</li>
+</ul>
+<h4>Limitations:<span class="absolute -mt-20" id="limitations"></span>
+    <a href="#limitations" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><ul>
+<li>WAL shipping, while efficient, closely ties replication to the storage engine. Careful consideration of version compatibility is crucial to maintain a consistent database state.</li>
+<li>Leveraging this approach for zero-downtime upgrades requires a replication protocol that supports running different software versions on the leader and followers.</li>
+</ul>
+<h3>Logical (Row-Based) Log Replication:<span class="absolute -mt-20" id="logical-row-based-log-replication"></span>
+    <a href="#logical-row-based-log-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>When specific requirements arise, such as replicating a subset of data, moving data between different types of databases, or implementing conflict resolution logic (refer to &ldquo;Handling Write Conflicts&rdquo;), it becomes necessary to elevate the replication process to the application layer. This shift allows for more customized and tailored solutions to address unique needs and scenarios.</p>
+<h4>Log Content:<span class="absolute -mt-20" id="log-content"></span>
+    <a href="#log-content" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Inserted Row:</strong> Log contains new values of all columns for the inserted row.</p>
+<p><strong>Deleted Row:</strong> Log provides sufficient information to uniquely identify the deleted row. If no primary key exists, old values of all columns need to be logged.</p>
+<p><strong>Updated Row:</strong> Log includes adequate details to uniquely identify the updated row, along with new values of all columns.</p>
+<p><strong>Transaction Modification:</strong> A transaction modifying multiple rows generates several log records. Followed by a record indicating the transaction&rsquo;s commitment.</p>
+<h4>Advantages:<span class="absolute -mt-20" id="advantages"></span>
+    <a href="#advantages" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Backward Compatibility:</strong> Logical log, being decoupled from storage engine internals, facilitates better backward compatibility. Allows the leader and follower to run different database software versions or even different storage engines.</p>
+<p><strong>Ease of Parsing:</strong> Logical log format is simpler for external applications to parse. Useful for sending database contents to external systems like data warehouses for offline analysis or building custom indexes and caches. This technique is called <strong>change data capture</strong>.</p>
+<h3>Trigger-Based Replication:<span class="absolute -mt-20" id="trigger-based-replication"></span>
+    <a href="#trigger-based-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In certain scenarios, where selective data replication, cross-database replication, or conflict resolution logic is required (refer to &ldquo;Handling Write Conflicts&rdquo;), it may be necessary to elevate replication to the application layer.</p>
+<h4>Tools and Techniques:<span class="absolute -mt-20" id="tools-and-techniques"></span>
+    <a href="#tools-and-techniques" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Database Log Reading Tools:</strong> Tools like Oracle GoldenGate can extract data changes from the database log and make them available to an application.</p>
+<p><strong>Triggers and Stored Procedures:</strong></p>
+<ul>
+<li>Relational databases offer features like triggers and stored procedures.</li>
+<li>A trigger allows the registration of custom application code automatically executed on data change (write transaction).</li>
+<li>The trigger can log this change into a separate table, accessible for reading by an external process.</li>
+</ul>
+<h4>Considerations:<span class="absolute -mt-20" id="considerations"></span>
+    <a href="#considerations" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Overheads and Limitations:</strong> Trigger-based replication typically incurs higher overheads compared to other methods and may be more susceptible to bugs and limitations.</p>
+<p><strong>Flexibility:</strong> Despite potential drawbacks, the flexibility of trigger-based replication makes it valuable in specific use cases.</p>
+<p><strong>Insight:</strong>
+Trigger-based replication, although more resource-intensive and potentially more error-prone than built-in database replication, offers unparalleled flexibility. It becomes essential in situations demanding custom logic, selective data replication, or replication across different database systems.</p>
 ]]></content:encoded>
     </item>
     

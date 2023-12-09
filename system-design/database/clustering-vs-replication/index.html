@@ -11,21 +11,36 @@
 <link rel="apple-touch-icon" href="/dev-docs/apple-touch-icon.png" sizes="180x180" />
 <link fetchpriority="low" href="/dev-docs/site.webmanifest" rel="manifest" />
 
-  <title>Database Replication – Dev Docs</title>
-  <meta name="description" content="Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
-Benefits of Database Replication Load Distribution: Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.
-Redundancy: Replicas serve as backups in case of data loss or corruption on the master database." />
+  <title>Dev Docs</title>
+  <meta name="description" content="Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&amp;rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.
+Database Clustering: Definition:
+Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them. Shared Resources:
+In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage." />
   
 
-<meta property="og:title" content="Database Replication" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://sharief007.github.io/dev-docs/system-design/database/replication/" />
+<meta property="og:title" content="" />
+<meta property="og:description" content="Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.
+Database Clustering: Definition:
+Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them. Shared Resources:
+In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sharief007.github.io/dev-docs/system-design/database/clustering-vs-replication/" /><meta property="article:section" content="system-design" />
 
-  <meta itemprop="name" content="Database Replication">
-<meta itemprop="description" content=""><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Database Replication"/>
-<meta name="twitter:description" content=""/>
+
+
+  <meta itemprop="name" content="">
+<meta itemprop="description" content="Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.
+Database Clustering: Definition:
+Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them. Shared Resources:
+In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage.">
+
+<meta itemprop="wordCount" content="631">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.
+Database Clustering: Definition:
+Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them. Shared Resources:
+In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage."/>
 
     <link rel="preload" href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" as="style" />
     <link href="/dev-docs/css/compiled/main.min.6617e5b69f0c0369c51f9c6edffbea993a158ec2d9f41efa1b8b73dd81508c6f.css" rel="stylesheet" integrity="sha256-Zhfltp8MA2nFH5xu3/vqmToVjsLZ9B76G4tz3YFQjG8=" />
@@ -85,7 +100,7 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
 </div>
 
   <div class="mx-auto flex max-w-screen-xl">
-    <aside class="sidebar-container flex flex-col print:hidden md:top-16 md:shrink-0 md:w-64 md:self-start max-md:[transform:translate3d(0,-100%,0)] md:sticky">
+    <aside class="sidebar-container flex flex-col print:hidden md:top-16 md:shrink-0 md:w-64 md:self-start max-md:[transform:translate3d(0,-100%,0)] md:hidden xl:block">
   
   <div class="px-4 pt-4 md:hidden">
     <div class="search-wrapper relative md:w-64">
@@ -133,26 +148,7 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
   >Dijkstra&#39;s Algorithm
     </a>
               
-            </li><li class="flex flex-col gap-1 "><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/graph-theory/problems/"
-    
-  >Problems
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
-    </a>
-              <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/graph-theory/problems/cycle-in-directed-graph/"
-    
-  >Cycle in Directed Graphs
-    </a>
-              
-            </li></ul>
-      </div>
-            </li><li class="flex flex-col gap-1 "><a
+            </li><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
     href="/dev-docs/graph-theory/search/"
@@ -378,7 +374,7 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
   >System Design
         <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
     </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 "><a
+        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
     href="/dev-docs/system-design/scaling/"
@@ -413,14 +409,6 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
               
             </li></ul>
       </div>
-            </li><li class="flex flex-col gap-1 "><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/misc/checksum/"
-    
-  >Checksum
-    </a>
-              
             </li><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
       text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
@@ -432,11 +420,26 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
               <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
         <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
     class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
     href="/dev-docs/system-design/database/replication/"
     
   >Database Replication
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
+    </a>
+              
+            </li><li class="flex flex-col gap-1 open"><a
+    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
+    href="/dev-docs/system-design/database/clustering/"
+    
+  >Database Clustering
+    </a>
+              
+            </li><li class="flex flex-col gap-1 open"><a
+    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
+    href="/dev-docs/system-design/database/clustering-vs-replication/"
+    
+  >clustering-vs-replication
     </a>
   
     <ul class='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'><li>
@@ -447,48 +450,6 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
             </li>
           </ul>
   
-              <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/leader-based-replication/"
-    
-  >Master Slave Replication
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/consistency-models/"
-    
-  >Consistency Models
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/replication-lag/"
-    
-  >Replication Lag
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/replication-implementations/"
-    
-  >Replication Implementations
-    </a>
-              
-            </li></ul>
-      </div>
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/clustering/"
-    
-  >Database Clustering
-    </a>
               
             </li></ul>
       </div>
@@ -496,116 +457,10 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
       </div></li>
     </ul>
 
-    <ul class="flex flex-col gap-1 max-md:hidden">
-        
-        <li class=""><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/scaling/"
-    
-  >Application Scaling
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
-    </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/scaling/horizontal-scaling/"
-    
-  >Horizontal Scaling
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/scaling/session-management/"
-    
-  >Session Management in Horizontal Scaling
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/scaling/database-bottleneck/"
-    
-  >Database Bottleneck
-    </a>
-              
-            </li></ul>
-      </div></li>
-        <li class=""><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/misc/checksum/"
-    
-  >Checksum
-    </a></li>
-        <li class="open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/"
-    
-  >Database
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
-    </a><div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      sidebar-active-item bg-primary-100 font-semibold text-primary-800 contrast-more:border contrast-more:border-primary-500 dark:bg-primary-400/10 dark:text-primary-600 contrast-more:dark:border-primary-500"
-    href="/dev-docs/system-design/database/replication/"
-    
-  >Database Replication
-        <span class="hextra-sidebar-collapsible-button"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" class="origin-center transition-transform rtl:-rotate-180"></path></svg></span>
-    </a>
-              <div class="pt-1 ltr:pr-0 overflow-hidden transition-all ease-in-out duration-200">
-        <ul class='relative flex flex-col gap-1 before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] ltr:ml-3 ltr:pl-3 ltr:before:left-0 rtl:mr-3 rtl:pr-3 rtl:before:right-0 dark:before:bg-neutral-800'><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/leader-based-replication/"
-    
-  >Master Slave Replication
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/consistency-models/"
-    
-  >Consistency Models
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/replication-lag/"
-    
-  >Replication Lag
-    </a>
-              
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/replication/replication-implementations/"
-    
-  >Replication Implementations
-    </a>
-              
-            </li></ul>
-      </div>
-            </li><li class="flex flex-col gap-1 open"><a
-    class="flex items-center justify-between gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
-      text-gray-500 hover:bg-gray-100 hover:text-gray-900 contrast-more:border contrast-more:border-transparent contrast-more:text-gray-900 contrast-more:hover:border-gray-900 dark:text-neutral-400 dark:hover:bg-primary-100/5 dark:hover:text-gray-50 contrast-more:dark:text-gray-50 contrast-more:dark:hover:border-gray-50"
-    href="/dev-docs/system-design/database/clustering/"
-    
-  >Database Clustering
-    </a>
-              
-            </li></ul>
-      </div></li>
-        
-      </ul>
-    </div>
+    <div class="max-xl:hidden h-0 w-64 shrink-0"></div></div>
   
   
-  <div class="  sticky bottom-0 bg-white dark:bg-dark mx-4 py-4 shadow-[0_-12px_16px_#fff] flex items-center gap-2 dark:border-neutral-800 dark:shadow-[0_-12px_16px_#111] contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:shadow-none border-t" data-toggle-animation="show">
+  <div class="md:hidden  sticky bottom-0 bg-white dark:bg-dark mx-4 py-4 shadow-[0_-12px_16px_#fff] flex items-center gap-2 dark:border-neutral-800 dark:shadow-[0_-12px_16px_#111] contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:shadow-none border-t" data-toggle-animation="show">
       <div class="flex grow flex-col">
         <button
   title="Change theme"
@@ -626,7 +481,15 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
 <nav class="hextra-toc order-last hidden w-64 shrink-0 xl:block print:hidden px-4" aria-label="table of contents">
     <div class="hextra-scrollbar sticky top-16 overflow-y-auto pr-4 pt-6 text-sm [hyphens:auto] max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:-mr-4 rtl:-ml-4"><p class="mb-4 font-semibold tracking-tight">On this page</p><ul>
       <li class="my-2 scroll-my-6 scroll-py-6">
-        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#benefits-of-database-replication">Benefits of Database Replication
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#database-clustering">Database Clustering:
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#database-replication">Database Replication:
+        </a>
+      </li>
+      <li class="my-2 scroll-my-6 scroll-py-6">
+        <a class="ltr:pl-4 rtl:pr-4 inline-block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words" href="#key-differences">Key Differences:
         </a>
       </li></ul>
       <div class="mt-8 border-t bg-white pt-8 shadow-[0_-12px_16px_white] dark:bg-dark dark:shadow-[0_-12px_16px_#111] sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400"></div>
@@ -636,36 +499,162 @@ Redundancy: Replicas serve as backups in case of data loss or corruption on the 
 
     <article class="w-full break-words flex min-h-[calc(100vh-var(--navbar-height))] min-w-0 justify-center pb-8 pr-[calc(env(safe-area-inset-right)-1.5rem)]">
       <main class="w-full min-w-0 max-w-6xl px-6 pt-4 md:px-12">
-        <div class="mt-1.5 flex items-center gap-1 overflow-hidden text-sm text-gray-500 dark:text-gray-400 contrast-more:text-current">
-      <div class="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis hover:text-gray-900 dark:hover:text-gray-100">
-        <a href="https://sharief007.github.io/dev-docs/system-design/">System Design</a>
-      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      <div class="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis hover:text-gray-900 dark:hover:text-gray-100">
-        <a href="https://sharief007.github.io/dev-docs/system-design/database/">Database</a>
-      </div><svg class="w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="whitespace-nowrap transition-colors font-medium text-gray-700 contrast-more:font-bold contrast-more:text-current dark:text-gray-100 contrast-more:dark:text-current">Database Replication</div>
-</div>
-
+        <br class="mt-1.5 text-sm" />
+        <h1 class="text-center mt-2 text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100"></h1>
+        <div class="mb-16"></div>
         <div class="content">
-          <h1>Database Replication</h1>
-          <p>Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.</p>
-<h3>Benefits of Database Replication<span class="absolute -mt-20" id="benefits-of-database-replication"></span>
-    <a href="#benefits-of-database-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><strong>Load Distribution</strong>:
-Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.</p>
-<p><strong>Redundancy</strong>:
-Replicas serve as backups in case of data loss or corruption on the master database.</p>
-<p><strong>Geographic Distribution</strong>:
-Replicas can be located in different geographic regions, providing lower latency access for users in different parts of the world.</p>
-<p><strong>High Availability</strong>:
-Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.</p>
+          <p>Database clustering and database replication are two distinct strategies used in database management to achieve different goals. Below, I&rsquo;ll provide a detailed explanation of both concepts and highlight their key differences.</p>
+<h3>Database Clustering:<span class="absolute -mt-20" id="database-clustering"></span>
+    <a href="#database-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li>
+<p><strong>Definition</strong>:</p>
+<ul>
+<li>Database clustering involves creating multiple copies (nodes) of a database and distributing the workload across them.</li>
+</ul>
+</li>
+<li>
+<p><strong>Shared Resources</strong>:</p>
+<ul>
+<li>In clustering, nodes typically share a common storage system. However, in Shared-Nothing clustering, each node has its own storage.</li>
+</ul>
+</li>
+<li>
+<p><strong>Types</strong>:</p>
+<ul>
+<li>Shared-Disk Clustering: All nodes share a common storage system, allowing them to access the same data. Each node has its own processing power.</li>
+<li>Shared-Nothing Clustering: Each node has its own storage and processing power. Data is partitioned across the nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Operational Mode</strong>:</p>
+<ul>
+<li>Active-Passive Clustering: One node is active and handles all requests, while the others remain passive, ready to take over in case of failure.</li>
+<li>Active-Active Clustering: All nodes actively process requests simultaneously. Data is usually partitioned across nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>High Availability: Provides redundancy for fault tolerance.</li>
+<li>Scalability: Enables handling of more requests by distributing workload.</li>
+<li>Load Balancing: Distributes queries to prevent bottlenecks.</li>
+<li>Fault Tolerance: Ensures data integrity and availability even if a node fails.</li>
+<li>Improved Performance: Enhances overall database system performance.</li>
+</ul>
+</li>
+<li>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Complexity: Setting up and managing a clustered database can be more complex than a single-node system.</li>
+<li>Synchronization: Ensuring data consistency across nodes can be challenging.</li>
+<li>Cost: Clustering typically requires additional hardware and software licenses.</li>
+<li>Network Overhead: Communication between nodes can introduce latency.</li>
+</ul>
+</li>
+</ol>
+<h3>Database Replication:<span class="absolute -mt-20" id="database-replication"></span>
+    <a href="#database-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li>
+<p><strong>Definition</strong>:</p>
+<ul>
+<li>Database replication involves creating and maintaining multiple copies of a database, with the primary purpose of ensuring data redundancy, availability, and fault tolerance.</li>
+</ul>
+</li>
+<li>
+<p><strong>Primary and Secondary Nodes</strong>:</p>
+<ul>
+<li>In replication, there is a primary (master) node and one or more secondary (slave) nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Copying</strong>:</p>
+<ul>
+<li>The primary node is responsible for processing write operations. These changes are then replicated to the secondary nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Read Operations</strong>:</p>
+<ul>
+<li>Secondary nodes can handle read operations, which offloads some of the query processing from the primary node.</li>
+</ul>
+</li>
+<li>
+<p><strong>Types</strong>:</p>
+<ul>
+<li>Master-Slave Replication: Write operations are performed on the master node, and changes are replicated to the slave nodes.</li>
+<li>Multi-Master Replication: Allows write operations on multiple nodes, with changes propagated to all other nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Latency</strong>:</p>
+<ul>
+<li>Replication can introduce some level of latency between the time a write operation occurs on the primary node and when it&rsquo;s replicated to the secondary nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>High Availability: Allows for failover in case of primary node failure.</li>
+<li>Read Scalability: Offloads read queries to secondary nodes, improving overall performance.</li>
+<li>Data Redundancy: Ensures that data is backed up and available even if the primary node fails.</li>
+</ul>
+</li>
+<li>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Data Consistency: Ensuring that data across nodes remains consistent can be complex, especially in multi-master setups.</li>
+<li>Conflict Resolution: In multi-master setups, conflicts may arise when multiple nodes attempt to write to the same data simultaneously.</li>
+</ul>
+</li>
+</ol>
+<h3>Key Differences:<span class="absolute -mt-20" id="key-differences"></span>
+    <a href="#key-differences" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li>
+<p><strong>Purpose</strong>:</p>
+<ul>
+<li>Clustering primarily aims to improve performance, scalability, and fault tolerance by distributing the workload across nodes.</li>
+<li>Replication primarily focuses on redundancy, availability, and fault tolerance by creating multiple copies of the database.</li>
+</ul>
+</li>
+<li>
+<p><strong>Operational Mode</strong>:</p>
+<ul>
+<li>Clustering can operate in active-passive or active-active modes, with all nodes actively processing requests (in active-active setups).</li>
+<li>Replication involves a primary node for write operations and one or more secondary nodes for read operations.</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Consistency</strong>:</p>
+<ul>
+<li>In clustering, data consistency is maintained by ensuring that all nodes have access to the same data (shared storage or synchronized partitions).</li>
+<li>In replication, ensuring data consistency can be more complex, especially in multi-master setups, where conflict resolution may be required.</li>
+</ul>
+</li>
+<li>
+<p><strong>Latency</strong>:</p>
+<ul>
+<li>Replication can introduce some level of latency between the primary and secondary nodes due to the replication process.</li>
+</ul>
+</li>
+</ol>
+<p>Both clustering and replication have their own strengths and are often used together in complex database systems to achieve both performance enhancement and high availability. The choice between them depends on the specific requirements and constraints of the application and infrastructure.</p>
 
         </div>
-        <div class="mt-16"></div>
-        <div class="mt-16"></div>
-        
       </main>
     </article>
   </div>
-<footer class="hextra-footer bg-gray-100 pb-[env(safe-area-inset-bottom)] dark:bg-neutral-900 print:bg-transparent"><hr class="dark:border-neutral-800" />
+<footer class="hextra-footer bg-gray-100 pb-[env(safe-area-inset-bottom)] dark:bg-neutral-900 print:bg-transparent">
+    <div class="mx-auto flex max-w-screen-xl gap-2 py-2 px-4"><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle group h-7 rounded-md px-2 text-left text-xs font-medium text-gray-600 transition-colors dark:text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-primary-100/5 dark:hover:text-gray-50"
+  type="button"
+  aria-label="Toggle Dark Mode"
+>
+  <div class="flex items-center gap-2 capitalize"><svg height=12 class="group-data-[theme=light]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hidden">Dark</span></div>
+</button>
+</div>
+  <hr class="dark:border-neutral-800" />
   <div
     class="mx-auto flex max-w-screen-xl justify-center py-12 pl-[max(env(safe-area-inset-left),1.5rem)] pr-[max(env(safe-area-inset-right),1.5rem)] text-gray-600 dark:text-gray-400 md:justify-start"
   >
