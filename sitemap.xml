@@ -36,7 +36,7 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/clustering/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/partitioning/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</loc>
   </url><url>
@@ -50,6 +50,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/clustering/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</loc>
@@ -61,6 +63,8 @@
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/multi-leader-replication/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</loc>
   </url><url>

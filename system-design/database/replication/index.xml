@@ -218,6 +218,67 @@ Scaling the architecture is achievable by adding more follower nodes. However, t
     </item>
     
     <item>
+      <title>Multi Leader Replication</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/multi-leader-replication/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/multi-leader-replication/</guid>
+      <description>Leader-based replication, with its single leader processing all writes, presents a significant drawback: if connectivity to the leader is lost due to network interruptions or other reasons, writing to the database becomes impossible.
+An evolution of the leader-based model is the multi-leader configuration, also known as master–master or active/active replication. In this setup, more than one node is empowered to accept writes. Despite multiple nodes being capable of processing writes, the fundamental concept of replication remains unchanged: each node handling a write must disseminate that data change to all other nodes in the configuration.</description>
+      <content:encoded><![CDATA[<p>Leader-based replication, with its single leader processing all writes, presents a significant drawback: if connectivity to the leader is lost due to network interruptions or other reasons, writing to the database becomes impossible.</p>
+<p>An evolution of the leader-based model is the multi-leader configuration, also known as master–master or active/active replication. In this setup, more than one node is empowered to accept writes. Despite multiple nodes being capable of processing writes, the fundamental concept of replication remains unchanged: each node handling a write must disseminate that data change to all other nodes in the configuration.</p>
+<h4>Key Points:<span class="absolute -mt-20" id="key-points"></span>
+    <a href="#key-points" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><ol>
+<li>
+<p><strong>Leader Redundancy:</strong></p>
+<ul>
+<li>Overcomes the single point of failure inherent in a single-leader model.</li>
+<li>If one leader becomes unreachable, another leader can still accept writes.</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Change Propagation:</strong></p>
+<ul>
+<li>Every node processing a write ensures the propagation of that data change to all other nodes.</li>
+</ul>
+</li>
+</ol>
+<h3>Considerations:<span class="absolute -mt-20" id="considerations"></span>
+    <a href="#considerations" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
+<li>
+<p><strong>Consistency Challenges:</strong></p>
+<ul>
+<li>Achieving consistency across multiple leaders can introduce complexities and challenges.</li>
+</ul>
+</li>
+<li>
+<p><strong>Conflict Resolution:</strong></p>
+<ul>
+<li>Handling conflicts in scenarios where multiple leaders process writes simultaneously requires careful consideration.</li>
+</ul>
+</li>
+</ul>
+<h3>Advantages:<span class="absolute -mt-20" id="advantages"></span>
+    <a href="#advantages" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
+<li>
+<p><strong>Improved Fault Tolerance:</strong></p>
+<ul>
+<li>Overcomes the limitation of a single leader for write acceptance, enhancing fault tolerance.</li>
+</ul>
+</li>
+<li>
+<p><strong>High Availability:</strong></p>
+<ul>
+<li>Enables continued write operations even if one leader becomes inaccessible.</li>
+</ul>
+</li>
+</ul>
+<h3>Insight:<span class="absolute -mt-20" id="insight"></span>
+    <a href="#insight" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Multi-leader replication addresses the single leader&rsquo;s limitations by distributing the ability to accept writes across multiple nodes. While introducing fault tolerance and high availability, it also brings challenges related to consistency and conflict resolution that need thoughtful management.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
       <title>Replication Implementations</title>
       <link>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -235,24 +296,15 @@ Workaround: The leader can replace nondeterministic function calls with a fixed 
 <p>Due to numerous edge cases and potential challenges in maintaining consistency, statement-based replication is often considered less preferable in favor of alternative replication methods.</p>
 <h3>Write-Ahead Log (WAL) Shipping:<span class="absolute -mt-20" id="write-ahead-log-wal-shipping"></span>
     <a href="#write-ahead-log-wal-shipping" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In scenarios involving structures like B-trees, where individual disk blocks are overwritten, modifications are initially recorded in a write-ahead log (WAL). This practice ensures that the index can be restored to a consistent state following a crash.</p>
-<h4>Replication Process:<span class="absolute -mt-20" id="replication-process"></span>
-    <a href="#replication-process" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Log Shipping:</strong></p>
-<ul>
-<li>The leader not only writes the log to disk but also transmits it across the network to its followers.</li>
-<li>The follower, upon receiving the log, reconstructs identical data structures as those on the leader.</li>
-</ul>
-<p><strong>Log Contents:</strong></p>
-<ul>
-<li>The WAL contains details about which bytes were altered in specific disk blocks.</li>
-<li>This close coupling with the storage engine makes replication intricately linked to the underlying storage format.</li>
-</ul>
+<p>The leader not only writes the log to disk but also transmits it across the network to its followers. The follower, upon receiving the log, reconstructs identical data structures as those on the leader.</p>
+<p>The WAL contains details about which bytes were altered in specific disk blocks. This close coupling with the storage engine makes replication intricately linked to the underlying storage format.</p>
 <h4>Limitations:<span class="absolute -mt-20" id="limitations"></span>
     <a href="#limitations" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><ul>
 <li>WAL shipping, while efficient, closely ties replication to the storage engine. Careful consideration of version compatibility is crucial to maintain a consistent database state.</li>
 <li>Leveraging this approach for zero-downtime upgrades requires a replication protocol that supports running different software versions on the leader and followers.</li>
 </ul>
 <h3>Logical (Row-Based) Log Replication:<span class="absolute -mt-20" id="logical-row-based-log-replication"></span>
-    <a href="#logical-row-based-log-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>When specific requirements arise, such as replicating a subset of data, moving data between different types of databases, or implementing conflict resolution logic (refer to &ldquo;Handling Write Conflicts&rdquo;), it becomes necessary to elevate the replication process to the application layer. This shift allows for more customized and tailored solutions to address unique needs and scenarios.</p>
+    <a href="#logical-row-based-log-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>An alternative approach involves using distinct log formats for replication and storage engine, enabling decoupling of the replication log from storage engine internals. This specialized replication log is known as a logical log.</p>
 <h4>Log Content:<span class="absolute -mt-20" id="log-content"></span>
     <a href="#log-content" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Inserted Row:</strong> Log contains new values of all columns for the inserted row.</p>
 <p><strong>Deleted Row:</strong> Log provides sufficient information to uniquely identify the deleted row. If no primary key exists, old values of all columns need to be logged.</p>
@@ -262,20 +314,13 @@ Workaround: The leader can replace nondeterministic function calls with a fixed 
     <a href="#advantages" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Backward Compatibility:</strong> Logical log, being decoupled from storage engine internals, facilitates better backward compatibility. Allows the leader and follower to run different database software versions or even different storage engines.</p>
 <p><strong>Ease of Parsing:</strong> Logical log format is simpler for external applications to parse. Useful for sending database contents to external systems like data warehouses for offline analysis or building custom indexes and caches. This technique is called <strong>change data capture</strong>.</p>
 <h3>Trigger-Based Replication:<span class="absolute -mt-20" id="trigger-based-replication"></span>
-    <a href="#trigger-based-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In certain scenarios, where selective data replication, cross-database replication, or conflict resolution logic is required (refer to &ldquo;Handling Write Conflicts&rdquo;), it may be necessary to elevate replication to the application layer.</p>
+    <a href="#trigger-based-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>When specific requirements arise, such as replicating a subset of data, moving data between different types of databases, or implementing conflict resolution logic, it becomes necessary to elevate the replication process to the application layer. This shift allows for more customized and tailored solutions to address unique needs and scenarios.</p>
 <h4>Tools and Techniques:<span class="absolute -mt-20" id="tools-and-techniques"></span>
     <a href="#tools-and-techniques" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Database Log Reading Tools:</strong> Tools like Oracle GoldenGate can extract data changes from the database log and make them available to an application.</p>
-<p><strong>Triggers and Stored Procedures:</strong></p>
-<ul>
-<li>Relational databases offer features like triggers and stored procedures.</li>
-<li>A trigger allows the registration of custom application code automatically executed on data change (write transaction).</li>
-<li>The trigger can log this change into a separate table, accessible for reading by an external process.</li>
-</ul>
+<p><strong>Triggers and Stored Procedures:</strong> Relational databases offer features like triggers and stored procedures. A trigger allows the registration of custom application code automatically executed on data change (write transaction). The trigger can log this change into a separate table, accessible for reading by an external process.</p>
 <h4>Considerations:<span class="absolute -mt-20" id="considerations"></span>
     <a href="#considerations" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p><strong>Overheads and Limitations:</strong> Trigger-based replication typically incurs higher overheads compared to other methods and may be more susceptible to bugs and limitations.</p>
 <p><strong>Flexibility:</strong> Despite potential drawbacks, the flexibility of trigger-based replication makes it valuable in specific use cases.</p>
-<p><strong>Insight:</strong>
-Trigger-based replication, although more resource-intensive and potentially more error-prone than built-in database replication, offers unparalleled flexibility. It becomes essential in situations demanding custom logic, selective data replication, or replication across different database systems.</p>
 ]]></content:encoded>
     </item>
     
