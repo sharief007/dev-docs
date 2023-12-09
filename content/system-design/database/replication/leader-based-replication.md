@@ -21,7 +21,6 @@ graph TD;
     B -->|Replicate| C[Slave 1]
     B -->|Replicate| D[Slave 2]
   end
-
 ```
 
 Each node that stores a copy of the database is called a **replica**. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a **replication log** or **change stream**.
