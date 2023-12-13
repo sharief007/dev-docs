@@ -32,6 +32,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/transactions/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</loc>
@@ -43,6 +45,8 @@
     <loc>https://sharief007.github.io/dev-docs/graph-theory/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/partitioning/secondary-indices/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</loc>
   </url><url>
@@ -56,6 +60,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/database/partitioning/rebalancing/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</loc>
@@ -63,8 +69,6 @@
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/facade/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</loc>
-  </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/multi-leader-replication/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</loc>
   </url><url>

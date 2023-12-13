@@ -13,7 +13,7 @@
       
       <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</guid>
       <description>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
-graph TD;subgraph Master Slave Replicationdirection LRA[Client] --&gt;|Write Request| B[Master]B --&gt;|Replicate| C[Slave 1]B --&gt;|Replicate| D[Slave 2]endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.</description>
+graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.</description>
       <content:encoded><![CDATA[<p>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.</p>
 <pre class="mermaid mt-6">graph TD;
   subgraph Master Slave Replication
@@ -214,67 +214,6 @@ Scaling the architecture is achievable by adding more follower nodes. However, t
 	l1 -->> f1: Replication (record 1)
 	u3 ->> f1: Read the question (record 1)</pre><p>Preventing this anomaly necessitates a different guarantee: <strong>consistent prefix reads</strong>. This guarantee asserts that if a sequence of writes occurs in a specific order, any reader observing those writes will perceive them in the same order.</p>
 <p>This challenge is particularly pronounced in partitioned (sharded) databases. One solution is to ensure that causally related writes are stored in the same partition. However, in certain applications, achieving this efficiently may pose challenges.</p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>Multi Leader Replication</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/multi-leader-replication/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/multi-leader-replication/</guid>
-      <description>Leader-based replication, with its single leader processing all writes, presents a significant drawback: if connectivity to the leader is lost due to network interruptions or other reasons, writing to the database becomes impossible.
-An evolution of the leader-based model is the multi-leader configuration, also known as master–master or active/active replication. In this setup, more than one node is empowered to accept writes. Despite multiple nodes being capable of processing writes, the fundamental concept of replication remains unchanged: each node handling a write must disseminate that data change to all other nodes in the configuration.</description>
-      <content:encoded><![CDATA[<p>Leader-based replication, with its single leader processing all writes, presents a significant drawback: if connectivity to the leader is lost due to network interruptions or other reasons, writing to the database becomes impossible.</p>
-<p>An evolution of the leader-based model is the multi-leader configuration, also known as master–master or active/active replication. In this setup, more than one node is empowered to accept writes. Despite multiple nodes being capable of processing writes, the fundamental concept of replication remains unchanged: each node handling a write must disseminate that data change to all other nodes in the configuration.</p>
-<h4>Key Points:<span class="absolute -mt-20" id="key-points"></span>
-    <a href="#key-points" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><ol>
-<li>
-<p><strong>Leader Redundancy:</strong></p>
-<ul>
-<li>Overcomes the single point of failure inherent in a single-leader model.</li>
-<li>If one leader becomes unreachable, another leader can still accept writes.</li>
-</ul>
-</li>
-<li>
-<p><strong>Data Change Propagation:</strong></p>
-<ul>
-<li>Every node processing a write ensures the propagation of that data change to all other nodes.</li>
-</ul>
-</li>
-</ol>
-<h3>Considerations:<span class="absolute -mt-20" id="considerations"></span>
-    <a href="#considerations" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
-<li>
-<p><strong>Consistency Challenges:</strong></p>
-<ul>
-<li>Achieving consistency across multiple leaders can introduce complexities and challenges.</li>
-</ul>
-</li>
-<li>
-<p><strong>Conflict Resolution:</strong></p>
-<ul>
-<li>Handling conflicts in scenarios where multiple leaders process writes simultaneously requires careful consideration.</li>
-</ul>
-</li>
-</ul>
-<h3>Advantages:<span class="absolute -mt-20" id="advantages"></span>
-    <a href="#advantages" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ul>
-<li>
-<p><strong>Improved Fault Tolerance:</strong></p>
-<ul>
-<li>Overcomes the limitation of a single leader for write acceptance, enhancing fault tolerance.</li>
-</ul>
-</li>
-<li>
-<p><strong>High Availability:</strong></p>
-<ul>
-<li>Enables continued write operations even if one leader becomes inaccessible.</li>
-</ul>
-</li>
-</ul>
-<h3>Insight:<span class="absolute -mt-20" id="insight"></span>
-    <a href="#insight" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Multi-leader replication addresses the single leader&rsquo;s limitations by distributing the ability to accept writes across multiple nodes. While introducing fault tolerance and high availability, it also brings challenges related to consistency and conflict resolution that need thoughtful management.</p>
 ]]></content:encoded>
     </item>
     
