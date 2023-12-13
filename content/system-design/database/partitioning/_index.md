@@ -108,5 +108,5 @@ Hashing keys provides relief from hot spots, although it cannot eliminate them e
 
 Currently, most data systems lack automatic mechanisms to counter highly skewed workloads. It falls upon the application to manage skew reduction. For instance, if a specific key is exceptionally active, a straightforward approach is to append a random number to the key. Even a two-digit decimal random number diversifies writes across 100 keys, distributing them to different partitions.
 
-However, this introduces complexities. Splitting writes across keys necessitates additional efforts for reads, and monitoring which keys undergo splitting becomes essential.
+However, this introduces complexities. Splitting writes across keys introduces additional efforts for reads, and this also requires monitoring and keeping track of keys which undergo splitting.
 
