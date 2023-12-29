@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Database Partitioning of Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/system-design/partitioning/</link>
+    <description>Recent content in Database Partitioning on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/system-design/partitioning/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Secondary indices</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/partitioning/secondary-indices/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/partitioning/secondary-indices/</guid>
+      <description>When records are exclusively accessed through their primary key, the partition can be derived from that key. This enables the routing of read and write requests to the specific partition responsible for that key.
+Secondary indexes, on the other hand, typically don&amp;rsquo;t uniquely identify a record. Instead, they serve as a means to search for occurrences of a specific value. For example, you can find all transactions over $100, locate articles related to technology trends, or identify all properties with more than four bedrooms.</description>
+      <content:encoded><![CDATA[<p>When records are exclusively accessed through their primary key, the partition can be derived from that key. This enables the routing of read and write requests to the specific partition responsible for that key.</p>
+<p>Secondary indexes, on the other hand, typically don&rsquo;t uniquely identify a record. Instead, they serve as a means to search for occurrences of a specific value. For example, you can find all transactions over $100, locate articles related to technology trends, or identify all properties with more than four bedrooms.</p>
+<p>Secondary indexes play a crucial role in relational databases and are also widely utilized in document databases.</p>
+<h3>Partitioning Secondary Indexes by Document:<span class="absolute -mt-20" id="partitioning-secondary-indexes-by-document"></span>
+    <a href="#partitioning-secondary-indexes-by-document" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>To facilitate user searches for cars based on color and brand, you implement a secondary index on color and brand (considered as fields in a document database or columns in a relational database). Once the index is declared, the database automatically performs the indexing. For instance, adding a red car to the database results in the automatic inclusion of its document ID in the index entry for color:red.</p>
+<p>In this indexing methodology, every partition operates as an independent entity. Each partition autonomously manages its set of secondary indexes, exclusively encompassing the documents residing within that specific partition. The partition remains oblivious to the data stored in other partitions.</p>
+<p>When interacting with the database—whether to add, remove, or update a document—the operation only deals with the specific partition housing the targeted document ID. Hence, it is also known as <strong>local index</strong>.</p>
+<p><img src="/dev-docs/database/local-index.png" alt="" loading="lazy" /></p>
+<p>When searching for red cars, a query needs to be distributed across all partitions, and the results must be aggregated. This querying method, referred to as <strong>scatter/gather</strong>, can make read queries on secondary indexes relatively costly. Even with parallelized partition querying, scatter/gather is susceptible to <code>tail latency amplification</code>.</p>
+<h3>Partitioning Secondary Indexes by Term:<span class="absolute -mt-20" id="partitioning-secondary-indexes-by-term"></span>
+    <a href="#partitioning-secondary-indexes-by-term" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>In contrast to having each partition possess its individual secondary index (local index), a <strong>global index</strong> covering data across all partitions can be constructed. However, storing such a global index on a single node may become a bottleneck, defeating the purpose of partitioning. To address this, the global index is also partitioned, although differently from the primary key index.</p>
+<p>This type of index is termed term-partitioned, where the partition of the index is determined by the term being searched.</p>
+<p><img src="/dev-docs/database/global-index.png" alt="" loading="lazy" /></p>
+<p>Similar to the document-partitioned approach, the term-partitioned index can be partitioned by the term itself or by using a hash of the term. Partitioning by the term itself proves useful for range scans (e.g., on a numeric property like the asking price of a car), while partitioning on a hash of the term provides a more evenly distributed load.</p>
+<p>The benefit of a global (term-partitioned) index lies in more efficient reads. Instead of performing scatter/gather over all partitions, a client can make a request solely to the partition containing the term of interest. However, the drawback is that writes become slower and more complex. A write to a single document may impact multiple partitions of the index, as each term in the document might reside on a different partition or node.</p>
+<p>In practical terms, updates to global secondary indexes are often asynchronous. This means that if you read the index shortly after a write, the change may not yet be reflected in the index.</p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Rebalancing Partitions</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/partitioning/rebalancing/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/partitioning/rebalancing/</guid>
+      <description>In a database, things can change over time. For example, when more people are using it, you might need to add more computing power. If the amount of data gets bigger, you may want to add more storage space and memory. Sometimes, a machine might stop working, and others have to take on its tasks.
+When any of these changes occur, data and requests may need to be moved from one machine to another.</description>
+      <content:encoded><![CDATA[<p>In a database, things can change over time. For example, when more people are using it, you might need to add more computing power. If the amount of data gets bigger, you may want to add more storage space and memory. Sometimes, a machine might stop working, and others have to take on its tasks.</p>
+<p>When any of these changes occur, data and requests may need to be moved from one machine to another. This process of shifting work from one machine to another is called <strong>rebalancing</strong>.</p>
+<p>Regardless of which partitioning scheme is used, when rebalancing happens, there are a few basic things we want:</p>
+<ol>
+<li>After rebalancing, the work (like storing data, and handling read and write requests) should be divided fairly among all the machines.</li>
+<li>Even when rebalancing is going on, the database should still be able to handle new requests for reading and writing data.</li>
+</ol>
+<h3>Strategies for Rebalancing<span class="absolute -mt-20" id="strategies-for-rebalancing"></span>
+    <a href="#strategies-for-rebalancing" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><h4>Problem with Hash Mod N<span class="absolute -mt-20" id="problem-with-hash-mod-n"></span>
+    <a href="#problem-with-hash-mod-n" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>When using hash partitioning (as discussed earlier), where we divide possible hashes into ranges and assign each range to a partition, the mod N approach can lead to issues.</p>
+<p>In the mod N approach, if the number of nodes N changes, most keys will have to be moved from one node to another. For instance, if hash(key) equals 123456 and you start with 10 nodes, the key is on node 6 (because 123456 mod 10 equals 6). If you grow to 11 nodes, the key must move to node 3 (123456 mod 11 equals 3), and if you expand to 12 nodes, it has to move to node 0 (123456 mod 12 equals 0). This frequent key movement makes rebalancing extremely costly and inefficient.</p>
+<h4>Fixed Number of Partitions<span class="absolute -mt-20" id="fixed-number-of-partitions"></span>
+    <a href="#fixed-number-of-partitions" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>To address the challenge of dynamic node changes, a simple solution involves creating a surplus of partitions compared to the number of nodes. Multiple partitions are then assigned to each node. For example, in a 10-node cluster, the database may begin with 1,000 partitions, distributing around 100 partitions to each node.</p>
+<p>When a new node joins, it can acquire a few partitions from each existing node until an even distribution is restored. Conversely, if a node is removed, the process reverses.</p>
+<p>Importantly, only complete partitions are moved between nodes. The total number of partitions and the key-to-partition assignments remain constant. The sole adjustment is the reassignment of partitions to nodes. However, this reassignment isn&rsquo;t instantaneous—it takes time to transfer a large amount of data over the network. During this transfer, the old partition assignment is used for any ongoing reads and writes.</p>
+<p><img src="/dev-docs/database/fixed-partitions.png" alt="" loading="lazy" /></p>
+<p>In this setup, the number of partitions is typically established during the initial database setup and remains constant thereafter. It&rsquo;s crucial to choose a number high enough to accommodate future growth, yet not so high that it introduces excessive management overhead.</p>
+<p>Determining the optimal number of partitions becomes challenging when the dataset size varies significantly. Larger partitions can make rebalancing and recovering from node failures costly, while overly small partitions result in excessive overhead. The ideal performance is achieved when partition size is balanced, neither too large nor too small.</p>
+<h4>Dynamic Partitioning<span class="absolute -mt-20" id="dynamic-partitioning"></span>
+    <a href="#dynamic-partitioning" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>To address the challenges of fixed partitions, databases like HBase and RethinkDB employ dynamic key range–based partitioning. In this approach, partitions are created and adjusted dynamically based on data size:</p>
+<p><strong>Dynamic Partition Creation:</strong> As a partition approaches a configured size limit (e.g., 10 GB in HBase), it is split into two, distributing roughly half of the data on each side of the split.</p>
+<p><strong>Merging Small Partitions:</strong> Conversely, if a partition shrinks below a certain threshold due to data deletion, it can be merged with an adjacent partition.</p>
+<p><strong>Load Balancing:</strong> After splitting a large partition, one of its halves can be moved to another node to balance the overall load. In HBase, this involves transferring partition files through its distributed filesystem, HDFS.</p>
+<p>Dynamic partitioning offers the advantage of adapting the number of partitions to the total data volume. However, a drawback is that an empty database starts with a single partition. Until the dataset grows and the first partition is split, all writes are handled by a single node, while other nodes remain inactive.</p>
+<p>To address this, databases like HBase and MongoDB allow the configuration of an initial set of partitions on an empty database, a practice known as pre-splitting. This helps distribute the load more evenly from the start, mitigating the issue of a single node handling all writes in the early stages of a small dataset.</p>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

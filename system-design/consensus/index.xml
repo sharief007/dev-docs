@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Consensus of Dev Docs</title>
+    <link>https://sharief007.github.io/dev-docs/system-design/consensus/</link>
+    <description>Recent content in Consensus on Dev Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/system-design/consensus/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Two Phase Commit</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/consensus/two-phase-commit/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/consensus/two-phase-commit/</guid>
+      <description>Atomic Commit Transaction outcome is either a successful commit (all writes made durable) or an abort (all writes rolled back). At a single database node, atomicity is commonly implemented by the storage engine.
+Distributed Atomic Commit In scenarios like multi-object transactions in a partitioned database with term-partitioned secondary indexes (in which the index entry may be on a different node from the primary data).
+Sending a commit request to all nodes and independently committing the transaction on each node is insufficient.</description>
+      <content:encoded><![CDATA[<h4>Atomic Commit<span class="absolute -mt-20" id="atomic-commit"></span>
+    <a href="#atomic-commit" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Transaction outcome is either a successful commit (all writes made durable) or an abort (all writes rolled back). At a single database node, atomicity is commonly implemented by the storage engine.</p>
+<h4>Distributed Atomic Commit<span class="absolute -mt-20" id="distributed-atomic-commit"></span>
+    <a href="#distributed-atomic-commit" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In scenarios like multi-object transactions in a partitioned database with term-partitioned secondary indexes (in which the index entry may be on a different node from the primary data).</p>
+<p>Sending a commit request to all nodes and independently committing the transaction on each node is insufficient. Commit success on some nodes and failure on others could violate the atomicity guarantee.</p>
+<p>Distributed datastores, especially many &ldquo;NoSQL&rdquo; systems, often lack support for such transactions. Some clustered relational systems, however, do support distributed transactions.</p>
+<h4>Irrevocable Commits<span class="absolute -mt-20" id="irrevocable-commits"></span>
+    <a href="#irrevocable-commits" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>Once a transaction is committed on one node, it cannot be revocked even if it&rsquo;s later discovered to be aborted on another node. This rule exists because committed data becomes visible to other transactions, and other clients may start relying on that data.</p>
+<p>Although the effects of a committed transaction can be undone by a compensating transaction later on, the database treats this as a separate transaction. Any cross-transaction correctness requirements are considered the responsibility of the application, not the database.</p>
+<h4>Two Phase Commit<span class="absolute -mt-20" id="two-phase-commit"></span>
+    <a href="#two-phase-commit" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>2PC (Two Phase Commit) splits the commit/abort process into two phases (hence the name). It introduces a new component known as a coordinator (or transaction manager). The multiple database nodes involved in distributed transaction are referred to as Pariticipants.</p>
+<pre class="mermaid mt-6">sequenceDiagram
+	participant C as cordinator
+    participant P1 as participant 1
+    participant P2 as participant 2
+
+    C->>P1: write data
+    C->>P2: write data
+
+    note left of C: Phase 1
+    rect gray
+    C->>P1: prepare
+    C->>P2: prepare
+    end
+
+    note left of C: Phase 2
+    rect gray
+    P1->>C: yes
+    P2->>C: yes
+    end</pre><p><strong>Phase 1 - Prepare:</strong> Coordinator sends a prepare request to each participant, inquiring if they are prepared to commit. Coordinator monitors responses from participants.</p>
+<p><strong>Phase 2 - Commit or Abort:</strong></p>
+<ul>
+<li>If all participants respond with &ldquo;yes,&rdquo; indicating readiness to commit, the coordinator proceeds with a commit request, and the actual commit occurs.</li>
+<li>If any participant responds with &ldquo;no,&rdquo; indicating an inability to commit, the coordinator issues an abort request to all nodes.</li>
+</ul>
+<p>If this request (to commit or to abort) fails or times out (if any participant crashes), the coordinator must retry forever until it succeeds.</p>
+<p><strong>Cordinator Failure</strong></p>
+<p>If the coordinator fails before sending prepare requests, a participant can safely abort the transaction.</p>
+<p>However, once a participant has received a prepare request and voted &ldquo;yes,&rdquo; it loses the ability to unilaterally abort. The participant must wait for communication from the coordinator regarding the final decision—whether the transaction was committed or aborted. In the event of coordinator failure or network issues at this stage, the participant is left in a state of uncertainty, termed &ldquo;in doubt&rdquo; or &ldquo;uncertain.&rdquo;</p>
+<p>Participants in this state can do nothing but wait for resolution.</p>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

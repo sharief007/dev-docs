@@ -7,16 +7,205 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/system-design/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Checksum</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</link>
+      <title>CAP Theorem</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/cap-theorem/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</guid>
-      <description>In computer science, a checksum is a value derived from the data contained in a data packet or a file. It is a small-sized piece of data that is calculated from the original data and is used to ensure the integrity of the data during transmission or storage. The purpose of a checksum is to detect errors that may have occurred during data transmission or storage.
-The checksum is typically calculated using a mathematical algorithm, often a hash function or a cyclic redundancy check (CRC).</description>
-      <content:encoded><![CDATA[<p>In computer science, a <strong>checksum</strong> is a value derived from the data contained in a data packet or a file. It is a small-sized piece of data that is calculated from the original data and is used to ensure the integrity of the data during transmission or storage. The purpose of a checksum is to detect errors that may have occurred during data transmission or storage.</p>
-<p>The checksum is typically calculated using a mathematical algorithm, often a hash function or a cyclic redundancy check (CRC). The resulting checksum is then sent or stored along with the data. When the data is received or retrieved, the checksum is recalculated, and the new checksum is compared to the original checksum. If the two checksums match, it indicates that the data is likely to be intact. If they don&rsquo;t match, it suggests that errors may have occurred, and the data integrity is compromised.</p>
-<p>Checksums are commonly used in networking protocols, file storage, error-checking mechanisms, and various data verification processes. They provide a simple and efficient way to detect errors without the need for extensive redundancy or complex error-correction algorithms. However, it&rsquo;s important to note that checksums are not foolproof and are primarily designed to catch accidental errors, not malicious tampering. For more robust error detection and correction, techniques like error-correcting codes are used.</p>
+      <guid>https://sharief007.github.io/dev-docs/system-design/cap-theorem/</guid>
+      <description>The CAP theorem, proposed by Eric Brewer, states that in a distributed system, you can achieve at most two out of the three properties: Consistency (C), Availability (A), and Partition Tolerance (P).
+According to the CAP theorem, when a network partition happens, you need to make a trade-off between Consistency and Availability.
+Network Partition A network partition is a situation where communication between different nodes or components of the distributed system is either slow or completely lost.</description>
+      <content:encoded><![CDATA[<p>The CAP theorem, proposed by Eric Brewer, states that in a distributed system, you can achieve at most two out of the three properties: Consistency (C), Availability (A), and Partition Tolerance (P).</p>
+<p>According to the CAP theorem, when a network partition happens, you need to make a trade-off between Consistency and Availability.</p>
+<h4>Network Partition<span class="absolute -mt-20" id="network-partition"></span>
+    <a href="#network-partition" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>A network partition is a situation where communication between different nodes or components of the distributed system is either slow or completely lost. It might be due to network failures, latency, or other issues.</p>
+<h4>Centralized System<span class="absolute -mt-20" id="centralized-system"></span>
+    <a href="#centralized-system" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In a centralized systems(e.g., RDBMS), there is no concept of network partitions. All components of the system are within a single network, and communication between different parts of the system is assumed to be reliable and instantaneous. Hence, you effectively get both Availability and Consistency.</p>
+<h4>Distributed System<span class="absolute -mt-20" id="distributed-system"></span>
+    <a href="#distributed-system" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In a distributed system, network partitions can occur. This means that in the face of a network partition, you have to choose whether to prioritize consistency of data (making sure all nodes see the same data) or availability of the system (ensuring that every request receives a response without guaranteeing that it contains the most recent version of the data).</p>
+<ul>
+<li>
+<p>If you choose Consistency, it might mean sacrificing Availability during a partition.</p>
+</li>
+<li>
+<p>If you choose Availability, it might mean sacrificing Consistency, allowing nodes to diverge in their views of the data during a partition.</p>
+</li>
+<li>
+<p>In CAP terms:</p>
+<ul>
+<li><strong>CA:</strong> Consistent and Available, but not Partition Tolerant (not suitable for distributed systems).</li>
+<li><strong>CP:</strong> Consistent and Partition Tolerant, sacrificing Availability during a partition.</li>
+<li><strong>AP:</strong> Available and Partition Tolerant, sacrificing Consistency during a partition.</li>
+</ul>
+</li>
+</ul>
+<p>Consistency Patterns: <a href="/dev-docs/system-design/database/replication/consistency-models/" >Consistency Models</a><br>
+Availability Patterns: <a href="/dev-docs/system-design/database/replication/" >Replication</a></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Database Clustering</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/clustering/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://sharief007.github.io/dev-docs/system-design/clustering/</guid>
+      <description>Database clustering is a method used to enhance the performance, availability, and scalability of databases. It involves creating multiple copies of a database, called nodes, and distributing the workload across them. This not only increases the capacity to handle more requests but also provides fault tolerance in case one node fails.
+Types of Database Clustering: Shared-Nothing Clustering In this type, each node has its own storage and processing power, and they do not share any components.</description>
+      <content:encoded><![CDATA[<p>Database clustering is a method used to enhance the performance, availability, and scalability of databases. It involves creating multiple copies of a database, called nodes, and distributing the workload across them. This not only increases the capacity to handle more requests but also provides fault tolerance in case one node fails.</p>
+<p><img src="/dev-docs/database/clustering.png" alt="" loading="lazy" /></p>
+<h3>Types of Database Clustering:<span class="absolute -mt-20" id="types-of-database-clustering"></span>
+    <a href="#types-of-database-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><h4>Shared-Nothing Clustering<span class="absolute -mt-20" id="shared-nothing-clustering"></span>
+    <a href="#shared-nothing-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this type, each node has its own storage and processing power, and they do not share any components. Data is partitioned across the nodes, and each node handles a specific subset of data. Common in environments where high availability and scalability are crucial.</p>
+<pre class="mermaid mt-6">graph LR;
+    subgraph Database Cluster
+    direction LR
+        A[(Node 1)] -->|Data Partition 1| B[Storage 1]
+        A -->|Data Partition 2| C[Storage 2]
+        A -->|Data Partition 3| D[Storage 3]
+        E[(Node 2)] -->|Data Partition 1| F[Storage 4]
+        E -->|Data Partition 2| G[Storage 5]
+        I[(Node 3)] -->|Data Partition 1| J[Storage 6]
+    end
+    subgraph IP Network
+        P[Proxy] --> A
+        P --> E
+        P --> I
+    end</pre><h4>Shared-Disk Clustering<span class="absolute -mt-20" id="shared-disk-clustering"></span>
+    <a href="#shared-disk-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this type, all nodes share a common storage system, allowing them to access the same data. Each node has its own processing power, but they all read and write to a shared storage medium. Typically used in environments where a large dataset needs to be accessed simultaneously.</p>
+<pre class="mermaid mt-6">graph LR;
+    subgraph Database Cluster
+    direction LR
+        A[(Node 1)] -->|Shared Storage| S[Shared Disk]
+        B[(Node 2)] -->|Shared Storage| S
+        C[(Node 3)] -->|Shared Storage| S
+    end
+    subgraph IP Network
+        P[Proxy] --> A
+        P --> B
+        P --> C
+    end</pre><h4>Active-Passive Clustering (Failover Clustering)<span class="absolute -mt-20" id="active-passive-clustering-failover-clustering"></span>
+    <a href="#active-passive-clustering-failover-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this setup, one node is active and handles all requests while the other node(s) remain passive, ready to take over in case of a failure. The passive node(s) constantly replicate data from the active node, ensuring it&rsquo;s up-to-date.</p>
+<pre class="mermaid mt-6">graph LR;
+    subgraph Database Cluster
+        A[(Node 1 Active)] ---> D[Storage 1]
+        B[(Node 2 Passive)] --> E[Storage 2]
+        C[(Node 3 Passive)] --> f[Storage 3]
+
+        A <-.-> |Replication| B
+        A <-.-> |Replication| C
+    end
+    subgraph IP Network
+        P[Proxy] --> A
+    end</pre><h4>Active-Active Clustering<span class="absolute -mt-20" id="active-active-clustering"></span>
+    <a href="#active-active-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h4><p>In this setup, all nodes are actively processing requests simultaneously. Data is usually partitioned so that each node handles a specific subset of the workload. Provides better scalability but can be more complex to manage than active-passive setups.</p>
+<pre class="mermaid mt-6">graph LR
+  subgraph Database Cluster
+    A[(Node 1 - Active)]
+    B[(Node 2 - Active)]
+    LB[Load Balancer]
+
+    LB --> A
+    LB --> B
+  end
+
+  subgraph Application Servers
+    AS1[Application Server 1] --> LB
+    AS2[Application Server 2] --> LB
+  end</pre><h3>Benefits of Database Clustering:<span class="absolute -mt-20" id="benefits-of-database-clustering"></span>
+    <a href="#benefits-of-database-clustering" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li>
+<p><strong>High Availability</strong>:</p>
+<ul>
+<li>Clustering provides redundancy, ensuring that if one node fails, another can take over without significant downtime.</li>
+</ul>
+</li>
+<li>
+<p><strong>Scalability</strong>:</p>
+<ul>
+<li>Clustering allows for the distribution of the workload, enabling a database system to handle more requests than a single node.</li>
+</ul>
+</li>
+<li>
+<p><strong>Load Balancing</strong>:</p>
+<ul>
+<li>Requests can be distributed evenly across nodes, preventing any single node from becoming a bottleneck.</li>
+</ul>
+</li>
+<li>
+<p><strong>Fault Tolerance</strong>:</p>
+<ul>
+<li>Even if a node fails, the database continues to operate, maintaining data integrity and availability.</li>
+</ul>
+</li>
+<li>
+<p><strong>Improved Performance</strong>:</p>
+<ul>
+<li>By distributing queries across multiple nodes, the overall performance of the database system can be significantly enhanced.</li>
+</ul>
+</li>
+</ol>
+<h3>Challenges and Considerations:<span class="absolute -mt-20" id="challenges-and-considerations"></span>
+    <a href="#challenges-and-considerations" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li>
+<p><strong>Complexity</strong>:</p>
+<ul>
+<li>Setting up and managing a clustered database can be more complex than a single-node system.</li>
+</ul>
+</li>
+<li>
+<p><strong>Synchronization</strong>:</p>
+<ul>
+<li>Ensuring that data across nodes is consistent can be challenging, especially in active-active setups.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cost</strong>:</p>
+<ul>
+<li>Clustering typically requires additional hardware and software licenses, which can increase the overall cost of the database system.</li>
+</ul>
+</li>
+<li>
+<p><strong>Network Overhead</strong>:</p>
+<ul>
+<li>Communication between nodes can introduce additional latency, especially in geographically distributed clusters.</li>
+</ul>
+</li>
+</ol>
+<h3>Popular Implementations:<span class="absolute -mt-20" id="popular-implementations"></span>
+    <a href="#popular-implementations" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><ol>
+<li>
+<p><strong>MySQL Cluster</strong>:</p>
+<ul>
+<li>An open-source distributed database management system designed for high availability and scalability.</li>
+</ul>
+</li>
+<li>
+<p><strong>PostgreSQL Streaming Replication</strong>:</p>
+<ul>
+<li>Allows for replication of data from one PostgreSQL database to another for failover and load balancing.</li>
+</ul>
+</li>
+<li>
+<p><strong>Oracle Real Application Clusters (RAC)</strong>:</p>
+<ul>
+<li>Provides a shared-disk architecture that allows multiple nodes to access a single database simultaneously.</li>
+</ul>
+</li>
+<li>
+<p><strong>MongoDB Sharding</strong>:</p>
+<ul>
+<li>MongoDB uses sharding to distribute data across multiple nodes, enabling horizontal scalability.</li>
+</ul>
+</li>
+<li>
+<p><strong>Microsoft SQL Server AlwaysOn Availability Groups</strong>:</p>
+<ul>
+<li>Provides high availability and disaster recovery capabilities, allowing for automatic failover.</li>
+</ul>
+</li>
+</ol>
+<p>Keep in mind that the choice of clustering method and implementation depends on the specific requirements and constraints of the application and infrastructure. It&rsquo;s crucial to carefully evaluate these factors before implementing a clustered database solution.</p>
 ]]></content:encoded>
     </item>
     

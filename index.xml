@@ -36,6 +36,15 @@ graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]Now, let&amp;
 graph LRA[5] --&gt; B[4]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style A fill: #4287f5style B fill: #4287f5graph LRA[4] --&gt; B[5]B --&gt; C[3]C --&gt; D[2]D --&gt; E[1]style B fill: #4287f5style C fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[5]C --&gt; D[2]D --&gt; E[1]style C fill: #4287f5style D fill: #4287f5graph LRA[4] --&gt; B[3]B --&gt; C[2]C --&gt; D[5]D --&gt; E[1]style D fill: #4287f5style E fill: #4287f5After the first pass:</description>
     </item>
     <item>
+      <title>CAP Theorem</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/cap-theorem/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/system-design/cap-theorem/</guid>
+      <description>The CAP theorem, proposed by Eric Brewer, states that in a distributed system, you can achieve at most two out of the three properties: Consistency (C), Availability (A), and Partition Tolerance (P).
+According to the CAP theorem, when a network partition happens, you need to make a trade-off between Consistency and Availability.
+Network Partition A network partition is a situation where communication between different nodes or components of the distributed system is either slow or completely lost.</description>
+    </item>
+    <item>
       <title>Checksum</title>
       <link>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -62,9 +71,9 @@ Examples Simple Weighted Graph: A/ \2 3/ \B-------C\ /1D Initial distance
     </item>
     <item>
       <title>Master Slave Replication</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/replication/leader-based-replication/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/replication/leader-based-replication/</guid>
       <description>In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.
 graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write Request| B[Master] B --&gt;|Replicate| C[Slave 1] B --&gt;|Replicate| D[Slave 2] endEach node that stores a copy of the database is called a replica. Whenever the leader writes new data to its local storage, it also sends the data change to all of its followers as part of a replication log or change stream.</description>
     </item>
@@ -96,9 +105,9 @@ Key Participants: Component: This is the base interface or abstract class that d
     </item>
     <item>
       <title>Consistency Models</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/replication/consistency-models/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/replication/consistency-models/</guid>
       <description>Synchronous Replication Client does not receive success message until all replicas complete the write query. This is referred as Strong Consistency.
 sequenceDiagramactor c as clientparticipant m as master replicaparticipant s1 as slave replicaparticipant s2 as slave replicac -&gt;&gt; +m: Read Write Queriesm --&gt;&gt; s1: Replication Requestm --&gt;&gt; s2: Replication Requests1 --&gt;&gt; m: Acknowledgements2 --&gt;&gt; m: Acknowledgementm -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
     </item>
@@ -123,9 +132,9 @@ High Availability: In the event of a hardware failure or maintenance, the system
     </item>
     <item>
       <title>Secondary indices</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/partitioning/secondary-indices/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/partitioning/secondary-indices/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/partitioning/secondary-indices/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/partitioning/secondary-indices/</guid>
       <description>When records are exclusively accessed through their primary key, the partition can be derived from that key. This enables the routing of read and write requests to the specific partition responsible for that key.
 Secondary indexes, on the other hand, typically don&amp;rsquo;t uniquely identify a record. Instead, they serve as a means to search for occurrences of a specific value. For example, you can find all transactions over $100, locate articles related to technology trends, or identify all properties with more than four bedrooms.</description>
     </item>
@@ -139,9 +148,9 @@ The algorithm repeatedly finds the smallest (or largest, depending on the sortin
     </item>
     <item>
       <title>Database Clustering</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/clustering/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/clustering/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/clustering/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/clustering/</guid>
       <description>Database clustering is a method used to enhance the performance, availability, and scalability of databases. It involves creating multiple copies of a database, called nodes, and distributing the workload across them. This not only increases the capacity to handle more requests but also provides fault tolerance in case one node fails.
 Types of Database Clustering: Shared-Nothing Clustering In this type, each node has its own storage and processing power, and they do not share any components.</description>
     </item>
@@ -162,17 +171,17 @@ This pattern is particularly useful when you have a set of objects with similar 
     </item>
     <item>
       <title>Rebalancing Partitions</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/partitioning/rebalancing/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/partitioning/rebalancing/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/partitioning/rebalancing/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/partitioning/rebalancing/</guid>
       <description>In a database, things can change over time. For example, when more people are using it, you might need to add more computing power. If the amount of data gets bigger, you may want to add more storage space and memory. Sometimes, a machine might stop working, and others have to take on its tasks.
 When any of these changes occur, data and requests may need to be moved from one machine to another.</description>
     </item>
     <item>
       <title>Replication Lag</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/replication/replication-lag/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/replication/replication-lag/</guid>
       <description>The delay, known as replication lag, between a write occurring on the leader and being reflected on a follower may be minimal, often just a fraction of a second, making it practically imperceptible.
 Scaling the architecture is achievable by adding more follower nodes. However, this scalability is typically viable with asynchronous replication. Attempting synchronous replication to all followers could render the entire system unavailable for writing in the event of a single node failure or network outage.</description>
     </item>
@@ -203,9 +212,9 @@ Key Participants in the Facade Pattern: Facade: This is the central class of the
     </item>
     <item>
       <title>Replication Implementations</title>
-      <link>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</link>
+      <link>https://sharief007.github.io/dev-docs/system-design/replication/replication-implementations/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</guid>
+      <guid>https://sharief007.github.io/dev-docs/system-design/replication/replication-implementations/</guid>
       <description>Statement-Based Replication: In statement-based replication, the leader records and shares every executed write request (statement) with its followers. Each follower processes these statements, such as INSERT, UPDATE, or DELETE, similar to client-generated SQL statements.
 Challenges: Nondeterministic Functions: Statements calling functions like NOW() or RAND() may produce different results on each replica.
 Workaround: The leader can replace nondeterministic function calls with a fixed return value in the statement log for consistency across followers.</description>
@@ -272,6 +281,15 @@ Increased Load on the Database: As your application gains popularity, the number
       <guid>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</guid>
       <description>The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.
 Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hamiltonian path in a graph is a path that visits each vertex exactly once.</description>
+    </item>
+    <item>
+      <title>Two Phase Commit</title>
+      <link>https://sharief007.github.io/dev-docs/system-design/consensus/two-phase-commit/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/system-design/consensus/two-phase-commit/</guid>
+      <description>Atomic Commit Transaction outcome is either a successful commit (all writes made durable) or an abort (all writes rolled back). At a single database node, atomicity is commonly implemented by the storage engine.
+Distributed Atomic Commit In scenarios like multi-object transactions in a partitioned database with term-partitioned secondary indexes (in which the index entry may be on a different node from the primary data).
+Sending a commit request to all nodes and independently committing the transaction on each node is insufficient.</description>
     </item>
   </channel>
 </rss>

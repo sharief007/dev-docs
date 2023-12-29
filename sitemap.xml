@@ -10,19 +10,21 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/bubble-sort/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/cap-theorem/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/misc/checksum/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/creational/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/problems/cycle-in-directed-graph/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/</loc>
-  </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/replication/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/shortest-path/dijkstras-algorithm/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/leader-based-replication/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/replication/leader-based-replication/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/misc/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/problems/</loc>
   </url><url>
@@ -32,13 +34,13 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/sorting/topological-sort/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/transactions/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/transactions/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/composite/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/consistency-models/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/replication/consistency-models/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/partitioning/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/partitioning/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/search/depth-first-search/</loc>
   </url><url>
@@ -46,7 +48,7 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/scaling/horizontal-scaling/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/partitioning/secondary-indices/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/partitioning/secondary-indices/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/selection-sort/</loc>
   </url><url>
@@ -54,15 +56,15 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/clustering/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/clustering/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/decorator/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/insertion-sort/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/partitioning/rebalancing/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/partitioning/rebalancing/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-lag/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/replication/replication-lag/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/scaling/session-management/</loc>
   </url><url>
@@ -70,7 +72,7 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/merge-sort/</loc>
   </url><url>
-    <loc>https://sharief007.github.io/dev-docs/system-design/database/replication/replication-implementations/</loc>
+    <loc>https://sharief007.github.io/dev-docs/system-design/replication/replication-implementations/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/structural/proxy/</loc>
   </url><url>
@@ -86,6 +88,8 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/consensus/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/scaling/database-bottleneck/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/</loc>
@@ -99,5 +103,7 @@
     <loc>https://sharief007.github.io/dev-docs/tags/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/system-design/consensus/two-phase-commit/</loc>
   </url>
 </urlset>
