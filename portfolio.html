@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Your Name - Portfolio</title>
+</head>
+<body class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-800 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="font-bold text-lg">Your Name</div>
+            <div class="ml-auto">
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-gray-300">Home</a>
+                    <a href="#" class="hover:text-gray-300">Portfolio</a>
+                    <a href="#" class="hover:text-gray-300">Contact</a>
+                    <!-- Dark Mode Toggle Button -->
+                    <button id="darkModeToggle" class="focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="h-6 w-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 10h14M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container mx-auto flex-1 flex flex-col items-center justify-center">
+        <!-- Profile Picture -->
+        <img src="database/clustering.png" alt="Profile Picture" class="rounded-full mb-4 w-64 h-64">
+
+        <!-- Summary -->
+        <div class="text-center">
+            <p class="text-lg font-semibold">Hi, I'm Your Name</p>
+            <p class="text-gray-600 dark:text-gray-400">A passionate web developer</p>
+        </div>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+        });
+    </script>
+</body>
+</html>
