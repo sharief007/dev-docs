@@ -275,6 +275,46 @@ Key Challenges Database Bottlenecks: The database can become a bottleneck if it 
 Increased Load on the Database: As your application gains popularity, the number of concurrent users and requests can increase dramatically.</description>
     </item>
     <item>
+      <title>Iterator</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/iterator/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/iterator/</guid>
+      <description>The Iterator design pattern is a behavioral design pattern that provides a way to access the elements of an aggregate object sequentially without exposing its underlying representation. This pattern is particularly useful for collections like lists, trees, and other complex data structures.
+from typing import Any, Optional from abc import ABC, abstractmethod # Node class for the binary tree class Node: def __init__(self, value: Any): self.value = value self.left: Optional[Node] = None self.</description>
+    </item>
+    <item>
+      <title>Observer</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/observer/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/observer/</guid>
+      <description>The Observer design pattern is a behavioral design pattern that defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically. It is typically used to implement distributed event-handling systems.
+Key Concepts Subject: The subject (or observable) maintains a list of its observers and notifies them of any state changes, usually by calling one of their methods. Observers: Observers (or subscribers) register with the subject to receive updates when the subject changes state.</description>
+    </item>
+    <item>
+      <title>State</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/state/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/state/</guid>
+      <description>The State design pattern is a behavioral design pattern that allows an object to change its behavior when its internal state changes. The object will appear to change its class.
+from abc import ABC, abstractmethod class State(ABC): @abstractmethod def insert_coin(self, context): pass @abstractmethod def eject_coin(self, context): pass @abstractmethod def dispense(self, context): pass class NoCoinState(State): def insert_coin(self, context): print(&amp;#34;Coin inserted.&amp;#34;) context.state = HasCoinState() def eject_coin(self, context): print(&amp;#34;No coin to eject.&amp;#34;) def dispense(self, context): print(&amp;#34;Insert coin first.</description>
+    </item>
+    <item>
+      <title>Strategy</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/strategy/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/strategy/</guid>
+      <description>The Strategy design pattern is a behavioral design pattern that defines a family of algorithms, encapsulates each one, and makes them interchangeable. The strategy pattern lets the algorithm vary independently from the clients that use it.
+Key Concepts Strategy Interface: Defines a common interface for all supported algorithms. Context uses this interface to call the algorithm defined by a concrete strategy. Concrete Strategies: Implement the strategy interface and contain the actual algorithm.</description>
+    </item>
+    <item>
+      <title>Template</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/template/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/template/</guid>
+      <description>The Template Method design pattern is a behavioral design pattern that defines the skeleton of an algorithm in a method, deferring some steps to subclasses. This pattern lets subclasses redefine certain steps of an algorithm without changing the algorithm&amp;rsquo;s structure.
+Key Concepts Abstract Class: Defines the template method and declares abstract operations that subclasses should implement. Concrete Classes: Implement the abstract operations defined by the abstract class. Example in Python Let&amp;rsquo;s consider an example where we define a skeleton for cooking a dish.</description>
+    </item>
+    <item>
       <title>Travelling Salesman Problem</title>
       <link>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

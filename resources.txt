@@ -19,3 +19,6 @@ Interviews
 
 Salesforce MTS
 https://leetcode.com/discuss/interview-experience/4266617/Salesforce-or-MTS-or-In-Person-Interview-or-November-4
+
+Goldman Sachs system design
+https://leetcode.com/discuss/interview-experience/5073329/All-of-Goldman-Sachs-System-Design
