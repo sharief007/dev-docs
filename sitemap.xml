@@ -84,9 +84,13 @@
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/sorting-algorithms/counting-sort/</loc>
   </url><url>
+    <loc>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</loc>
+  </url><url>
     <loc>https://sharief007.github.io/dev-docs/categories/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/command/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/consensus/</loc>
   </url><url>
@@ -97,6 +101,12 @@
     <loc>https://sharief007.github.io/dev-docs/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/iterator/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/low-level-design/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/mediator/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/memento/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/observer/</loc>
   </url><url>
@@ -115,5 +125,7 @@
     <loc>https://sharief007.github.io/dev-docs/graph-theory/travelling-salesman-problem/</loc>
   </url><url>
     <loc>https://sharief007.github.io/dev-docs/system-design/consensus/two-phase-commit/</loc>
+  </url><url>
+    <loc>https://sharief007.github.io/dev-docs/design-patterns/behavioral/visitor/</loc>
   </url>
 </urlset>

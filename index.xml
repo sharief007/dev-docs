@@ -109,7 +109,7 @@ Key Participants: Component: This is the base interface or abstract class that d
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://sharief007.github.io/dev-docs/system-design/replication/consistency-models/</guid>
       <description>Synchronous Replication Client does not receive success message until all replicas complete the write query. This is referred as Strong Consistency.
-sequenceDiagramactor c as clientparticipant m as master replicaparticipant s1 as slave replicaparticipant s2 as slave replicac -&gt;&gt; +m: Read Write Queriesm --&gt;&gt; s1: Replication Requestm --&gt;&gt; s2: Replication Requests1 --&gt;&gt; m: Acknowledgements2 --&gt;&gt; m: Acknowledgementm -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
+sequenceDiagram actor c as client participant m as master replica participant s1 as slave replica participant s2 as slave replica c -&gt;&gt; +m: Read Write Queries m --&gt;&gt; s1: Replication Request m --&gt;&gt; s2: Replication Request s1 --&gt;&gt; m: Acknowledgement s2 --&gt;&gt; m: Acknowledgement m -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
     </item>
     <item>
       <title>Depth First Search</title>
@@ -257,6 +257,14 @@ Participants: Subject: This is the interface that both the RealSubject (the actu
 java python go import java.util.Arrays; public class CountingSort { public static void countingSort(int[] arr, int max) { int[] countArray = new int[max + 1]; // Create a count array to store frequencies // Step 1: Count the frequency of each element for (int num : arr) { countArray[num]++; } // Step 2: Calculate cumulative frequencies for (int i = 1; i &amp;lt;= max; i++) { countArray[i] += countArray[i - 1]; } int[] outputArray = new int[arr.</description>
     </item>
     <item>
+      <title></title>
+      <link>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</guid>
+      <description>Design a meeting scheduler.
+There are n meeting rooms available each with a different capacity. Book any available meeting room for the given interval. (start, end, attendees). Send notifications to the users invited to the meeting. import bisect from abc import abstractmethod, ABC from dataclasses import dataclass, field from datetime import datetime from enum import Enum from random import randint from typing import List, Dict, Tuple, Set @dataclass class User: id: int name: str @classmethod def notify(cls, meeting_request): meeting_request.</description>
+    </item>
+    <item>
       <title>Chain Of Responsibility</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -264,6 +272,14 @@ java python go import java.util.Arrays; public class CountingSort { public stati
       <description>The Chain of Responsibility is a behavioral design pattern that helps in passing a request along a chain of handlers.
 The Chain of Responsibility pattern is like a relay race. In a relay race, each runner passes the baton to the next runner. Similarly, in this pattern, a request is passed along a chain of handlers.
 Each handler decides either to process the request or to pass it along the chain.</description>
+    </item>
+    <item>
+      <title>Command</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/command/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/command/</guid>
+      <description>The Command design pattern is a behavioral design pattern that turns a request into a stand-alone object that contains all information about the request. This transformation allows you to parameterize methods with different requests, delay or queue a request&amp;rsquo;s execution, and support undoable operations.
+Key Concepts Command: An interface that declares a method for executing a command. Concrete Command: Implements the Command interface and defines the binding between a receiver object and an action.</description>
     </item>
     <item>
       <title>Database Bottleneck</title>
@@ -281,6 +297,22 @@ Increased Load on the Database: As your application gains popularity, the number
       <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/iterator/</guid>
       <description>The Iterator design pattern is a behavioral design pattern that provides a way to access the elements of an aggregate object sequentially without exposing its underlying representation. This pattern is particularly useful for collections like lists, trees, and other complex data structures.
 from typing import Any, Optional from abc import ABC, abstractmethod # Node class for the binary tree class Node: def __init__(self, value: Any): self.value = value self.left: Optional[Node] = None self.</description>
+    </item>
+    <item>
+      <title>Mediator</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/mediator/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/mediator/</guid>
+      <description>The Mediator design pattern is a behavioral design pattern that encapsulates how a set of objects interact. It promotes loose coupling by preventing objects from referring to each other explicitly and allows their interaction to be varied independently. Instead of having each object communicate directly with each other, they communicate through a mediator.
+Key Concepts Mediator Interface: Defines the interface for communication between Colleague objects. Concrete Mediator: Implements the Mediator interface and coordinates communication between Colleague objects.</description>
+    </item>
+    <item>
+      <title>Memento</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/memento/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/memento/</guid>
+      <description>The Memento design pattern is a behavioral design pattern that allows you to capture and externalize an object&amp;rsquo;s internal state without violating its encapsulation so that the object can be restored to this state later. This is particularly useful for implementing undo or rollback functionality.
+Key Concepts Memento: The Memento object stores the internal state of the originator object. It has two interfaces: a narrow interface for caretakers (which should not expose any state) and a wide interface for originators (which allows full access to the state).</description>
     </item>
     <item>
       <title>Observer</title>
@@ -330,6 +362,14 @@ Pre Requisities Hamiltonian Path and Hamiltonian Cycle: Hamiltonian Path: A Hami
       <description>Atomic Commit Transaction outcome is either a successful commit (all writes made durable) or an abort (all writes rolled back). At a single database node, atomicity is commonly implemented by the storage engine.
 Distributed Atomic Commit In scenarios like multi-object transactions in a partitioned database with term-partitioned secondary indexes (in which the index entry may be on a different node from the primary data).
 Sending a commit request to all nodes and independently committing the transaction on each node is insufficient.</description>
+    </item>
+    <item>
+      <title>Visitor</title>
+      <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/visitor/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/visitor/</guid>
+      <description>The Visitor design pattern is a behavioral design pattern that allows you to add further operations to objects without modifying them. This pattern follows the open/closed principle, allowing you to add new functionality to classes without changing their structure. It involves four main components:
+Visitor: An interface or abstract class for all visitors. It declares a visit method for each type of element that can be visited. Concrete Visitor: Classes that implement the Visitor interface.</description>
     </item>
   </channel>
 </rss>

@@ -62,7 +62,7 @@ graph TD; subgraph Master Slave Replication direction LR A[Client] --&gt;|Write 
       
       <guid>https://sharief007.github.io/dev-docs/system-design/replication/consistency-models/</guid>
       <description>Synchronous Replication Client does not receive success message until all replicas complete the write query. This is referred as Strong Consistency.
-sequenceDiagramactor c as clientparticipant m as master replicaparticipant s1 as slave replicaparticipant s2 as slave replicac -&gt;&gt; +m: Read Write Queriesm --&gt;&gt; s1: Replication Requestm --&gt;&gt; s2: Replication Requests1 --&gt;&gt; m: Acknowledgements2 --&gt;&gt; m: Acknowledgementm -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
+sequenceDiagram actor c as client participant m as master replica participant s1 as slave replica participant s2 as slave replica c -&gt;&gt; +m: Read Write Queries m --&gt;&gt; s1: Replication Request m --&gt;&gt; s2: Replication Request s1 --&gt;&gt; m: Acknowledgement s2 --&gt;&gt; m: Acknowledgement m -&gt;&gt; -c: Query ResponseBenefits Data Integrity: Ensures that all nodes have the most up-to-date information at all times.</description>
       <content:encoded><![CDATA[<h3>Synchronous Replication<span class="absolute -mt-20" id="synchronous-replication"></span>
     <a href="#synchronous-replication" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>Client does not receive success message until all replicas complete the write query. This is referred as <strong>Strong Consistency</strong>.</p>
 <pre class="mermaid mt-6">sequenceDiagram
