@@ -1,3 +1,12 @@
+---
+title: Meeting Scheduler
+type: docs
+sidebar:
+  open: true
+toc: true
+params:
+  editURL: 
+---
 
 Design a meeting scheduler.
 - There are n meeting rooms available each with a different capacity.
@@ -21,7 +30,7 @@ class User:
     @classmethod
     def notify(cls, meeting_request):
         meeting_request.acknowledge(MeetingResponse(randint(1, 2)))
-        
+
 
 class MeetingResponse(Enum):
     ACCEPTED = 1
