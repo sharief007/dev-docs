@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language><atom:link href="https://sharief007.github.io/dev-docs/low-level-design/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title></title>
+      <title>Meeting Scheduler</title>
       <link>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -36,7 +36,7 @@ There are n meeting rooms available each with a different capacity. Book any ava
 </span></span><span class="line"><span class="cl">    <span class="nd">@classmethod</span>
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">meeting_request</span><span class="p">):</span>
 </span></span><span class="line"><span class="cl">        <span class="n">meeting_request</span><span class="o">.</span><span class="n">acknowledge</span><span class="p">(</span><span class="n">MeetingResponse</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
-</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MeetingResponse</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 </span></span><span class="line"><span class="cl">    <span class="n">ACCEPTED</span> <span class="o">=</span> <span class="mi">1</span>

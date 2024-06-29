@@ -257,14 +257,6 @@ Participants: Subject: This is the interface that both the RealSubject (the actu
 java python go import java.util.Arrays; public class CountingSort { public static void countingSort(int[] arr, int max) { int[] countArray = new int[max + 1]; // Create a count array to store frequencies // Step 1: Count the frequency of each element for (int num : arr) { countArray[num]++; } // Step 2: Calculate cumulative frequencies for (int i = 1; i &amp;lt;= max; i++) { countArray[i] += countArray[i - 1]; } int[] outputArray = new int[arr.</description>
     </item>
     <item>
-      <title></title>
-      <link>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</guid>
-      <description>Design a meeting scheduler.
-There are n meeting rooms available each with a different capacity. Book any available meeting room for the given interval. (start, end, attendees). Send notifications to the users invited to the meeting. import bisect from abc import abstractmethod, ABC from dataclasses import dataclass, field from datetime import datetime from enum import Enum from random import randint from typing import List, Dict, Tuple, Set @dataclass class User: id: int name: str @classmethod def notify(cls, meeting_request): meeting_request.</description>
-    </item>
-    <item>
       <title>Chain Of Responsibility</title>
       <link>https://sharief007.github.io/dev-docs/design-patterns/behavioral/chain-of-responsibility/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -305,6 +297,14 @@ from typing import Any, Optional from abc import ABC, abstractmethod # Node clas
       <guid>https://sharief007.github.io/dev-docs/design-patterns/behavioral/mediator/</guid>
       <description>The Mediator design pattern is a behavioral design pattern that encapsulates how a set of objects interact. It promotes loose coupling by preventing objects from referring to each other explicitly and allows their interaction to be varied independently. Instead of having each object communicate directly with each other, they communicate through a mediator.
 Key Concepts Mediator Interface: Defines the interface for communication between Colleague objects. Concrete Mediator: Implements the Mediator interface and coordinates communication between Colleague objects.</description>
+    </item>
+    <item>
+      <title>Meeting Scheduler</title>
+      <link>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://sharief007.github.io/dev-docs/low-level-design/meeting-scheduler/</guid>
+      <description>Design a meeting scheduler.
+There are n meeting rooms available each with a different capacity. Book any available meeting room for the given interval. (start, end, attendees). Send notifications to the users invited to the meeting. import bisect from abc import abstractmethod, ABC from dataclasses import dataclass, field from datetime import datetime from enum import Enum from random import randint from typing import List, Dict, Tuple, Set @dataclass class User: id: int name: str @classmethod def notify(cls, meeting_request): meeting_request.</description>
     </item>
     <item>
       <title>Memento</title>
