@@ -1,6 +1,6 @@
 ---
 title: 'Database Anomalies'
-weight: 1
+weight: 2
 type: docs
 toc: true
 prev: 
