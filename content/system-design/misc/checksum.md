@@ -1,6 +1,5 @@
 ---
 title: 'Checksum'
-weight: 1
 type: docs
 ---
 
