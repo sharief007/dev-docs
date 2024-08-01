@@ -1,3 +1,8 @@
+---
+title: 'Layer 4 vs Layer 7'
+type: docs
+toc: false
+---
 
 ### Layer 4 Load Balancing (Transport Layer):
 **Characteristics**:
@@ -31,23 +36,3 @@
 - Load balancing for web applications where different types of requests (e.g., static vs. dynamic content) need to be routed to different servers.
 - APIs where different versions or endpoints need to be directed to different backend services.
 - Microservices architectures where requests may need to be routed to specific services based on headers or request paths.
-
-### Choosing Between Layer 4 and Layer 7 in System Design Interviews:
-**Layer 4 Load Balancing**:
-- Use when simplicity, performance, and efficiency are key.
-- Suitable for scenarios where content-based routing is not necessary.
-- Mention its use in high-performance, low-latency environments.
-
-**Layer 7 Load Balancing**:
-- Use when you need advanced routing based on the content of the requests.
-- Ideal for web applications, APIs, and microservices with complex routing and security needs.
-- Highlight its ability to handle SSL termination, content-based routing, and other application-specific requirements.
-
-### Example Interview Scenario:
-**Scenario**: Designing a scalable web application.
-
-**Solution**:
-- **Layer 4 Load Balancer**: Use for distributing incoming TCP connections to different servers to handle high throughput efficiently.
-- **Layer 7 Load Balancer**: Use for handling HTTP/HTTPS traffic, performing SSL termination, and routing requests based on URL paths to different microservices (e.g., routing `/api` requests to API servers and `/static` requests to static content servers).
-
-In summary, choose Layer 4 load balancing for performance and simplicity, and Layer 7 load balancing for advanced routing and application-specific requirements. Demonstrating an understanding of both and knowing when to apply each will showcase your depth of knowledge in system design interviews.
