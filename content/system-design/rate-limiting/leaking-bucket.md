@@ -1,6 +1,6 @@
 ---
 title: 'Leaking Bucket Algorithm'
-weight: 1
+weight: 2
 type: docs
 toc: true
 prev: 

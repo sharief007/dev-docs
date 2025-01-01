@@ -1,6 +1,6 @@
 ---
 title: 'Fixed Window Algorithm'
-weight: 1
+weight: 3
 type: docs
 toc: true
 prev: 
