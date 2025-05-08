@@ -19,4 +19,5 @@ Welcome to DevDocs: Your Ultimate Resource Hub for Documentation, Gists, and Mor
     {{< card link="system-design" title="System Design" subtitle="Crafting Scalable and Resilient Systems" >}}
     {{< card link="sorting-algorithms" title="Sorting Algorithms" subtitle="The art of organizing data" >}}
     {{< card link="low-level-design" title="Low Level Design Problems" subtitle="" >}}
+    {{< card link="machine-learning" title="Machine Learning" subtitle="" >}}
 {{< /cards >}}
