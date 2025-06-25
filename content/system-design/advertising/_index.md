@@ -1,5 +1,6 @@
 ---
 title: 'Core concepts in Digital Advertising'
+weight: 1
 toc: false
 sidebar:
   open: false
