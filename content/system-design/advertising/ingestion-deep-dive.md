@@ -1,6 +1,6 @@
 ---
 title: 'Ingestion Deep Dive'
-weight: 3
+weight: 4
 toc: false
 sidebar:
   open: false
@@ -11,10 +11,6 @@ params:
 ---
 
 ### 1. Push-Based Model: Direct to Broker vs. Intermediate Service
-
-**Candidate:** "This is a push-based model, where a light-weight agent like Fluentd is required to send parsed events to broker. Is it okay to directly send messages to broker? Shall we add a service in between for the sake of centralism, auth, etc."
-
-**Response:**
 
 It's **generally okay and often preferred to directly send messages from lightweight agents (like Fluentd, Filebeat) to a robust message broker like Kafka.** This is the standard, battle-tested pattern for high-throughput log/event ingestion.
 
@@ -41,24 +37,11 @@ An intermediate service (often called an **Ingestion Service** or **API Gateway*
 
 **Decision for this Ad Click System:**
 
-Given the requirements of **high volume, low latency (for ingestion), and simplicity where possible**, direct communication from **Fluentd/Filebeat to Kafka is the recommended approach.**
-
-* Kafka handles the bulk of the "centralism" by being the single ingest point.
-* Kafka's built-in security features are generally sufficient.
-* Agents can perform basic parsing and transformation.
-* Complex logic (deduplication, aggregation) belongs in the stream processing layer (Flink/Spark), not the ingestion layer.
-
 Adding an intermediate service would introduce more latency, more operational complexity (another distributed service to manage), and potential bottlenecks without a clear, overwhelming benefit for this specific use case.
 
 ### 2. Push vs. Pull Model for Log Ingestion
 
-Push model requires additional agents set up. How about pull model? This is an excellent question that highlights a fundamental architectural choice for log collection.
-
-#### 2.1 Push Model (Recommended for this System)
-
-Okay, here's a detailed comparison table of the push model and pull model for log ingestion in the context of your ad click aggregation system, presented in Markdown.
-
-## Push Model vs. Pull Model for Log Ingestion: A Comparison
+#### Push Model vs. Pull Model for Log Ingestion: A Comparison
 
 | Feature             | Push Model (e.g., Filebeat/Fluentd to Kafka)                                       | Pull Model (e.g., Central Collector via SSH/API)                                 | Rationale for Ad Click System             |
 | :------------------ | :--------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- | :---------------------------------------- |
@@ -77,8 +60,6 @@ Okay, here's a detailed comparison table of the push model and pull model for lo
 **Decision for this Ad Click System:**
 
 For an ad click system with **1 billion events per day, real-time aggregation, and a few minutes of end-to-end latency**, the **push model is overwhelmingly superior and necessary.**
-
-The real-time nature of the events and the sheer volume necessitate immediate transmission of logs as they are generated. A pull model would introduce unacceptable latency and create a severe bottleneck at the central collector. While agent deployment adds some management overhead, the benefits in terms of latency, scalability, and resilience are critical for this use case.
 
 ### 3. Explaining Fluentd, Filebeat, Logstash Shippers
 

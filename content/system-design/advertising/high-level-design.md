@@ -86,21 +86,6 @@ flowchart TD
     ADHC --> QL
     QL --> Client("Client Applications<br>(e.g., Billing, Reporting Dashboards)")
 
-    style A fill:#CCEEFF,stroke:#3399FF,stroke-width:2px,color:#333
-    style L fill:#FFE5CC,stroke:#FF9933,stroke-width:2px,color:#333
-    style LEH fill:#E6FFE6,stroke:#33CC33,stroke-width:2px,color:#333
-    style Dedupe fill:#E6FFE6,stroke:#33CC33,stroke-width:2px,color:#333
-    style MLA fill:#E6FFE6,stroke:#33CC33,stroke-width:2px,color:#333
-    style Filtering fill:#E6FFE6,stroke:#33CC33,stroke-width:2px,color:#333
-    style Calc fill:#E6FFE6,stroke:#33CC33,stroke-width:2px,color:#333
-    style RTDB fill:#FFE0FF,stroke:#CC66CC,stroke-width:2px,color:#333
-    style LTS fill:#E6E6E6,stroke:#666666,stroke-width:2px,color:#333
-    style ADHC fill:#FFCCCC,stroke:#FF6666,stroke-width:2px,color:#333
-    style QL fill:#CCFFFF,stroke:#009999,stroke-width:2px,color:#333
-    style MQ fill:#FFFFCC,stroke:#FFCC00,stroke-width:2px,color:#333
-    style SPC fill:#E6FFE6,stroke:#33CC33,stroke-width:3px,color:#333,padding:20px 
-    style BP fill:#DDEEFF,stroke:#6699FF,stroke-width:2px,color:#333
-    style Client fill:#F2F2F2,stroke:#999999,stroke-width:2px,color:#333
 ```
 
 # Detailed Component Design & Justifications

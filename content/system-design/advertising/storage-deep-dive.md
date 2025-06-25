@@ -1,6 +1,6 @@
 ---
-title: 'High Level Design'
-weight: 4
+title: 'Storage Deep Dive'
+weight: 6
 toc: false
 sidebar:
   open: false
@@ -40,8 +40,6 @@ Think of it like this:
 
 
 ### Cardinality in Our Ad Click System
-
-Now, let's apply this to our ad click scenario:
 
 * **`country`:**
     * **Number of Unique Values:** Around 200 (number of countries in the world).

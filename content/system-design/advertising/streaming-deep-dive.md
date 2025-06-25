@@ -1,6 +1,6 @@
 ---
-title: 'High Level Design'
-weight: 3
+title: 'Streaming Deep Dive'
+weight: 5
 toc: false
 sidebar:
   open: false
@@ -24,7 +24,7 @@ Since the log event itself doesn't provide a unique ID, we need to construct one
     * **Why not `country`?** `country` is a coarser grain and less likely to contribute to uniqueness than the other attributes. Including it might make the hash less effective if the same combination of `timestamp/user/ad/ip` but different `country` (e.g., due to geo-IP lookup errors) could occur and be considered distinct. It's safer to rely on the most granular identifiers.
     * **Consideration:** It's *possible* for a user to click the same ad, from the same IP, at the exact same millisecond. This is rare but possible, especially with bots or very fast, legitimate clicks. In such edge cases, our synthetic ID might falsely identify two distinct clicks as one. The interviewer did not provide a native unique ID, so this is the best we can do given the constraints. In a real-world system, we'd advocate for the client to generate a UUID for each click event.
 
-#### 4.2 Deduplication Mechanism in Stream Processor (e.g., Flink)
+#### Deduplication Mechanism in Stream Processor (e.g., Flink)
 
 1.  **Stateful Operator:** The stream processing framework (e.g., Flink's `KeyedProcessFunction` or a similar stateful operator) will handle deduplication.
 2.  **State Backend:** This operator needs a *state backend* (e.g., RocksDB, which can spill to disk) to store the unique IDs.
@@ -34,23 +34,8 @@ Since the log event itself doesn't provide a unique ID, we need to construct one
     * **If Hash Exists:** This event is a duplicate. Discard it.
     * **If Hash Does Not Exist:** This is a new event. Store the hash in the state and allow the event to proceed downstream for aggregation.
     * **Set Timer:** When storing the hash, also set a timer (e.g., 5-10 minutes from the event's `click_timestamp`) to automatically remove this hash from the state when the timer fires.
-
-#### 4.3 The "5-10 Minute Time Window" for Deduplication
-
-This window refers to the **duration for which a unique event ID (our hash) is kept in the state for deduplication checks.**
-
-* **Why a Window?**
-    * **Memory/State Management:** Storing every unique click event ID *indefinitely* would lead to unbounded state growth, crashing the stream processor. We only need to deduplicate events that might reasonably arrive as duplicates within a short period.
-    * **Duplicate Arrival Patterns:** Duplicates typically arise from network retries, agent restarts, or misconfigurations. These usually manifest within seconds or a few minutes of the original event.
-* **What it means:**
-    * If an original event arrives at `T0`, its hash is stored.
-    * Any duplicate of that event arriving between `T0` and `T0 + Window` will be detected and discarded.
-    * After `T0 + Window`, the hash is removed from the state. If a duplicate of that event arrives *after* this window, it will *not* be detected as a duplicate and will be processed as a new event.
-* **Determining the Window (5-10 minutes):**
+4. **Determining the Window (5-10 minutes):**
     * This is an **empirically determined value** based on typical network latency, retry policies of upstream systems, and how long duplicates are observed to occur.
-    * **5-10 minutes is a common pragmatic choice for "soft real-time" systems.**
-        * It's long enough to catch most common network-induced duplicates.
-        * It's short enough to prevent state from growing excessively large.
     * **Trade-off:**
         * **Too Short:** Might miss legitimate duplicates that arrive very late.
         * **Too Long:** Increases the memory/disk footprint of the state, potentially impacting performance and recovery times.

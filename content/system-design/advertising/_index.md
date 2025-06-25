@@ -1,6 +1,6 @@
 ---
-title: 'Core concepts in Digital Advertising'
-weight: 1
+title: 'Ad Click Event Aggregation'
+weight: 2
 toc: false
 sidebar:
   open: false
@@ -10,95 +10,49 @@ params:
   editURL: 
 ---
 
-1. **Impression**  
-   - One display of an ad to a user. If a banner ad appears while you’re browsing a site, that counts as one impression.
 
-2. **Click-Through Rate (CTR)**  
-   - Measures the effectiveness of an ad.  
-   - **Formula:** (Number of Clicks ÷ Number of Impressions) × 100  
-   - Example: If 1000 people see an ad and 50 click on it, the CTR is 5%.
+Imagine you are tasked with designing a real-time system to aggregate and analyze ad click events for a large advertising platform. This system needs to handle massive data volumes, provide near real-time insights for reporting and billing, and be resilient to various failures.
 
-3. **Conversion & Conversion Rate**  
-   - A *conversion* happens when a user takes a desired action after clicking the ad (e.g., buying something, signing up).  
-   - **Conversion Rate:** (Number of Conversions ÷ Number of Clicks) × 100  
-   - Helps advertisers understand how effective their funnel is.
+**Input Data:**
 
-4. **Real-Time Bidding (RTB)**  
-   - This is the algorithmic auctioning of ad spaces in *real time*—usually milliseconds before the page loads.  
-   - When you visit a site, a request is sent to an ad exchange with data like your location, interests, etc. Advertisers bid instantly to show you their ad. The highest bidder wins, and their ad appears.
+Click events are appended to log files located on various ad servers. Each click event has the following attributes:
 
-5. **Demand-Side Platform (DSP)**  
-   - A system used by advertisers to buy ad inventory in an automated way, often via RTB.
+* `click_timestamp`: When the click occurred (Unix epoch, milliseconds).
+* `user_id`: Unique identifier for the user.
+* `ad_id`: Unique identifier for the advertisement clicked.
+* `ip`: IP address of the user.
+* `country`: Country of the user.
 
-6. **Supply-Side Platform (SSP)**  
-   - Used by publishers to sell ad space automatically. It connects to multiple DSPs to get the best price for their ad inventory.
+**Data Volume:**
 
-7. **Ad Exchange**  
-   - The marketplace connecting SSPs and DSPs. It handles bids and returns the winning ad in real time.
+* **Ingestion Rate:** Approximately **1 billion ad clicks per day**.
+* **Total Ads:** Roughly **2 million unique ads** in the system.
+* **Growth:** The number of ad click events is projected to grow by **30% year-over-year**.
 
-8. **CPM, CPC, CPA** (Pricing Models)  
-   - **CPM (Cost per Mille):** Cost per 1000 impressions.  
-   - **CPC (Cost per Click):** Advertisers pay when someone clicks.  
-   - **CPA (Cost per Acquisition):** Pay only when a conversion happens.
+**Functional Requirements:**
 
-9. **Targeting**  
-   - Ads can be shown to users based on demographics, interests, behaviors, location, time of day, device type, etc.
+The system must support the following primary queries and aggregation capabilities:
 
-10. **Frequency Capping**  
-   - Limits the number of times a user sees the same ad. Prevents fatigue.
+1.  **Ad Click Count (Per Ad):**
+    * Return the total number of click events for a *particular `ad_id`* within the last `M` minutes.
+    * `M` should be a configurable parameter (e.g., 1, 5, 10, 60 minutes).
+2.  **Top N Most Clicked Ads:**
+    * Return the **top 100 most clicked `ad_id`s** in the past `M` minutes.
+    * `M` should be a configurable parameter (e.g., 1, 5, 10, 60 minutes).
+    * Aggregation for this query should occur and be updated every minute.
+3.  **Filtered Aggregations:**
+    * Both of the above queries (Ad Click Count and Top N Ads) must support filtering by `ip`, `user_id`, or `country`. This means a user should be able to ask for, for example, "top 100 ads from users in the USA in the last 5 minutes."
 
+**Non-Functional Requirements:**
 
-## RTB process
-
-```mermaid
-flowchart 
-    Advertiser
-    DSP["Demand side platform"]
-    publisher
-    SSP["Seller side platform"]
-
-    subgraph s1 ["Demand side"]
-        Advertiser --> DSP
-    end
-
-    subgraph s2 ["Supply side"]
-        publisher --> SSP
-    end
-
-    exchange["Ad exchange"]
-    DSP --> exchange 
-    SSP --> exchange
-```
-
-### 🌐 **Data Flow: From User Visit to Ad Display**
-
-1. **User visits a website or app** with ad slots.
-2. The **Publisher**'s site triggers a request to the **Supply-Side Platform (SSP)**.
-3. The SSP packages user data (like location, browser, time, etc.) and sends a **bid request** to an **Ad Exchange**.
-4. The Ad Exchange forwards the bid request to multiple **Demand-Side Platforms (DSPs)**.
-5. Each DSP runs algorithms to:
-   - Evaluate the user data
-   - Decide whether to bid
-   - Calculate how much to bid
-6. Bids are returned to the Ad Exchange.
-7. The **highest bid wins**, and the winning DSP sends the **ad creative** (image/text/HTML snippet).
-8. The Ad Exchange sends the ad back to the SSP, which returns it to the Publisher.
-9. The ad is shown to the user—all in a matter of **milliseconds**.
-
-
-```mermaid
-flowchart TD
-    A[User visits website] --> B[Publisher sends ad request]
-    B --> C[SSP receives and packages user data]
-    C --> D[Ad Exchange receives bid request]
-    D --> E[DSP1 evaluates and bids]
-    D --> F[DSP2 evaluates and bids]
-    D --> G[DSP3 evaluates and bids]
-    E --> H[Ad Exchange selects highest bid]
-    F --> H
-    G --> H
-    H --> I[Winning Ad Creative sent to SSP]
-    I --> J[SSP sends Ad Creative to Publisher]
-    J --> K[Ad displayed to user]
-```
-
+1.  **Latency:**
+    * End-to-end latency (from click event generation to queryable aggregation) should be **within a few minutes**.
+    * Note: This latency is acceptable as the primary use cases are ad billing and reporting, not real-time bidding (RTB) which has much stricter sub-second latency requirements.
+2.  **Correctness:**
+    * The accuracy of aggregation results is paramount, as the data is used for billing and critical reporting.
+3.  **Scalability:**
+    * The system must be horizontally scalable to handle current data volumes and the projected 30% YoY growth, effectively operating at "Facebook or Google scale" for this specific use case.
+4.  **Reliability & Resilience:** The system must account for and gracefully handle the following edge cases:
+    * **Late Events:** Click events might arrive later than their `click_timestamp` due to network delays or system issues.
+    * **Duplicated Events:** The same click event might be sent multiple times by upstream systems or agents.
+    * **System Failures:** Individual components or parts of the system might go down at any time, requiring robust recovery mechanisms without data loss.
