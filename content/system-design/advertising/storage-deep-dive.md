@@ -1,10 +1,10 @@
 ---
 title: 'Storage Deep Dive'
 weight: 6
-toc: false
+toc: true
 sidebar:
-  open: false
-prev: 
+  open: true
+prev: streaming-deep-dive
 next:
 params:
   editURL: 

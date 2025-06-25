@@ -1,11 +1,11 @@
 ---
 title: 'Ad Click Event Aggregation'
-weight: 2
-toc: false
+weight: 1
+toc: true
 sidebar:
-  open: false
+  open: true
 prev: 
-next:
+next: digital-ads-terminology
 params:
   editURL: 
 ---

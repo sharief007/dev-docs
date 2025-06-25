@@ -1,11 +1,11 @@
 ---
 title: 'Streaming Deep Dive'
 weight: 5
-toc: false
+toc: true
 sidebar:
-  open: false
-prev: 
-next:
+  open: true
+prev: ingestion-deep-dive
+next: storage-deep-dive
 params:
   editURL: 
 ---

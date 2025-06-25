@@ -1,11 +1,11 @@
 ---
 title: 'Digital Advertising Terminology'
-weight: 1
-toc: false
+weight: 2
+toc: true
 sidebar:
-  open: false
-prev: 
-next:
+  open: true
+prev: _index
+next: high-level-design
 params:
   editURL: 
 ---

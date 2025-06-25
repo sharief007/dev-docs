@@ -4,8 +4,8 @@ weight: 4
 toc: false
 sidebar:
   open: false
-prev: 
-next:
+prev: high-level-design
+next: streaming-deep-dive
 params:
   editURL: 
 ---

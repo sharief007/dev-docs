@@ -1,11 +1,11 @@
 ---
 title: 'High Level Design'
 weight: 3
-toc: false
+toc: true
 sidebar:
-  open: false
-prev: 
-next:
+  open: true
+prev: digital-ads-terminology
+next: ingestion-deep-dive
 params:
   editURL: 
 ---
