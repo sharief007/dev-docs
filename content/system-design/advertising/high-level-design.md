@@ -1,6 +1,7 @@
 ---
 title: 'High Level Design'
 weight: 3
+type: docs
 toc: true
 sidebar:
   open: true

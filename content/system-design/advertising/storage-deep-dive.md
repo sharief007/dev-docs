@@ -1,6 +1,7 @@
 ---
 title: 'Storage Deep Dive'
 weight: 6
+type: docs
 toc: true
 sidebar:
   open: true

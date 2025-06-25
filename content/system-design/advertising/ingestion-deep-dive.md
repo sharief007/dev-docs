@@ -1,6 +1,7 @@
 ---
 title: 'Ingestion Deep Dive'
 weight: 4
+type: docs
 toc: false
 sidebar:
   open: false

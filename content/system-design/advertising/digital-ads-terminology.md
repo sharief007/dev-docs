@@ -1,6 +1,7 @@
 ---
 title: 'Digital Advertising Terminology'
 weight: 2
+type: docs
 toc: true
 sidebar:
   open: true
