@@ -167,6 +167,70 @@ graph
 - **False negatives**: _Never happen._ If it’s in the filter, it won’t say it’s not.
 - **False positives**: _Can happen._ The filter may wrongly say an element exists due to overlapping bits from different insertions.
 
+### Sample Implementation
+
+```python
+import math
+import hashlib
+import bitarray  # Install via: pip install bitarray
+
+class BloomFilter:
+    def __init__(self, expected_items, false_positive_rate):
+        """
+        Initialize a Bloom filter with given capacity and desired error rate.
+        """
+        self.n = expected_items
+        self.p = false_positive_rate
+
+        # Calculate optimal size (m) and number of hashes (k)
+        self.m = self.optimal_bit_array_size(self.n, self.p)
+        self.k = self.optimal_num_hash_functions(self.m, self.n)
+
+        self.bit_array = bitarray.bitarray(self.m)
+        self.bit_array.setall(0)
+
+    def _hashes(self, item):
+        """
+        Generate k hash values using double hashing.
+        """
+        item = item.encode('utf-8')
+        h1 = int(hashlib.sha256(item).hexdigest(), 16)
+        h2 = int(hashlib.md5(item).hexdigest(), 16)
+
+        for i in range(self.k):
+            yield (h1 + i * h2) % self.m
+
+    def add(self, item):
+        """
+        Insert an item into the Bloom filter.
+        """
+        for idx in self._hashes(item):
+            self.bit_array[idx] = 1
+
+    def check(self, item):
+        """
+        Check if an item might be in the Bloom filter.
+        Returns:
+            True — Possibly present (may be false positive)
+            False — Definitely not present
+        """
+        return all(self.bit_array[idx] for idx in self._hashes(item))
+
+    @staticmethod
+    def optimal_bit_array_size(n, p):
+        """
+        m = -(n * ln(p)) / (ln(2)^2)
+        """
+        return int(-n * math.log(p) / (math.log(2) ** 2))
+
+    @staticmethod
+    def optimal_num_hash_functions(m, n):
+        """
+        k = (m / n) * ln(2)
+        """
+        return int((m / n) * math.log(2))
+```
+
 
 ## ✨ Best Practices Recap (At-a-Glance)
 
