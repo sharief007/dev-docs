@@ -136,7 +136,7 @@ graph
     B8["0"]
     B9["0"]
   end
-  InsertAlice["Insert 'alice'"]
+  InsertAlice["Query 'alice'"]
   InsertAlice -->|H1 = 1| B1
   InsertAlice -->|H2 = 4| B4
   InsertAlice -->|H3 = 7| B7
@@ -232,7 +232,7 @@ class BloomFilter:
 ```
 
 
-## ✨ Best Practices Recap (At-a-Glance)
+## ✨ Best Practices Recap
 
 - **Precompute capacity**: (*n*) to avoid overfilling the filter, which increases false positives.
 - **Choose optimal *k***: Use $$k = \frac{m}{n} \ln 2$$ to balance accuracy vs performance.
