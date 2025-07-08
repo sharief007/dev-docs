@@ -6,7 +6,7 @@ toc: true
 sidebar:
   open: true
 prev: _index
-next: high-level-design
+next: high-level-design-adv
 params:
   editURL: 
 ---

@@ -5,7 +5,7 @@ type: docs
 toc: true
 sidebar:
   open: true
-prev: high-level-design
+prev: high-level-design-lb
 next: 
 params:
   editURL: 

@@ -5,7 +5,7 @@ type: docs
 toc: false
 sidebar:
   open: false
-prev: high-level-design
+prev: high-level-design-adv
 next: streaming-deep-dive
 params:
   editURL: 
