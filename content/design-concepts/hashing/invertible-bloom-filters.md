@@ -85,31 +85,8 @@ Cell:
   - Remove element by reversing insert/delete
 - Repeat until no more recoverable cells
 
----
-
-### 📊 Architecture Flow
-
-```mermaid
-flowchart TD
-    A[Start] --> B{Insert/Delete Item}
-    B --> C1[Hash to k Cells]
-    C1 --> D[Update Cells]
-    D --> E{Decoding?}
-    E -- Yes --> F[Find ±1 Count Cells]
-    F --> G[Verify idSum vs hashSum]
-    G --> H{Success?}
-    H -- Yes --> I[Recover Element & Subtract]
-    H -- No --> J[Stop]
-    I --> F
-    J --> K[End]
-    E -- No --> K
-```
 
 ### Example
-
-## ⚙️ Setup
-
-Let’s replicate the same parameters as your example:
 
 - **Cell array size**: 10  
 - **Hash functions**: H1, H2, H3  
@@ -229,6 +206,89 @@ Eventually all cells reach neutral state — decoding complete. ✅
 | Insert Carol | 0, 4, 7         | count += 1, XOR `idSum`, XOR `hashSum`                                |
 | Decode Phase | Any cell with `count=1` and `idSum==hashSum` | Recovered → Deleted → Cascading decode |
 
+### Implementaion
+
+```python
+import hashlib
+import random
+
+class Cell:
+    def __init__(self):
+        self.count = 0
+        self.idSum = 0
+        self.hashSum = 0
+
+    def is_pure(self):
+        return abs(self.count) == 1 and self.hashSum == self.hash_item(self.idSum)
+
+    @staticmethod
+    def hash_item(item_id):
+        h = hashlib.sha256(str(item_id).encode()).hexdigest()
+        return int(h, 16)
+
+class IBF:
+    def __init__(self, size=10, num_hashes=3):
+        self.size = size
+        self.num_hashes = num_hashes
+        self.cells = [Cell() for _ in range(size)]
+        self.seeds = [random.randint(0, 10000) for _ in range(num_hashes)]
+
+    def _hashes(self, item_id):
+        return [
+            hash((seed, item_id)) % self.size
+            for seed in self.seeds
+        ]
+
+    def insert(self, item_id):
+        h = Cell.hash_item(item_id)
+        for idx in self._hashes(item_id):
+            cell = self.cells[idx]
+            cell.count += 1
+            cell.idSum ^= item_id
+            cell.hashSum ^= h
+
+    def delete(self, item_id):
+        h = Cell.hash_item(item_id)
+        for idx in self._hashes(item_id):
+            cell = self.cells[idx]
+            cell.count -= 1
+            cell.idSum ^= item_id
+            cell.hashSum ^= h
+
+    def decode(self):
+        decoded_items = []
+        changed = True
+
+        while changed:
+            changed = False
+            for cell in self.cells:
+                if cell.is_pure():
+                    item_id = cell.idSum
+                    decoded_items.append(item_id)
+                    self.delete(item_id)  # simulate removal
+                    changed = True
+                    break  # restart scan after mutation
+
+        return decoded_items
+
+# 👀 Example usage
+if __name__ == "__main__":
+    ibf = IBF(size=10, num_hashes=3)
+
+    # Demo items
+    alice = 13
+    bob = 21
+    carol = 34
+
+    # Insert items
+    ibf.insert(alice)
+    ibf.insert(bob)
+    ibf.insert(carol)
+
+    # Decode
+    recovered = ibf.decode()
+    print("Decoded Items:", recovered)
+```
 
 ## 🧪 Best Practices
 
