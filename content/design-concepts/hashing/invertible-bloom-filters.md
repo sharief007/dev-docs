@@ -170,8 +170,8 @@ graph TD
     A0 -->|hashSum ^= 1011| A3["hashSum = 1011"]
 
     B0["Cell 4"] -->|count++| B1["count = 2"]
-    B0 -->|idSum ^= 0101| B2["idSum = 0110"] %% 0011 ^ 0101
-    B0 -->|hashSum ^= 1011| B3["hashSum = 0101"] %% 1110 ^ 1011
+    B0 -->|idSum ^= 0101| B2["idSum = 0011 ^ 0101 = 0110"]
+    B0 -->|hashSum ^= 1011| B3["hashSum = 1110 ^ 1011 = 0101"]
 
     C0["Cell 6"] -->|count++| C1["count = 1"]
     C0 -->|idSum ^= 0101| C2["idSum = 0101"]
@@ -189,12 +189,12 @@ graph TD
     A0 -->|hashSum ^= 0111| A3["hashSum = 0111"]
 
     B0["Cell 4"] -->|count++| B1["count = 3"]
-    B0 -->|idSum ^= 0110| B2["idSum = 0000"] %% 0110 ^ 0110
-    B0 -->|hashSum ^= 0111| B3["hashSum = 0010"] %% 0101 ^ 0111
+    B0 -->|idSum ^= 0110| B2["idSum = 0110 ^ 0110 = 0000"]
+    B0 -->|hashSum ^= 0111| B3["hashSum = 0101 ^ 0111 = 0010"]
 
     C0["Cell 7"] -->|count++| C1["count = 2"]
-    C0 -->|idSum ^= 0110| C2["idSum = 0101"] %% 0011 ^ 0110
-    C0 -->|hashSum ^= 0111| C3["hashSum = 1001"] %% 1110 ^ 0111
+    C0 -->|idSum ^= 0110| C2["idSum = 0011 ^ 0110 = 0101"]
+    C0 -->|hashSum ^= 0111| C3["hashSum = 1110 ^ 0111 = 1001"]
   end
 ```
 
