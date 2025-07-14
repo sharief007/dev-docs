@@ -79,6 +79,37 @@ After : [0, 0, 1, 0, 0, 1, 0, 1, 0, 0]
 To delete `"cat"`, we decrement the same counters.
 
 
+## Implementation
+
+```python
+import mmh3         # pip install mmh3
+from collections import defaultdict
+
+class CountingBloomFilter:
+    def __init__(self, size: int, hash_count: int):
+        self.size = size                    # Size of counter array
+        self.hash_count = hash_count        # Number of hash functions
+        self.counters = [0] * size          # Counter array
+
+    def _hashes(self, item: str):
+        return [mmh3.hash(item, seed) % self.size for seed in range(self.hash_count)]
+
+    def add(self, item: str):
+        for i in self._hashes(item):
+            self.counters[i] += 1
+
+    def remove(self, item: str):
+        for i in self._hashes(item):
+            if self.counters[i] > 0:
+                self.counters[i] -= 1
+
+    def contains(self, item: str) -> bool:
+        return all(self.counters[i] > 0 for i in self._hashes(item))
+
+    def __str__(self):
+        return str(self.counters)
+```
+
 ## 🧠 Best Practices
 
 - **Choose optimal `k` and `m`**: Use formulas to minimize false positives:
