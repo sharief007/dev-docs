@@ -27,8 +27,6 @@ HTTP/1.1 404 Not Found
 | **4xx** | 400–499 | Client Error — bad request from the client |
 | **5xx** | 500–599 | Server Error — server failed a valid request |
 
----
-
 ## 1xx — Informational
 
 | Code | Name | Description |
@@ -36,8 +34,6 @@ HTTP/1.1 404 Not Found
 | **100** | Continue | Server received request headers; client should send the body. Used with `Expect: 100-continue` to avoid sending large bodies on auth failure. |
 | **101** | Switching Protocols | Server is switching protocols per client request. Used to upgrade from HTTP/1.1 → WebSocket or HTTP/2. |
 | **103** | Early Hints | Server sends preliminary response headers before the final response. Allows client to preload resources while server prepares the full response. |
-
----
 
 ## 2xx — Success
 
@@ -48,8 +44,6 @@ HTTP/1.1 404 Not Found
 | **202** | Accepted | Request accepted for processing, but processing not complete. Used for async jobs. No body required. |
 | **204** | No Content | Success, no body. Common for DELETE and PUT responses where the client doesn't need the updated resource. |
 | **206** | Partial Content | Response contains a partial resource body. Used with `Range` requests for resumable downloads and video scrubbing. |
-
----
 
 ## 3xx — Redirection
 
@@ -81,8 +75,6 @@ Use **308** when permanently moving a POST/PUT endpoint. Use **307** for tempora
 **304 returns no body.** The browser uses its cached copy. `Content-Type`, `Content-Length`, and `Content-Encoding` headers are also omitted. Triggered by conditional request headers (`If-None-Match`, `If-Modified-Since`).
 {{< /callout >}}
 
----
-
 ## 4xx — Client Error
 
 The request is invalid or the client lacks permission.
@@ -111,8 +103,6 @@ The request is invalid or the client lacks permission.
 | Can re-auth help? | ✅ | ❌ |
 | Meaning | "Who are you?" | "I know you, but no." |
 
----
-
 ## 5xx — Server Error
 
 The server failed to fulfill a valid request.
@@ -134,8 +124,6 @@ The server failed to fulfill a valid request.
 | 502 | Upstream server | Invalid/corrupt response from backend |
 | 503 | This server | Overloaded, in deploy/restart |
 | 504 | Upstream server | Backend too slow (timeout) |
-
----
 
 ## Quick Reference
 

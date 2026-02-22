@@ -20,8 +20,6 @@ Header-Name: value1, value2
 
 Headers are grouped by purpose, not by whether they appear in requests or responses.
 
----
-
 ## Request Headers
 
 Sent by the client to provide context about the request, the client, and what it will accept.
@@ -91,8 +89,6 @@ Used with caching and to prevent lost-update problems.
 | `X-Forwarded-Proto` | `X-Forwarded-Proto: https` | Original protocol (HTTP or HTTPS) used by the client. Set by load balancers/proxies when terminating TLS. |
 | `X-Forwarded-Host` | `X-Forwarded-Host: api.example.com` | Original `Host` header, preserved by the proxy. |
 | `Forwarded` | `Forwarded: for=203.0.113.5;proto=https` | Standard RFC 7239 replacement for `X-Forwarded-*` headers. |
-
----
 
 ## Response Headers
 
@@ -168,8 +164,6 @@ Not standardized in HTTP/1.1; widely adopted by APIs.
 | `X-RateLimit-Reset` | `X-RateLimit-Reset: 1706745600` | Unix timestamp when the window resets. |
 | `Retry-After` | `Retry-After: 30` | Seconds to wait before retrying. Used with `429` and `503`. Can be a date instead of seconds. |
 
----
-
 ## Caching Headers
 
 Caching headers control how responses are stored and reused by browsers, CDNs, and proxies.
@@ -223,8 +217,6 @@ Caching headers control how responses are stored and reused by browsers, CDNs, a
 | API responses (short TTL) | `private, max-age=60` |
 | CDN-cached API responses | `public, s-maxage=300, max-age=0` |
 
----
-
 ## Security Headers
 
 Set by the server to instruct the browser on security policies.
@@ -253,12 +245,12 @@ Cross-Origin Resource Sharing — allows controlled cross-origin requests from b
 | `Access-Control-Allow-Methods` | `GET, POST, PUT` | Allowed HTTP methods for cross-origin requests. |
 | `Access-Control-Allow-Headers` | `Content-Type, Authorization` | Allowed request headers. |
 | `Access-Control-Allow-Credentials` | `true` | Whether cookies/auth headers are included. Cannot be used with `*` origin. |
+| `Access-Control-Max-Age` | `86400` | Seconds the preflight response may be cached. |
+| `Access-Control-Expose-Headers` | `X-Request-Id` | Response headers the browser JS may read beyond the safe defaults. |
 
 {{< callout type="warning" >}}
 `Access-Control-Allow-Origin: *` and `Access-Control-Allow-Credentials: true` are **mutually exclusive**. Browsers will block the response if both are set. Use an explicit origin (e.g., `https://app.example.com`) when credentials are required.
 {{< /callout >}}
-| `Access-Control-Max-Age` | `86400` | Seconds the preflight response may be cached. |
-| `Access-Control-Expose-Headers` | `X-Request-Id` | Response headers the browser JS may read beyond the safe defaults. |
 
 **Preflight flow (for non-simple requests):**
 
@@ -276,15 +268,11 @@ sequenceDiagram
     S->>B: 200 OK
 ```
 
----
-
 ## Custom / Vendor Headers
 
 {{< callout type="info" >}}
 The `X-` prefix convention was **deprecated by RFC 6648 in 2012**. New custom headers should not use `X-`. Existing ones (`X-Forwarded-For`, `X-Request-Id`, etc.) remain in widespread use and are not going away.
 {{< /callout >}}
-
-By convention, non-standard headers were prefixed with `X-`. This convention was deprecated by RFC 6648 in 2012 but remains widespread.
 
 | Header | Description |
 |--------|-------------|

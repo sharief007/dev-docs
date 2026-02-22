@@ -13,8 +13,6 @@ params:
 
 HTTP/1.1 (RFC 2616, updated by RFC 7230–7235) is a text-based, stateless, request-response protocol over TCP. It became the dominant web protocol from 1997 and introduced persistent connections, chunked transfer, and request pipelining.
 
----
-
 ## Message Structure
 
 Every HTTP exchange consists of a **request** from the client and a **response** from the server. Both follow the same structure:
@@ -70,8 +68,6 @@ Lines are terminated by **CRLF** (`\r\n`). The blank line is not optional — pa
   {{< /tab >}}
 {{< /tabs >}}
 
----
-
 ## HTTP Methods
 
 | Method | Safe | Idempotent | Has Body | Use |
@@ -88,60 +84,58 @@ Lines are terminated by **CRLF** (`\r\n`). The blank line is not optional — pa
 - **Safe**: Does not modify server state
 - **Idempotent**: Multiple identical requests produce the same result as one
 
----
-
 ## Connections
 
-{{< tabs items="HTTP/1.0,HTTP/1.1 (Keep-Alive)" >}}
-  {{< tab >}}
-  A new TCP connection is opened for every request, then closed immediately.
+### HTTP/1.0 — One Request Per Connection
 
-  ```
-  TCP Handshake → GET /index.html → Response → TCP Close
-  TCP Handshake → GET /style.css  → Response → TCP Close
-  TCP Handshake → GET /script.js  → Response → TCP Close
-  ```
+A new TCP connection is opened for every request, then closed immediately.
 
-  **Problem:** TCP handshake (and TLS handshake over HTTPS) adds ~100–300ms of latency per request. Loading a page with 30 assets = 30 separate handshakes.
-  {{< /tab >}}
+```
+TCP Handshake → GET /index.html → Response → TCP Close
+TCP Handshake → GET /style.css  → Response → TCP Close
+TCP Handshake → GET /script.js  → Response → TCP Close
+```
 
-  {{< tab >}}
-  The default in HTTP/1.1. The TCP connection stays open after a request completes and is reused.
+{{< callout type="warning" >}}
+TCP handshake (and TLS handshake over HTTPS) adds ~100–300ms of latency per request. Loading a page with 30 assets = 30 separate handshakes.
+{{< /callout >}}
 
-  ```mermaid
-  sequenceDiagram
-      participant C as Client
-      participant S as Server
+### HTTP/1.1 — Persistent Connections (Keep-Alive)
 
-      C->>S: TCP Handshake (once)
-      C->>S: GET /index.html
-      S->>C: 200 OK (HTML)
-      C->>S: GET /style.css
-      S->>C: 200 OK (CSS)
-      C->>S: GET /script.js
-      S->>C: 200 OK (JS)
-      Note over C,S: Connection idle → closed after timeout
-  ```
+The default in HTTP/1.1. The TCP connection stays open after a request completes and is reused for multiple requests.
 
-  **Keep-Alive headers:**
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
 
-  ```
-  Connection: keep-alive
-  Keep-Alive: timeout=5, max=100
-  ```
+    C->>S: TCP Handshake (once)
+    C->>S: GET /index.html
+    S->>C: 200 OK (HTML)
+    C->>S: GET /style.css
+    S->>C: 200 OK (CSS)
+    C->>S: GET /script.js
+    S->>C: 200 OK (JS)
+    Note over C,S: Connection idle → closed after timeout
+```
 
-  | Parameter | Meaning |
-  |-----------|---------|
-  | `timeout` | Seconds the server keeps the idle connection open |
-  | `max` | Max number of requests before closing the connection |
+**Keep-Alive headers:**
 
-  To close explicitly: `Connection: close`
+```
+Connection: keep-alive
+Keep-Alive: timeout=5, max=100
+```
 
-  **Browser parallelism:** Browsers open **6 parallel TCP connections per origin** (not 1) to download resources concurrently. This is a workaround for HTTP/1.1's sequential request constraint.
-  {{< /tab >}}
-{{< /tabs >}}
+| Parameter | Meaning |
+|-----------|---------|
+| `timeout` | Seconds the server keeps the idle connection open |
+| `max` | Max number of requests before closing the connection |
 
----
+To close explicitly: `Connection: close`
+
+{{< callout type="info" >}}
+Browsers open **6 parallel TCP connections per origin** (not 1) to download resources concurrently. This is a workaround for HTTP/1.1's sequential request constraint — not a feature of the protocol.
+{{< /callout >}}
 
 ## Chunked Transfer Encoding
 
@@ -157,41 +151,49 @@ Transfer-Encoding: chunked
 
 ### Wire Format
 
-{{< steps >}}
+{{% steps %}}
+
 ### Write the chunk size
+
 Write the byte count of the next chunk in **hexadecimal**, followed by `\r\n`.
+
 ```
 7\r\n
 ```
 
 ### Write the chunk data
+
 Write the data bytes, followed by `\r\n`.
+
 ```
 Hello, \r\n
 ```
 
 ### Repeat for each chunk
+
 Each subsequent chunk follows the same size + data pattern.
+
 ```
 6\r\n
 world!\r\n
 ```
 
 ### Terminate the body
+
 Signal end of body with a **zero-length chunk**.
+
 ```
 0\r\n
 \r\n
 ```
-{{< /steps >}}
+
+{{% /steps %}}
 
 **Use cases:**
 - Streaming large file downloads
 - Server-sent log output or progress updates
 - Compressing a response whose final size is unknown
 - Server-Sent Events (SSE) over HTTP/1.1
-
----
 
 ## Pipelining
 
@@ -226,8 +228,6 @@ HTTP/1.1 pipelining requires the server to respond **in the same order as reques
 {{< callout type="warning" >}}
 **Pipelining is effectively dead.** HTTP/2 multiplexing solves the same problem without ordering constraints. Do not rely on or enable pipelining in production.
 {{< /callout >}}
-
----
 
 ## Head-of-Line (HOL) Blocking
 
@@ -275,8 +275,6 @@ sequenceDiagram
 **HTTP/2 does not eliminate TCP-level HOL blocking.** Its multiplexing only solves the application-level problem. In fact, TCP-level HOL on HTTP/2 can be worse — a single dropped packet stalls all streams simultaneously. HTTP/3 (QUIC) is the actual fix.
 {{< /callout >}}
 
----
-
 ## Content Negotiation
 
 Client advertises what it can handle; server responds with the best match.
@@ -294,8 +292,6 @@ Client advertises what it can handle; server responds with the best match.
 Accept: text/html, application/json;q=0.9, */*;q=0.8
 ```
 
----
-
 ## Compression
 
 Enabled via `Accept-Encoding` (request) and `Content-Encoding` (response).
@@ -306,8 +302,6 @@ Enabled via `Accept-Encoding` (request) and `Content-Encoding` (response).
 | `br` (Brotli) | Medium | Better than gzip (~20%) | Modern browsers, typically requires HTTPS |
 | `deflate` | Fast | Similar to gzip | Less common; has implementation quirks |
 | `identity` | — | None | No encoding applied |
-
----
 
 ## HTTP/1.1 Limitations
 
