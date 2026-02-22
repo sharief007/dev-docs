@@ -153,6 +153,10 @@ Cookie attributes:
 | `SameSite=Lax` | Cookie not sent on cross-site sub-resource requests, but sent on top-level navigation. Default in modern browsers. |
 | `SameSite=None` | Cookie sent on all cross-site requests. Requires `Secure`. |
 
+{{< callout type="warning" >}}
+`SameSite=None` requires the `Secure` attribute. Browsers silently reject `SameSite=None` cookies that are not also marked `Secure`.
+{{< /callout >}}
+
 ### Rate Limiting (Common Conventions)
 
 Not standardized in HTTP/1.1; widely adopted by APIs.
@@ -180,28 +184,34 @@ Caching headers control how responses are stored and reused by browsers, CDNs, a
 
 ### Cache-Control Directives
 
-**Response directives:**
+{{< callout type="info" >}}
+`Cache-Control: no-cache` does **not** mean "don't cache." It means "store it, but revalidate with the server before every use." Use `no-store` to actually prevent caching.
+{{< /callout >}}
 
-| Directive | Description |
-|-----------|-------------|
-| `max-age=N` | Cache for N seconds from the response date. |
-| `s-maxage=N` | Override `max-age` for shared caches (CDNs, proxies). |
-| `no-store` | Never cache. Response must not be stored anywhere. |
-| `no-cache` | Store but always revalidate with server before using. Despite the name, it does cache. |
-| `private` | Only browser cache; not shared caches (CDNs). Suitable for user-specific content. |
-| `public` | Any cache may store the response. |
-| `must-revalidate` | Cache must not serve stale content; must revalidate with server when expired. |
-| `immutable` | Resource will never change during `max-age`. Browser won't revalidate even on reload. For content-hashed assets. |
-| `stale-while-revalidate=N` | Serve stale content for N seconds while revalidating in the background. |
+{{< tabs items="Response Directives,Request Directives" >}}
+  {{< tab >}}
+  | Directive | Description |
+  |-----------|-------------|
+  | `max-age=N` | Cache for N seconds from the response date. |
+  | `s-maxage=N` | Override `max-age` for shared caches (CDNs, proxies). |
+  | `no-store` | Never cache. Response must not be stored anywhere. |
+  | `no-cache` | Store but always revalidate with server before using. |
+  | `private` | Only browser cache; not shared caches (CDNs). Suitable for user-specific content. |
+  | `public` | Any cache may store the response. |
+  | `must-revalidate` | Cache must not serve stale content; must revalidate with server when expired. |
+  | `immutable` | Resource will never change during `max-age`. Browser won't revalidate even on reload. For content-hashed assets. |
+  | `stale-while-revalidate=N` | Serve stale content for N seconds while revalidating in the background. |
+  {{< /tab >}}
 
-**Request directives:**
-
-| Directive | Description |
-|-----------|-------------|
-| `no-cache` | Force revalidation for this request even if cached copy is fresh. |
-| `no-store` | Do not store any part of this request or response. |
-| `max-age=0` | Treat any cached copy as stale; require fresh response. |
-| `max-stale=N` | Client will accept a stale response up to N seconds past expiry. |
+  {{< tab >}}
+  | Directive | Description |
+  |-----------|-------------|
+  | `no-cache` | Force revalidation for this request even if cached copy is fresh. |
+  | `no-store` | Do not store any part of this request or response. |
+  | `max-age=0` | Treat any cached copy as stale; require fresh response. |
+  | `max-stale=N` | Client will accept a stale response up to N seconds past expiry. |
+  {{< /tab >}}
+{{< /tabs >}}
 
 ### Common Cache Patterns
 
@@ -243,6 +253,10 @@ Cross-Origin Resource Sharing — allows controlled cross-origin requests from b
 | `Access-Control-Allow-Methods` | `GET, POST, PUT` | Allowed HTTP methods for cross-origin requests. |
 | `Access-Control-Allow-Headers` | `Content-Type, Authorization` | Allowed request headers. |
 | `Access-Control-Allow-Credentials` | `true` | Whether cookies/auth headers are included. Cannot be used with `*` origin. |
+
+{{< callout type="warning" >}}
+`Access-Control-Allow-Origin: *` and `Access-Control-Allow-Credentials: true` are **mutually exclusive**. Browsers will block the response if both are set. Use an explicit origin (e.g., `https://app.example.com`) when credentials are required.
+{{< /callout >}}
 | `Access-Control-Max-Age` | `86400` | Seconds the preflight response may be cached. |
 | `Access-Control-Expose-Headers` | `X-Request-Id` | Response headers the browser JS may read beyond the safe defaults. |
 
@@ -265,6 +279,10 @@ sequenceDiagram
 ---
 
 ## Custom / Vendor Headers
+
+{{< callout type="info" >}}
+The `X-` prefix convention was **deprecated by RFC 6648 in 2012**. New custom headers should not use `X-`. Existing ones (`X-Forwarded-For`, `X-Request-Id`, etc.) remain in widespread use and are not going away.
+{{< /callout >}}
 
 By convention, non-standard headers were prefixed with `X-`. This convention was deprecated by RFC 6648 in 2012 but remains widespread.
 

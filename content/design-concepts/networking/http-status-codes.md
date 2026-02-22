@@ -73,9 +73,13 @@ The client must take additional action to complete the request.
 | 307 | ❌ | ✅ |
 | 308 | ✅ | ✅ |
 
-> Use **308** when permanently moving a POST/PUT endpoint. Use **307** for temporary redirects that must preserve the HTTP method.
+{{< callout type="info" >}}
+Use **308** when permanently moving a POST/PUT endpoint. Use **307** for temporary redirects that must preserve the HTTP method. When in doubt between 301 and 302, prefer 308 and 307 respectively — they are strictly correct.
+{{< /callout >}}
 
-**304 Not Modified** — no body is returned. The browser uses the cached copy. Triggered by conditional request headers (`If-None-Match`, `If-Modified-Since`).
+{{< callout type="info" >}}
+**304 returns no body.** The browser uses its cached copy. `Content-Type`, `Content-Length`, and `Content-Encoding` headers are also omitted. Triggered by conditional request headers (`If-None-Match`, `If-Modified-Since`).
+{{< /callout >}}
 
 ---
 
