@@ -1,5 +1,5 @@
 ---
-title: 'Bloom Filter'
+title: Bloom Filter
 weight: 1
 type: docs
 toc: true

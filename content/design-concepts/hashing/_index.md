@@ -1,6 +1,6 @@
 ---
-title: 'Hashing'
-weight: 0
+title: Hashing
+weight: 4
 type: docs
 toc: true
 sidebar:

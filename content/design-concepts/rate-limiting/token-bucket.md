@@ -1,17 +1,19 @@
 ---
-title: 'Token Bucket Algorithm'
+title: Token Bucket Algorithm
 weight: 1
 type: docs
 toc: true
+sidebar:
+  open: true
 prev: 
 next: 
 params:
-  editURL:
+  editURL: 
 ---
 
 The **Token Bucket** algorithm is used to control the rate of requests, allowing bursts up to a certain limit while maintaining a steady rate over time.
 
-#### **How It Works**:
+### How It Works
 1. **Token Bucket Setup**:
    - The bucket has a **predefined capacity** (e.g., 4 tokens).
    - Tokens are added to the bucket at a **preset rate** (e.g., 2 tokens per second).
@@ -24,11 +26,11 @@ The **Token Bucket** algorithm is used to control the rate of requests, allowing
 
 ![Token Bucket](/dev-docs/rate-limiting/token-bucket.png)
 
-#### **Key Parameters**:
+### Key Parameters
 - **Bucket Size**: Maximum number of tokens the bucket can hold.
 - **Refill Rate**: Number of tokens added to the bucket per second.
 
-#### **Use Case Examples**:
+### Use Case Examples
 
 - **Per API Endpoint**: Different buckets are needed for each API endpoint with varying request limits (e.g., 1 post per second, 150 friends per day).
 - **Per IP Address**: Each IP address could have its own bucket for rate limiting.

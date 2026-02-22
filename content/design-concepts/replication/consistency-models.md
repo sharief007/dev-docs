@@ -1,19 +1,19 @@
 ---
-title: 'Consistency Models'
+title: Consistency Models
 weight: 2
 type: docs
 toc: true
 sidebar:
   open: true
 prev: 
-next:
+next: 
 params:
-  editURL:
+  editURL: 
 ---
 
 ### Synchronous Replication
 
-Client does not receive success message until all replicas complete the write query. This is referred as **Strong Consistency**.
+Client does not receive a success message until all replicas complete the write query. This is referred to as **Strong Consistency**.
 
 ```mermaid
 sequenceDiagram
@@ -30,11 +30,11 @@ sequenceDiagram
   m ->> -c: Query Response
 ```
 
-#### Benefits
+### Benefits
 
 **Data Integrity**: Ensures that all nodes have the most up-to-date information at all times.
 
-#### Draw Backs
+### Drawbacks
 
 **Single point of failure**: If the synchronous follower becomes unresponsive (due to a crash, network fault, etc.), the leader is forced to halt all write operations, patiently waiting until the synchronous replica is operational again before processing any writes.
 
@@ -42,7 +42,7 @@ sequenceDiagram
 
 ### Asynchronous Replication
 
-Client receives success message the second that master completes the write query. This is referred as **Eventual Consistency**.
+Client receives a success message the second that the master completes the write query. This is referred to as **Eventual Consistency**.
 
 
 ```mermaid

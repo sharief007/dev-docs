@@ -1,5 +1,5 @@
 ---
-title: ''
+title: Real-time Leaderboard System
 weight: 1
 type: docs
 toc: true

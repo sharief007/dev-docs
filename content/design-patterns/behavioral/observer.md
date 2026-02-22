@@ -1,9 +1,12 @@
 ---
-title: Observer
+title: Observer Pattern
+weight: 1
 type: docs
+toc: true
 sidebar:
   open: true
-toc: true
+prev: 
+next: 
 params:
   editURL: 
 ---

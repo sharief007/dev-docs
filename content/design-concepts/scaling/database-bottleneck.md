@@ -60,7 +60,7 @@ When server or code level optimizations are no longer sufficient to handle the l
 Divide the database into smaller, more manageable pieces (shards) and distribute them across multiple servers. Each shard is responsible for a subset of the data. This helps distribute the load and improve performance.
 
 #### Replication
-Use [database replication](/dev-docs/system-design/database/replication/) to create multiple copies (replicas) of the database. Read requests can be directed to the replicas, reducing the load on the primary database server.
+Use [database replication](/dev-docs/design-concepts/replication/) to create multiple copies (replicas) of the database. Read requests can be directed to the replicas, reducing the load on the primary database server.
 
 3. **Partitioning**:
    - Divide large tables into smaller, more manageable pieces (partitions) based on a defined criterion (e.g., range, list, hash). This can improve query performance and manageability.

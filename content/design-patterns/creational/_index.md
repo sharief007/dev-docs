@@ -2,9 +2,11 @@
 title: Creational Patterns
 weight: 1
 type: docs
+toc: true
 sidebar:
   open: true
-toc: true
+prev: 
+next: 
 params:
   editURL: 
 ---

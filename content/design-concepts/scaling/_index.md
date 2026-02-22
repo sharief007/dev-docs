@@ -1,12 +1,14 @@
 ---
-title: 'Application Scaling'
+title: Application Scaling
 weight: 1
 type: docs
 toc: true
+sidebar:
+  open: true
 prev: 
 next: horizontal-scaling
 params:
-  editURL:
+  editURL: 
 ---
 
 **Scaling** in the context of computing refers to the ability to handle an increasing amount of work or data by adding resources to a system. This is crucial in ensuring that an application or system can accommodate a growing user base, increasing data volumes, or higher levels of demand without compromising performance or reliability.

@@ -1,10 +1,12 @@
 ---
 title: Adapter Pattern
-type: docs
 weight: 1
+type: docs
 toc: true
 sidebar:
   open: true
+prev: 
+next: 
 params:
   editURL: 
 ---
@@ -154,7 +156,7 @@ classDiagram
 
 ### Object Based Adapter (Composition)
 
-``` mermaid
+```mermaid
 classDiagram
     class AudioPlayer {
         +play(audioType: String, filename: String)

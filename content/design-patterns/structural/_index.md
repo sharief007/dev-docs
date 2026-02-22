@@ -2,9 +2,11 @@
 title: Structural Patterns
 weight: 2
 type: docs
-toc: false
+toc: true
 sidebar:
   open: true
+prev: 
+next: 
 params:
   editURL: 
 ---
