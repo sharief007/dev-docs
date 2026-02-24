@@ -1,6 +1,6 @@
 ---
 title: HTTP Headers
-weight: 3
+weight: 5
 type: docs
 toc: true
 sidebar:
