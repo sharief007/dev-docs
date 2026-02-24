@@ -12,6 +12,8 @@ params:
 ---
 
 {{< cards >}}
+    {{< card link="tcp-vs-udp" title="TCP vs UDP" subtitle="Handshake, flow control, congestion control, TIME_WAIT, SYN flood, and why QUIC chose UDP" >}}
+    {{< card link="dns" title="DNS" subtitle="Resolution chain, record types, TTL, GeoDNS, load balancing, failover, and security" >}}
     {{< card link="http-1.1" title="HTTP/1.1" subtitle="Message structure, keep-alive, pipelining, and HOL blocking" >}}
     {{< card link="http-2" title="HTTP/2" subtitle="Binary framing, multiplexing, HPACK, and server push" >}}
     {{< card link="http-3" title="HTTP/3 and QUIC" subtitle="QUIC streams, 0-RTT, connection migration, and QPACK" >}}

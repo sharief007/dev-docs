@@ -1,6 +1,6 @@
 ---
 title: HTTP/3 and QUIC
-weight: 3
+weight: 5
 type: docs
 toc: true
 sidebar:

@@ -1,6 +1,6 @@
 ---
 title: HTTP/2
-weight: 2
+weight: 4
 type: docs
 toc: true
 sidebar:
