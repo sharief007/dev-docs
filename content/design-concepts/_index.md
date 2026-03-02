@@ -20,6 +20,7 @@ params:
     {{< card link="rate-limiting" title="Rate Limiting" subtitle="Traffic Control and Throttling Algorithms" >}}
     {{< card link="load-balancing" title="Load Balancing" subtitle="Distributing Load Across Multiple Servers" >}}
     {{< card link="storage-engine" title="Storage Engines" subtitle="Database Storage and Indexing Mechanisms" >}}
+    {{< card link="storage" title="Storage & Databases" subtitle="Indexes, RDBMS internals, SQL vs NoSQL, Redis, Cassandra, S3, and time-series" >}}
     {{< card link="transactions" title="Transactions" subtitle="ACID Properties and Isolation Levels" >}}
     {{< card link="consensus" title="Consensus" subtitle="Distributed Consensus Algorithms" >}}
     {{< card link="misc" title="Miscellaneous" subtitle="Additional System Design Concepts" >}}
