@@ -1,6 +1,6 @@
 ---
 title: HTTP Status Codes
-weight: 6
+weight: 7
 type: docs
 toc: true
 sidebar:

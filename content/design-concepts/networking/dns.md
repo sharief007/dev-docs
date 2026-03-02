@@ -11,190 +11,155 @@ params:
   editURL:
 ---
 
-DNS (Domain Name System) is a globally distributed, hierarchical database that maps human-readable names to IP addresses (and other data). It is consulted before every network connection — including HTTP requests, database connections, and microservice calls.
+Every network call your application makes — whether to an external API, a database, a microservice, or a CDN — starts with a DNS lookup. DNS translates a hostname into an IP address. Understanding it explains why deploys don't propagate instantly, why some users are routed to different servers than others, and why changing a DNS record is not the same as changing a config value.
 
-## Namespace Hierarchy
+## What Happens When You Hit Enter
 
-DNS names are read right to left, from least specific to most specific. Each label separated by a dot is a level in the tree.
-
-```
-api.example.com.
- ↑       ↑    ↑  ↑
- │       │    │  └─ root (implicit trailing dot)
- │       │    └──── TLD (top-level domain)
- │       └───────── second-level domain (registered by owner)
- └───────────────── subdomain / hostname
-```
-
-| Level | Name | Controlled by |
-|-------|------|---------------|
-| Root (`.`) | Unnamed; single dot | ICANN — 13 root server clusters |
-| TLD | `.com`, `.org`, `.io`, `.uk` | Registry operators (Verisign for .com) |
-| Second-level domain | `example.com` | Domain registrant |
-| Subdomain | `api.example.com` | Domain owner (you) |
-
-## Resolution Chain
-
-A DNS query travels through up to four distinct actors before returning an answer.
+You type `api.example.com` in a browser or make an HTTP call from code. Before a single byte of your request is sent, the OS needs an IP address. Here's the lookup chain:
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant R as Recursive Resolver
+    participant C as Your App / Browser
+    participant R as Recursive Resolver (e.g. 8.8.8.8)
     participant Root as Root Nameserver
-    participant TLD as TLD Nameserver (.com)
-    participant Auth as Authoritative Nameserver
+    participant TLD as .com Nameserver
+    participant Auth as example.com Nameserver
 
-    C->>R: api.example.com? (recursive)
-    Note over R: Cache miss at all levels
-    R->>Root: api.example.com? (iterative)
-    Root->>R: Refer to .com TLD server
-    R->>TLD: api.example.com? (iterative)
-    TLD->>R: Refer to ns1.example.com (NS record)
-    R->>Auth: api.example.com? (iterative)
-    Auth->>R: 93.184.216.34, TTL=300 (A record)
-    R->>C: 93.184.216.34, TTL=300
-    Note over R: Caches answer for 300 seconds
+    C->>R: Who is api.example.com? (recursive query)
+    Note over R: Not in cache — must walk the tree
+    R->>Root: Who is api.example.com?
+    Root->>R: I don't know, ask the .com nameserver
+    R->>TLD: Who is api.example.com?
+    TLD->>R: I don't know, ask ns1.example.com
+    R->>Auth: Who is api.example.com?
+    Auth->>R: It's 93.184.216.34 (good for 300 seconds)
+    R->>C: 93.184.216.34
+    Note over R: Caches this for 300s — next caller gets instant answer
 ```
 
-### Actors
+Five actors, four network hops, one answer. In practice the full chain takes 50–150ms the first time. After that, the recursive resolver caches the result — subsequent callers get the answer in under 1ms.
 
-| Actor | What it is | Role |
-|-------|-----------|------|
-| **Stub resolver** | Library in the OS or browser | Sends queries to the recursive resolver; caches results in process memory |
-| **Recursive resolver** | ISP DNS or public resolver (8.8.8.8, 1.1.1.1) | Receives recursive queries from clients; walks the hierarchy; caches results |
-| **Root nameserver** | 13 logical clusters (a.root-servers.net through m.root-servers.net) | Returns NS records for TLD servers; doesn't know the answer, only who to ask |
-| **TLD nameserver** | Operated by registry (Verisign, ICANN) | Returns NS records for the authoritative nameserver of the domain |
-| **Authoritative nameserver** | Operated by domain owner or their DNS provider | Holds the actual zone records; returns the final answer |
+### The Four Actors
 
-### Query Types
+**Your stub resolver** is a library baked into the OS. It checks a local cache first, then forwards to a recursive resolver. It doesn't know how to walk the DNS tree itself.
 
-**Recursive query** — the resolver takes full responsibility for returning a complete answer or an error. The client sends one query and waits. The resolver does all the iterative work.
+**The recursive resolver** (Google's 8.8.8.8, Cloudflare's 1.1.1.1, or your ISP's resolver) does all the work. It walks root → TLD → authoritative, caches every answer it gets along the way, and returns the final result to you. Shared by millions of clients — this is why the cache hit rate is so high.
 
-**Iterative query** — the server returns the best answer it has (a referral, if it doesn't know the answer). The resolver is responsible for following referrals and querying the next server in the chain.
+**Root nameservers** only know which servers are authoritative for each TLD (`.com`, `.io`, `.net`). There are 13 logical root clusters, operated by different organizations, distributed globally via anycast. They never answer with an IP address — just a referral.
 
-In practice: client → recursive resolver is **recursive**. Recursive resolver → root/TLD/authoritative is **iterative**.
+**The authoritative nameserver** is where your actual DNS records live. You configure it through your DNS provider (Cloudflare, Route 53, etc.). It is the only server that knows the real answer for your domain.
 
-### Caching at Every Level
+### The Caching Layer That Burns Engineers
 
-Each layer caches responses for the duration of the TTL:
+Every answer carries a TTL (Time To Live). Resolvers cache the answer for exactly that many seconds.
 
-| Cache layer | Where | Scope |
-|-------------|-------|-------|
-| Browser DNS cache | Per tab/process | Expires based on TTL (Chrome caps at 1 min for short TTLs) |
-| OS resolver cache | `/etc/resolv.conf`, `nscd`, `systemd-resolved` | Per machine |
-| Recursive resolver cache | ISP / 8.8.8.8 / 1.1.1.1 | Shared across all clients using that resolver |
-| Authoritative server | Zone data | Source of truth; does not cache |
+```
+api.example.com → 93.184.216.34  TTL=3600
+                                      ↑
+                        This answer is cached for 1 hour.
+                        Every resolver that looked it up won't check again for 1 hour.
+                        If you change the IP, some clients won't see it for up to 1 hour.
+```
+
+Cache layers exist at every level:
+
+| Layer | Scope | Notes |
+|-------|-------|-------|
+| Browser | Per process | Chrome caps TTL at 60s even if the record says longer |
+| OS (`nscd`, `systemd-resolved`) | Per machine | `sudo systemd-resolve --flush-caches` to clear |
+| Recursive resolver | Shared across all clients on that resolver | Can't flush it — you have to wait for TTL expiry |
+| Authoritative server | Source of truth | No caching — always returns current data |
 
 {{< callout type="warning" >}}
-DNS propagation delay is not a single timer — it is the sum of all cached TTLs across all resolvers that have cached the old record. When you change a DNS record, clients on a resolver that cached the old answer wait up to the old TTL before seeing the new one. Lower your TTL 24–48 hours before a planned change.
+"DNS propagation" isn't a single event with a known duration. It's the process of every cached copy of your old record expiring across every resolver that has it. A resolver that cached your record 1 second before you changed it will keep the old answer for a full TTL. This is why the rule exists: **lower your TTL 24–48 hours before any planned change**, then make the change.
 {{< /callout >}}
 
 ## Record Types
 
-| Type | Full Name | Data | Purpose |
-|------|-----------|------|---------|
-| **A** | Address | IPv4 address | Hostname → IPv4 (`api.example.com → 93.184.216.34`) |
-| **AAAA** | IPv6 Address | IPv6 address | Hostname → IPv6 |
-| **CNAME** | Canonical Name | Another hostname | Alias → target name (follows the chain to get the IP) |
-| **NS** | Name Server | Hostname of nameserver | Delegates a zone to specific nameservers |
-| **MX** | Mail Exchanger | Hostname + priority | Routes email to the correct mail server |
-| **TXT** | Text | Arbitrary string | SPF, DKIM, DMARC, domain ownership verification |
-| **SRV** | Service | Host, port, priority, weight | Service discovery with explicit port (`_http._tcp.example.com`) |
-| **PTR** | Pointer | Hostname | Reverse DNS — IP → hostname (used in email anti-spam) |
-| **SOA** | Start of Authority | Primary NS, serial, timers | Zone metadata; one per zone; serial number drives zone transfers |
-| **CAA** | Certification Authority Authorization | CA name | Restricts which CAs may issue certificates for the domain |
+| Type | Maps | Real use |
+|------|------|---------|
+| **A** | hostname → IPv4 | `api.example.com → 1.2.3.4` — the most common record |
+| **AAAA** | hostname → IPv6 | Same as A but for IPv6 |
+| **CNAME** | hostname → another hostname | Point `www.example.com` to your CDN's hostname |
+| **NS** | zone → nameservers | Tells the world which servers are authoritative for your domain |
+| **MX** | domain → mail server | Routes incoming email; has a priority number |
+| **TXT** | domain → text string | SPF, DKIM, DMARC (email auth); domain ownership proof (Google, AWS) |
+| **SRV** | service → host + port | Service discovery — used by Kubernetes DNS, gRPC, SIP |
+| **PTR** | IP → hostname | Reverse DNS; used by mail servers to verify sender identity |
+| **CAA** | domain → allowed CA | Restricts which certificate authorities can issue certs for your domain |
 
-### CNAME Gotchas
+### The CNAME Trap at the Root Domain
 
-**CNAME at the zone apex is forbidden** (RFC 1034). The zone apex (naked domain, e.g., `example.com`) must have an SOA and NS record. A CNAME there would conflict. This means you cannot CNAME `example.com` to a CDN.
+You want to point your naked domain (`example.com`, not `www.example.com`) to a CDN or load balancer that gives you a hostname like `d1234.cloudfront.net` instead of a fixed IP.
 
-Workarounds:
-- **ALIAS / ANAME records**: proprietary extension (Route 53, Cloudflare) — resolves the CNAME target and returns its A record at the apex
-- **Cloudflare CNAME flattening**: resolves CNAME chain and returns A record, looks like a normal A record to clients
+Your instinct: add a CNAME from `example.com` → `d1234.cloudfront.net`. This violates RFC 1034 and most DNS providers reject it. The root domain **must** have SOA and NS records. A CNAME would conflict with them.
 
-**CNAME chains**: a CNAME can point to another CNAME. Resolvers follow the chain (up to 8 hops in most implementations). Each hop adds a lookup. Keep chains short.
+**Why this is a real problem:** CDNs and cloud load balancers intentionally don't give you a stable IP — they use hostnames so they can shift IPs around for scaling and failover. But you can't CNAME a root domain.
 
-**CNAME and other records cannot coexist**: a name that has a CNAME record cannot have any other record type at the same name.
+**How to work around it:**
+- **Cloudflare**: CNAME flattening — resolves the CNAME chain internally and returns an A record to clients, as if it were a real A record at the apex.
+- **AWS Route 53**: ALIAS record — a Route 53-proprietary extension that behaves like A but accepts a hostname target (ALB, CloudFront, S3 website endpoint).
 
-### MX Priority
+Both solutions resolve the CNAME target at query time and return the resolved IP. Clients never see the CNAME. The A record stays up-to-date as the CDN shifts IPs.
 
-```
-example.com MX 10 mail1.example.com
-example.com MX 20 mail2.example.com
-```
+### TXT Records: Your Domain's Proof of Identity
 
-Lower priority number = higher preference. `mail1` handles all mail normally. `mail2` only receives if `mail1` is unreachable.
+The same record type is used for everything that needs to attach metadata to a domain:
 
-### TXT Records for Email Authentication
+| Use | Example value | What it does |
+|-----|--------------|--------------|
+| **SPF** | `v=spf1 include:_spf.google.com ~all` | Declares which mail servers are allowed to send email for this domain |
+| **DKIM** | `v=DKIM1; k=rsa; p=MIGf...` | Public key for verifying email signatures |
+| **DMARC** | `v=DMARC1; p=reject; rua=mailto:dmarc@example.com` | Policy when SPF/DKIM fail — reject, quarantine, or monitor |
+| **Domain verification** | `google-site-verification=abc123` | Prove domain ownership to Google, AWS, GitHub, etc. |
 
-| Record | What it does |
-|--------|-------------|
-| **SPF** (`v=spf1 ...`) | Authorizes which servers may send email for the domain |
-| **DKIM** (`v=DKIM1; k=rsa; p=...`) | Public key used to verify email signatures |
-| **DMARC** (`v=DMARC1; p=reject; ...`) | Policy for handling SPF/DKIM failures (none, quarantine, reject) |
+Without SPF + DKIM + DMARC, email from your domain ends up in spam or is silently dropped by Gmail, Outlook, and others.
 
-All three are TXT records. Without them, email from your domain is rejected or flagged as spam by modern mail servers.
+## TTL: The Knob Engineers Forget Until It's Too Late
 
-### SRV Record Format
+TTL is the most consequential DNS setting you control. It determines how quickly the world reacts to your changes.
 
-```
-_service._proto.name  TTL  IN  SRV  priority  weight  port  target
-_https._tcp.api.example.com. 300 IN SRV 10 20 443 server1.example.com.
-```
+| TTL | Propagation speed | DNS query load | Use when |
+|-----|------------------|----------------|----------|
+| 60s | Fast (1 min worst case) | High — every resolver re-queries frequently | Active failover, migration in progress |
+| 300s | Reasonable (5 min) | Moderate | CDN origins, load-balanced endpoints |
+| 3600s | Slow (1 hr) | Low | Stable records you rarely change |
+| 86400s | Very slow (24 hr) | Minimal | MX records, nameservers, static IPs |
 
-Used by Kubernetes (kube-dns), gRPC name resolution, SIP, XMPP.
+**The deploy story:** You're migrating `api.example.com` from an old server (1.2.3.4) to a new one (5.6.7.8). Your TTL is 86400 (24 hours).
 
-## TTL and Caching
+- You update the A record. The change hits the authoritative server immediately.
+- Every resolver that cached `1.2.3.4` in the last 24 hours keeps serving it until their cache entry expires.
+- Traffic splits between old and new server for up to 24 hours.
+- You have to keep the old server running the entire time.
 
-TTL (Time To Live) is the number of seconds a resolver may cache a response before discarding it and re-querying.
+The fix: lower TTL to 60s two days before the migration. Make the change. Now worst-case propagation is 60 seconds. Raise TTL back afterward.
 
-| TTL | Effect | Use when |
-|-----|--------|----------|
-| 0 | Never cached; every query hits the authoritative server | Never use in production (kills authoritative server, violates RFC) |
-| 60s | Very fresh; high query volume | Active migration; failover in progress |
-| 300s (5 min) | Good balance for dynamic records | CDN origins, load-balanced endpoints, APIs |
-| 3600s (1 hr) | Moderate caching | Stable but changeable records |
-| 86400s (24 hr) | Heavy caching; minimal DNS load | Static IPs, mail server records |
+**Negative caching:** If a hostname doesn't exist, resolvers cache the "not found" (NXDOMAIN) response too — for the duration of the SOA minimum TTL. This matters in microservice environments: if service discovery removes a hostname and some clients have already cached NXDOMAIN, they'll keep failing even after the record is restored.
 
-**Negative TTL (NXDOMAIN caching):** When a name does not exist, the resolver caches the negative response for the duration of the SOA's minimum TTL. This prevents repeated lookups for non-existent names. Important for microservices: if a service crashes and its DNS record is removed, clients that already received NXDOMAIN will cache that failure.
+## GeoDNS: Serving Different IPs to Different Users
 
-**TTL strategy for planned changes:**
-1. Lower TTL to 60s, 24–48 hours before the change
-2. Make the DNS change
-3. Wait 60s for propagation
-4. Raise TTL back to its normal value
-
-## GeoDNS
-
-GeoDNS returns different records based on the geographic location of the client (or their resolver).
+The authoritative nameserver can return different A records depending on where the query is coming from. A US resolver gets the US endpoint; an EU resolver gets the EU endpoint.
 
 ```
-Client in US  → resolver 8.8.8.8 (geo: US)  → api.example.com A 1.2.3.4   (US endpoint)
-Client in EU  → resolver 1.1.1.1 (geo: EU)  → api.example.com A 5.6.7.8   (EU endpoint)
-Client in AP  → resolver (geo: APAC)         → api.example.com A 9.10.11.12 (APAC endpoint)
+Your app, resolving api.example.com:
+
+  Office in NYC    → uses 8.8.8.8 (US resolver) → gets 1.2.3.4  (US-East endpoint)
+  Office in Berlin → uses 1.1.1.1 (EU resolver)  → gets 5.6.7.8  (EU endpoint)
+  Mobile in SG     → uses ISP resolver (APAC)    → gets 9.10.11.12 (APAC endpoint)
 ```
 
-The authoritative server looks up the resolver's IP in a geo-IP database and returns the appropriate A record.
+This is how CDNs, global APIs, and multi-region systems route users to the nearest or fastest endpoint — no application logic required.
 
-**Problem:** the resolver's IP ≠ the client's IP. A corporate proxy or a public resolver (8.8.8.8) may be geographically distant from the actual end user. A client in Singapore using 8.8.8.8 (US) would be routed to the US endpoint.
+**The flaw:** DNS routes based on the **resolver's** IP, not the client's IP. A developer in Singapore on their company VPN routes through a US resolver → gets routed to the US region → 200ms round trips instead of 20ms.
 
-**EDNS Client Subnet (ECS):** RFC 7871 extension. The resolver forwards a prefix of the client's IP (`/24` for IPv4) to the authoritative server, allowing more accurate geo-routing.
+**EDNS Client Subnet (ECS)** fixes this: the resolver forwards a `/24` prefix of the actual client IP to the authoritative server, allowing geo-routing by client location rather than resolver location. Widely supported (8.8.8.8, most CDNs), but privacy-focused resolvers like Cloudflare disable it.
 
-```
-Recursive resolver → Authoritative: "client is from 203.0.113.0/24"
-Authoritative:      returns nearest endpoint for 203.0.113.x
-```
+## DNS as Infrastructure
 
-{{< callout type="info" >}}
-ECS improves geo-accuracy but leaks client location to the authoritative server and its operators. Privacy-focused resolvers (1.1.1.1 in privacy mode) disable ECS. Cloudflare's authoritative DNS uses a proprietary geo-routing mechanism that doesn't require ECS.
-{{< /callout >}}
+### Round-Robin: Simplest Load Balancing
 
-## DNS-Based Load Balancing and Failover
-
-### Round-Robin DNS
-
-Return multiple A records for the same name. Clients pick one (usually the first in the list). Resolvers rotate the order.
+Publish multiple A records for the same name. Resolvers cycle through them; clients pick one.
 
 ```
 api.example.com  A  1.2.3.4
@@ -202,71 +167,30 @@ api.example.com  A  5.6.7.8
 api.example.com  A  9.10.11.12
 ```
 
-**Limitations:**
-- Clients and resolvers cache the full record set and pick the same IP for the TTL duration — rotation is not guaranteed
-- No health awareness: a failed backend stays in rotation until manually removed
-- Uneven load: clients with long-running connections persist on one backend
+No setup beyond DNS. Works for initial traffic distribution. But: no health awareness (a dead server stays in rotation), no session affinity, and TTL means slow removal of failed endpoints.
 
-### Weighted Routing (Route 53 Weighted Records)
+### Weighted Routing and Canary Deploys
 
-Assign weights to records. Traffic is distributed probabilistically in proportion to weight.
+Route 53 (and most enterprise DNS providers) let you weight records — 90% to stable, 10% to the new version. Gradually shift weight as confidence grows. The DNS layer handles the split; no application changes needed.
 
-```
-api.example.com  A  1.2.3.4  weight=70   (70% of traffic)
-api.example.com  A  5.6.7.8  weight=30   (30% of traffic)
-```
+### Health-Check Failover
 
-Used for canary deployments: send 5% of traffic to new version, gradually increase.
+DNS provider polls your endpoints. When an endpoint fails, it's removed from DNS responses. When it recovers, it's added back.
 
-### Health-Check-Based Failover
+The catch: clients that cached the old record before the endpoint went down keep hitting the failed server until the TTL expires. This is why DNS-based failover requires short TTLs (60s) AND application-level retry logic. DNS alone cannot guarantee sub-minute failover.
 
-DNS provider runs active health checks against each endpoint. Unhealthy endpoints are removed from DNS responses.
+### Anycast: How 1.1.1.1 Is Fast Everywhere
 
-```mermaid
-sequenceDiagram
-    participant HC as Health Checker (Route 53)
-    participant DNS as Authoritative DNS
-    participant C as Client
+Cloudflare advertises the IP `1.1.1.1` from 300+ locations simultaneously via BGP. Your network routes your query to the nearest location advertising that IP — not to a single server in San Francisco.
 
-    HC->>Primary: GET /health → 200 OK
-    HC->>Secondary: GET /health → 200 OK
-    C->>DNS: api.example.com?
-    DNS->>C: 1.2.3.4 (primary)
-
-    Note over HC: Primary fails health check
-    HC->>DNS: Remove primary from rotation
-    C->>DNS: api.example.com?
-    DNS->>C: 5.6.7.8 (secondary only)
-```
-
-{{< callout type="warning" >}}
-DNS failover is bounded by TTL. Clients that already cached the old IP continue hitting the failed endpoint until their cached entry expires. For zero-downtime failover, combine short TTLs (60s) with health checks AND implement retries with fallback at the application layer. DNS alone is not fast enough for sub-minute failover.
-{{< /callout >}}
-
-### Anycast DNS
-
-The same IP address is advertised from multiple geographic locations via BGP. The network routes each client to the nearest PoP (point of presence) advertising that IP.
-
-```
-1.1.1.1 is advertised from:
-  - Ashburn, VA (US East)
-  - Los Angeles, CA (US West)
-  - Frankfurt, DE (EU)
-  - Singapore (APAC)
-  - ...200+ more locations
-
-Client query → routed by BGP to nearest PoP → answered locally
-```
-
-Used by: Cloudflare (1.1.1.1), Google (8.8.8.8), root nameservers. Provides low latency and resilience — a PoP going down just reroutes clients to the next nearest.
+This is the same mechanism root nameservers use. There aren't 13 physical root servers — there are 13 IP addresses, each advertised from hundreds of physical locations globally. DNS queries to root servers never travel more than a few milliseconds.
 
 ## Security
 
-| Attack / Mechanism | Description |
-|-------------------|-------------|
-| **DNS spoofing / cache poisoning** | Attacker injects a forged DNS response into a resolver's cache; subsequent clients get the wrong IP |
-| **DNSSEC** | Cryptographically signs zone records; resolvers verify signatures using public keys published in DNS; prevents spoofing but does not encrypt |
-| **DNS amplification (DDoS)** | Attacker spoofs victim's IP as source; sends small DNS queries to open resolvers; large responses (ANY queries) flood the victim — amplification factor up to 70× |
-| **DNS over TLS (DoT)** | Encrypts DNS queries between stub resolver and recursive resolver on TCP port 853; prevents eavesdropping and tampering by the network |
-| **DNS over HTTPS (DoH)** | Same as DoT but over HTTPS port 443; harder to block; used by browsers (Firefox, Chrome) |
-| **Split-horizon DNS** | Authoritative server returns different records based on whether the query comes from inside or outside the network (internal service discovery vs public IPs) |
+| Threat / Mechanism | What it means in practice |
+|-------------------|--------------------------|
+| **Cache poisoning** | Attacker races to inject a forged answer into a resolver's cache before the real answer arrives. Clients using that resolver get the wrong IP — potentially for the full TTL. |
+| **DNSSEC** | Zone records are signed with a private key; resolvers verify with the public key (published in DNS). Prevents poisoning. Doesn't encrypt — it only ensures authenticity. Adoption is still low (~30% of domains). |
+| **DNS amplification** | Attacker spoofs the victim's IP as the source of UDP DNS queries. Sends small queries (ANY type) to open resolvers; resolver sends large responses to the victim. Amplification factor up to 70×. Mitigated by rate-limiting and disabling open recursion. |
+| **DNS over HTTPS (DoH)** | Encrypts DNS queries inside HTTPS. Your ISP cannot see what domains you're resolving. Used by Chrome and Firefox by default when the resolver supports it. |
+| **Split-horizon DNS** | Authoritative server returns different records based on the query source. Internal clients (VPN, corporate network) get private IPs; external clients get public IPs. Used for private service discovery without exposing internal topology. |

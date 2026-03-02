@@ -17,6 +17,10 @@ params:
     {{< card link="http-1.1" title="HTTP/1.1" subtitle="Message structure, keep-alive, pipelining, and HOL blocking" >}}
     {{< card link="http-2" title="HTTP/2" subtitle="Binary framing, multiplexing, HPACK, and server push" >}}
     {{< card link="http-3" title="HTTP/3 and QUIC" subtitle="QUIC streams, 0-RTT, connection migration, and QPACK" >}}
+    {{< card link="http-evolution" title="HTTP Evolution" subtitle="Protocol comparison, practical implications by client type, and CDN/proxy termination" >}}
     {{< card link="http-status-codes" title="HTTP Status Codes" subtitle="Complete reference for 1xx–5xx status codes" >}}
     {{< card link="http-headers" title="HTTP Headers" subtitle="Request, response, security, and caching headers" >}}
+    {{< card link="cdn" title="CDN" subtitle="Edge caching, pull vs push, cache invalidation, origin shield, and video streaming" >}}
+    {{< card link="realtime-transport" title="WebSockets vs Long Polling vs SSE" subtitle="Protocol comparison, scaling stateful connections, and when to use each" >}}
+    {{< card link="api-protocols" title="REST vs gRPC vs GraphQL" subtitle="Wire format, streaming patterns, caching tradeoffs, and decision guide" >}}
 {{< /cards >}}
