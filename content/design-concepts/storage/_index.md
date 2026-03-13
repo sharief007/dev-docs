@@ -26,4 +26,6 @@ params:
     {{< card link="bloom-filters" title="Bloom Filters & HyperLogLog" subtitle="Probabilistic membership testing, false positive tuning, counting variants, and cardinality estimation" >}}
     {{< card link="caching-patterns" title="Caching Patterns" subtitle="Cache-aside, write-through, write-back, write-around, stampede, penetration, and avalanche" >}}
     {{< card link="cache-eviction" title="Cache Eviction" subtitle="LRU, LFU, ARC, W-TinyLFU, CLOCK, FIFO, and choosing the right policy" >}}
+    {{< card link="hotspot-problems" title="Hot-Key / Hotspot Problems" subtitle="Root cause, Redis key replication, partition bucketing, Kafka skew, and the celebrity problem" >}}
+    {{< card link="full-text-search" title="Full-Text Search (Elasticsearch)" subtitle="Inverted index, BM25, Lucene segments, shard architecture, and relevance tuning" >}}
 {{< /cards >}}

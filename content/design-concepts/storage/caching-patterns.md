@@ -171,37 +171,72 @@ SET user:42 <new_json> EX 300     # write-through: update
 
 **CDC-based invalidation** — a Change Data Capture process (Debezium reading PostgreSQL WAL) publishes DB change events to a message queue. Cache invalidation consumers subscribe and evict affected keys. Decouples the write path from cache invalidation; eventual consistency lag is the queue processing delay.
 
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant DB as PostgreSQL (WAL)
+    participant D as Debezium (CDC)
+    participant Q as Kafka / Message Queue
+    participant Inv as Cache Invalidator
+    participant C as Redis Cache
+
+    App->>DB: UPDATE users SET email=... WHERE id=42
+    DB->>DB: Write change to WAL
+    D->>DB: Tail WAL stream (continuous)
+    D->>Q: Publish change event {table: users, id: 42, op: UPDATE}
+    Q->>Inv: Deliver event
+    Inv->>C: DEL user:42
+    Note over App,C: Write path decoupled from cache invalidation
+```
+
 ## Cache Failure Modes
 
 ### Cache Stampede (Thundering Herd)
 
 A popular cached key expires. Many concurrent requests all get a cache miss simultaneously and all query the DB at once.
 
-```
-Key "product:99" expires (TTL=0)
+```mermaid
+sequenceDiagram
+    participant A as Request A
+    participant B as Request B
+    participant C as Cache
+    participant DB as Database
 
-t=0ms: Request A → MISS → query DB...
-t=0ms: Request B → MISS → query DB...   ← 500 concurrent requests
-t=0ms: Request C → MISS → query DB...      all hit DB at the same time
-...
-t=50ms: DB returns to all 500 requests
-         500 requests each write to cache (499 are redundant)
+    Note over C: Key "product:99" TTL expires
+    A->>C: GET product:99
+    B->>C: GET product:99
+    C-->>A: MISS
+    C-->>B: MISS
+    A->>DB: SELECT (query 1 of 500)
+    B->>DB: SELECT (query 2 of 500)
+    Note over DB: 500 concurrent queries — DB overwhelmed
+    DB-->>A: result
+    DB-->>B: result
+    A->>C: SET product:99 (redundant write)
+    B->>C: SET product:99 (redundant write)
 ```
 
 **Mitigation 1 — Mutex / Single-Flight:**
 
 The first request to miss acquires a lock and fetches from DB. Other requests wait for the lock to release, then read from the now-populated cache.
 
-```
-cache_miss:
-  if acquire_lock(key, timeout=500ms):
-    value = db.fetch(key)
-    cache.SET(key, value, TTL)
-    release_lock(key)
-  else:
-    # lock held by another request — wait and retry cache
-    sleep(10ms)
-    value = cache.GET(key)   # now likely populated
+```mermaid
+sequenceDiagram
+    participant A as Request A (first miss)
+    participant B as Request B
+    participant C as Cache
+    participant DB as Database
+
+    A->>C: GET product:99 → MISS
+    B->>C: GET product:99 → MISS
+    A->>C: SETNX lock:product:99 → acquired
+    B->>C: SETNX lock:product:99 → failed (lock held)
+    A->>DB: SELECT product WHERE id=99
+    DB-->>A: result
+    A->>C: SET product:99 (populate cache)
+    A->>C: DEL lock:product:99
+    B->>C: GET product:99 → HIT (now populated)
+    Note over B: Single DB query instead of 500
 ```
 
 Cost: a brief wait for non-first requests. Risk: if the lock holder crashes, others wait until timeout.

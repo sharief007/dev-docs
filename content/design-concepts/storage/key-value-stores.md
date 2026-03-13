@@ -173,12 +173,39 @@ Sentinel is an autonomous HA system — it monitors, notifies, and automatically
 ```
 
 **Failover process:**
-1. Sentinel instances independently detect the primary as unreachable (`is-master-down-by-addr`)
-2. A quorum (configurable, typically ≥ 2 of 3) agrees the primary is down
-3. One Sentinel is elected leader (Raft-like vote)
-4. Leader promotes the most up-to-date replica to primary (`SLAVEOF NO ONE`)
-5. Other replicas are reconfigured to follow the new primary
-6. Clients query Sentinel for the current primary address
+
+```mermaid
+sequenceDiagram
+    participant S1 as Sentinel 1
+    participant S2 as Sentinel 2
+    participant S3 as Sentinel 3
+    participant P as Primary
+    participant R1 as Replica 1
+    participant C as Client
+
+    Note over P: Primary becomes unreachable
+    S1->>P: PING (no response)
+    S2->>P: PING (no response)
+    S3->>P: PING (no response)
+
+    S1->>S2: is-master-down-by-addr?
+    S2-->>S1: yes
+    S1->>S3: is-master-down-by-addr?
+    S3-->>S1: yes
+    Note over S1,S3: Quorum (2 of 3) — primary is down
+
+    S1->>S2: Request Sentinel leader vote
+    S2-->>S1: vote granted
+    Note over S1: Elected Sentinel leader
+
+    S1->>R1: SLAVEOF NO ONE (promote to primary)
+    R1-->>S1: OK — now primary
+    S1->>S3: Reconfigure: replicate from R1
+
+    C->>S1: SENTINEL get-master-addr-by-name mymaster
+    S1-->>C: R1's IP:port
+    C->>R1: Connect to new primary
+```
 
 **Client requirement:** Clients must be Sentinel-aware — they ask Sentinel for the current primary rather than connecting to a hardcoded IP.
 
@@ -197,11 +224,18 @@ Redis Cluster partitions the keyspace across multiple primary nodes using **hash
 
 **Key-to-slot mapping:** `slot = CRC16(key) % 16384`. Every client computes this locally. If a request lands on the wrong node, the node returns a `MOVED` redirection.
 
-```
-Client → Node A: GET user:42
-Node A → MOVED 7638 node-b:6379    # slot 7638 is on Node B
-Client → Node B: GET user:42       # retry on correct node
-Client caches the slot→node mapping for future requests
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as Node A (slots 0–5460)
+    participant B as Node B (slots 5461–10922)
+
+    C->>A: GET user:42
+    Note over A: CRC16("user:42") % 16384 = 7638<br/>slot 7638 is not mine
+    A->>C: MOVED 7638 node-b:6379
+    C->>B: GET user:42 (retry on correct node)
+    B->>C: "alice"
+    Note over C: Caches slot 7638 → Node B<br/>Future requests go directly to B
 ```
 
 **Hash tags:** To ensure related keys land on the same slot (required for multi-key commands), use `{tag}`:

@@ -48,13 +48,18 @@ Most service meshes (Istio, Linkerd) use HTTP/2 for all service-to-service traff
 
 CDNs terminate the client-side protocol and open a separate connection to the origin. The client protocol and the origin protocol are **independently negotiated**.
 
-```
-Client                  CDN Edge (e.g. Cloudflare)           Origin Server
-  │                             │                                   │
-  │──── HTTP/3 (QUIC) ─────────►│                                   │
-  │                             │──── HTTP/2 (TCP) ────────────────►│
-  │                             │◄─── HTTP/2 response ──────────────│
-  │◄─── HTTP/3 response ────────│                                   │
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant E as CDN Edge (Cloudflare)
+    participant O as Origin Server
+
+    C->>E: HTTP/3 over QUIC (TLS 1.3 built-in)
+    Note over E: Terminates QUIC connection
+    E->>O: HTTP/2 over TCP (separate connection, pooled)
+    O->>E: HTTP/2 response
+    Note over E: Protocol translation — client never touches origin
+    E->>C: HTTP/3 response
 ```
 
 ### Protocol Negotiation

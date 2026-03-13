@@ -143,18 +143,25 @@ WebSocket connections are **stateful** — a persistent TCP socket exists betwee
 
 **Problem: message fan-out across instances**
 
-```
-Client A ──── WS ──── Server 1 ┐
-Client B ──── WS ──── Server 1 │  If Client C sends a message,
-Client C ──── WS ──── Server 2 │  Server 2 must notify Server 1
-Client D ──── WS ──── Server 3 ┘  to push to Clients A and B
-```
+```mermaid
+sequenceDiagram
+    participant CA as Client A
+    participant S1 as Server 1
+    participant R as Redis Pub/Sub
+    participant S2 as Server 2
+    participant CC as Client C
 
-**Solution: pub/sub bus behind the servers**
+    CA->>S1: WebSocket connect (room:chat)
+    CC->>S2: WebSocket connect (room:chat)
+    Note over S1: SUBSCRIBE room:chat
+    Note over S2: SUBSCRIBE room:chat
 
-```
-Client A ──── WS ──── Server 1 ────► Redis Pub/Sub ◄──── Server 2 ──── WS ──── Client C
-Client B ──── WS ──── Server 1 ◄──── (subscribed)       Server 2 ──── WS ──── Client D
+    CC->>S2: Send "Hello everyone"
+    S2->>R: PUBLISH room:chat "Hello everyone"
+    R-->>S1: Delivers to subscriber
+    R-->>S2: Delivers to subscriber (self)
+    S1->>CA: Push "Hello everyone"
+    S2->>CC: Push "Hello everyone"
 ```
 
 Each server subscribes to Redis (or Kafka, NATS) channels. When a message arrives on any server, it publishes to the bus; all other servers deliver it to their connected clients.

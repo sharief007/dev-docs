@@ -21,26 +21,13 @@ LSM trees eliminate random writes entirely. Every write goes to memory first, th
 
 ## Write Path
 
-```
-Write (k=foo, v=bar)
-        │
-        ▼
-┌──────────────────┐    also written to
-│   Memtable       │──────────────────► WAL (Write-Ahead Log)
-│ (in-memory,      │                   (sequential append — crash recovery)
-│  sorted tree)    │
-└──────────────────┘
-        │  memtable reaches size threshold (~64MB)
-        ▼
-┌──────────────────┐
-│   SSTable L0     │  immutable, sorted by key, written sequentially
-│  (disk file)     │
-└──────────────────┘
-        │  compaction
-        ▼
-┌──────────────────┐
-│  SSTable L1, L2… │  progressively larger, non-overlapping key ranges
-└──────────────────┘
+```mermaid
+flowchart TD
+    W["Write (k=foo, v=bar)"]
+    W --> M["Memtable\n(in-memory sorted tree, RAM speed)"]
+    W --> WAL["WAL — Write-Ahead Log\n(sequential append to disk, crash recovery)"]
+    M -->|"threshold ~64 MB"| L0["SSTable L0\n(immutable, sorted by key, sequential write)"]
+    L0 -->|"compaction"| L1["SSTable L1, L2…\n(progressively larger, non-overlapping key ranges)"]
 ```
 
 **Memtable:** An in-memory sorted data structure (red-black tree or skip list). Absorbs all writes at RAM speed. Writes are also appended to a WAL for durability — if the process crashes before flushing, the WAL replays the memtable.

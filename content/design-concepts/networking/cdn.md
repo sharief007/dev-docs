@@ -15,18 +15,22 @@ A CDN is a globally distributed network of servers (Points of Presence, PoPs) th
 
 ## How a Request Flows Through a CDN
 
-```
-User (NYC)          CDN Edge (Newark PoP)         Origin (us-east-1)
-    │                        │                           │
-    │── GET /logo.png ───────►│                           │
-    │                        │ Cache HIT                 │
-    │◄── 200 (from cache) ───│                           │
-    │                        │                           │
-    │── GET /api/feed ───────►│                           │
-    │                        │ Cache MISS                │
-    │                        │── GET /api/feed ──────────►│
-    │                        │◄── 200 ───────────────────│
-    │◄── 200 (cached + fwd) ─│                           │
+```mermaid
+sequenceDiagram
+    participant U as User (NYC)
+    participant E as CDN Edge (Newark PoP)
+    participant O as Origin (us-east-1)
+
+    U->>E: GET /logo.png
+    Note over E: Cache HIT
+    E->>U: 200 OK (from edge cache, ~5ms)
+
+    U->>E: GET /api/feed
+    Note over E: Cache MISS
+    E->>O: GET /api/feed (forwarded to origin)
+    O->>E: 200 OK
+    Note over E: Response stored in edge cache
+    E->>U: 200 OK (miss + origin RTT, ~50ms)
 ```
 
 The edge returns a cache hit in single-digit milliseconds. A cache miss adds one extra hop to origin but still benefits from persistent connections and optimized routing.
@@ -105,10 +109,20 @@ Vary: Authorization            # effectively disables caching (each token is uni
 
 Without origin shield, every PoP has its own cache. A cache miss on 300 PoPs means 300 simultaneous requests to origin for the same resource (thundering herd after a deploy or TTL expiry).
 
-```
-Without shield:                       With shield:
-  300 PoPs ──── 300 reqs ──► Origin     300 PoPs ──► Shield PoP ──► Origin
-                                               (1 req to origin)
+```mermaid
+graph LR
+    subgraph without["Without Shield — 300 requests to origin"]
+        P1[PoP 1] --> O1[Origin]
+        P2[PoP 2] --> O1
+        P3[PoP 300] --> O1
+    end
+
+    subgraph with["With Shield — 1 request to origin"]
+        P4[PoP 1] --> S[Shield PoP]
+        P5[PoP 2] --> S
+        P6[PoP 300] --> S
+        S --> O2[Origin]
+    end
 ```
 
 Origin shield adds a mid-tier cache layer. Edge PoPs that miss check the shield before hitting origin. One request to origin fills the shield; edge PoPs fill from the shield.

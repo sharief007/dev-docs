@@ -83,21 +83,28 @@ This is how Spark and Athena read Parquet column groups — they fetch only the 
 
 For objects larger than 100 MB, multipart upload is recommended (required above 5 GB). It enables parallel upload, reduced retry scope on failures, and streaming uploads where total size is unknown.
 
-```
-1. Initiate:   POST /bucket/key?uploads
-               → UploadId: "abc123"
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as S3
 
-2. Upload parts (parallel, any order):
-   PUT /bucket/key?partNumber=1&uploadId=abc123   (5 MB – 5 GB per part)
-   PUT /bucket/key?partNumber=2&uploadId=abc123
-   PUT /bucket/key?partNumber=3&uploadId=abc123
-   → Each part returns an ETag
+    C->>S: POST /bucket/key?uploads (Initiate)
+    S->>C: UploadId: "abc123"
 
-3. Complete:   POST /bucket/key?uploadId=abc123
-               Body: [{ partNumber: 1, ETag: "e1" }, ...]
-               → S3 assembles parts server-side → object is now readable
+    par Upload parts in parallel (any order)
+        C->>S: PUT /key?partNumber=1&uploadId=abc123
+        S->>C: ETag: "e1"
+        C->>S: PUT /key?partNumber=2&uploadId=abc123
+        S->>C: ETag: "e2"
+        C->>S: PUT /key?partNumber=3&uploadId=abc123
+        S->>C: ETag: "e3"
+    end
 
-4. Abort (on failure): DELETE /bucket/key?uploadId=abc123
+    C->>S: POST /key?uploadId=abc123 (Complete, with ETag list)
+    Note over S: Assembles parts server-side
+    S->>C: 200 OK — object now readable
+
+    Note over C,S: On failure: DELETE /key?uploadId=abc123 to abort
 ```
 
 **Part sizing:** Minimum 5 MB per part (except last). Maximum 10,000 parts per upload. For a 50 GB file: 10,000 parts × 5 MB = 50 GB — exactly at the limit. For 100 GB files, use 10 MB parts.
@@ -195,16 +202,24 @@ S3 PUT → EventBridge / SNS → Lambda (thumbnail generation)
 ```
 
 **Common pattern — async media processing:**
-```
-Client → presigned PUT → S3 (video.mp4 uploaded)
-                          │
-                          └── S3 Event Notification → SQS
-                                                       │
-                                                  Lambda / worker
-                                                  (transcode to HLS)
-                                                       │
-                                              PUT transcoded segments
-                                              back to S3
+
+```mermaid
+sequenceDiagram
+    participant C as Client (Browser)
+    participant App as App Server
+    participant S as S3
+    participant Q as SQS
+    participant W as Worker (Lambda)
+
+    C->>App: Request upload URL
+    App->>S: Generate presigned PUT URL (expires 15min)
+    App->>C: Presigned URL
+    C->>S: PUT video.mp4 (direct upload, bypasses App)
+    S->>Q: S3 Event Notification (object created)
+    Q->>W: Deliver message
+    W->>S: GET video.mp4 (fetch original)
+    Note over W: Transcode to HLS segments
+    W->>S: PUT seg-001.ts, seg-002.ts, manifest.m3u8
 ```
 
 **S3 Select:** Execute SQL-like queries directly on S3 objects (CSV, JSON, Parquet) without downloading the full file. Useful for filtering large log files or sampling Parquet columns.

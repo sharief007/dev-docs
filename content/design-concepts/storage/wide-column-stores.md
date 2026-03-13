@@ -78,21 +78,25 @@ RF=3: key → Node B (primary), Node C (replica 1), Node D (replica 2)
 
 Cassandra writes are always fast because they are sequential I/O operations — the same LSM tree write path.
 
-```
-Client write
-      │
-      ▼
-Coordinator node (any node can be coordinator)
-      │ writes to all replica nodes simultaneously
-      ├──► Node B: commit log (fsync) → memtable
-      ├──► Node C: commit log (fsync) → memtable
-      └──► Node D: commit log (fsync) → memtable
-                          │ threshold reached
-                          ▼
-                     SSTable flush (immutable, sequential)
-                          │ background
-                          ▼
-                       Compaction
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant Co as Coordinator (any node)
+    participant B as Replica Node B
+    participant Cv as Replica Node C
+    participant D as Replica Node D
+
+    C->>Co: Write (user_id=42, sent_at=now, body="hello")
+    par Parallel writes to all RF=3 replicas
+        Co->>B: commit log fsync → memtable
+        Co->>Cv: commit log fsync → memtable
+        Co->>D: commit log fsync → memtable
+    end
+    B-->>Co: ACK
+    Cv-->>Co: ACK
+    Note over Co: QUORUM met (2 of 3 ACKed)
+    Co->>C: Write acknowledged
+    Note over B,D: Background: memtable → SSTable flush → compaction
 ```
 
 **Coordinator:** Any node in the cluster can act as the coordinator for a request. The coordinator routes writes to the correct replica nodes and waits for acknowledgements according to the consistency level.
@@ -103,20 +107,28 @@ Coordinator node (any node can be coordinator)
 
 Reads are more expensive than writes. Cassandra must merge data from multiple SSTables and check multiple replicas depending on the consistency level.
 
-```
-Client read (user_id = 42)
-      │
-      ▼
-Coordinator → identifies replica nodes for this partition key
-      │
-      ├──► Replica Node B: bloom filter → partition index → SSTable data files → merge
-      │    (contacted for data, returns result + digest)
-      │
-      └──► Replica Node C: returns digest only (for consistency check)
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant Co as Coordinator
+    participant B as Replica Node B
+    participant Cv as Replica Node C
 
-Coordinator compares digests:
-  match  → return data to client
-  differ → read repair: fetch full data from all replicas, reconcile, write corrected version back
+    C->>Co: Read (user_id=42)
+    Co->>B: Fetch data (bloom filter → SSTable lookup)
+    Co->>Cv: Fetch digest only
+    B-->>Co: Full data + digest
+    Cv-->>Co: Digest only
+
+    alt Digests match
+        Co->>C: Return data
+    else Digests differ (stale replica)
+        Co->>Cv: Fetch full data for read repair
+        Cv-->>Co: Stale data
+        Note over Co: LWW reconciliation — latest timestamp wins
+        Co-->>Cv: Write corrected value back (async read repair)
+        Co->>C: Return latest data
+    end
 ```
 
 **Bloom filter:** Before touching any SSTable, Cassandra checks a per-SSTable Bloom filter. If the filter says "definitely not here," that SSTable is skipped. This is the critical optimization that prevents reading every SSTable on every query.

@@ -117,20 +117,20 @@ The WAL is a sequential append-only log of all changes made to the database. It 
 
 ### Write Path
 
-```
-Client COMMIT
-      │
-      ▼
-WAL record written (change description: table, page, offset, old value, new value)
-      │
-      ▼
-fsync() — WAL record flushed to durable storage   ← durability point
-      │
-      ▼
-COMMIT acknowledged to client
-      │
-      ▼ (asynchronously, later)
-Buffer pool dirty page written to data file
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant B as Buffer Pool (RAM)
+    participant W as WAL (Disk)
+    participant D as Data File (Disk)
+
+    C->>B: COMMIT transaction
+    B->>W: Write WAL record (table, page, old/new value)
+    W->>W: fsync() — flushed to durable storage
+    Note over W: Durability point
+    W->>C: COMMIT acknowledged
+    Note over B,D: Later, asynchronously
+    B-->>D: Flush dirty page to data file
 ```
 
 The data file write is deferred. WAL is enough for recovery — if the dirty page never makes it to disk before a crash, the WAL replays the change.
@@ -146,11 +146,16 @@ On startup after a crash, PostgreSQL:
 
 The WAL stream is also the replication mechanism. A standby connects to the primary and continuously receives WAL records, replaying them to stay in sync. This is **physical replication** — it replicates at the byte level, not the SQL level.
 
-```
-Primary                        Standby
-  │── WAL record (lsn=1001) ──►│
-  │── WAL record (lsn=1002) ──►│ replays: applies same page changes
-  │── WAL record (lsn=1003) ──►│
+```mermaid
+sequenceDiagram
+    participant P as Primary
+    participant S as Standby
+
+    P->>S: WAL record (lsn=1001)
+    P->>S: WAL record (lsn=1002)
+    Note over S: Replays: applies same page changes
+    P->>S: WAL record (lsn=1003)
+    Note over P,S: Async replication — standby may lag under load
 ```
 
 **Replication lag** = how far behind the standby is, measured in WAL bytes or time. A standby under heavy load may fall behind; reads on the standby may return stale data.

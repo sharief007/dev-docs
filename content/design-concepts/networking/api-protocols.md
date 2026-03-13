@@ -115,16 +115,36 @@ The server resolves each field via a **resolver function**. Fields can be resolv
 
 **N+1 problem:** A naive resolver for `recentOrders` fires one DB query per user. Fetching a feed of 100 users triggers 1 (users) + 100 (orders) = 101 queries.
 
-```
-users query        → 1 SQL query   → returns 100 users
-orders resolver    → 100 SQL queries (one per user)   ← N+1
+```mermaid
+sequenceDiagram
+    participant GQL as GraphQL Server
+    participant DB as Database
+
+    GQL->>DB: SELECT * FROM users LIMIT 100 (1 query)
+    DB-->>GQL: [user_1, user_2, ..., user_100]
+    GQL->>DB: SELECT orders WHERE user_id = user_1
+    GQL->>DB: SELECT orders WHERE user_id = user_2
+    Note over GQL,DB: ... 98 more queries
+    GQL->>DB: SELECT orders WHERE user_id = user_100
+    Note over DB: 101 total queries — N+1 problem
 ```
 
 **Fix: DataLoader batching.** DataLoader collects resolver calls within a single event loop tick, batches them into one query, then distributes results.
 
-```
-orders resolver    → batched: SELECT * FROM orders WHERE user_id IN (u1, u2, ..., u100)
-                   → 1 SQL query regardless of result size
+```mermaid
+sequenceDiagram
+    participant GQL as GraphQL Server
+    participant DL as DataLoader
+    participant DB as Database
+
+    GQL->>DL: load(user_1.orders)
+    GQL->>DL: load(user_2.orders)
+    Note over DL: Collects all calls in one event loop tick
+    GQL->>DL: load(user_100.orders)
+    DL->>DB: SELECT * FROM orders WHERE user_id IN (u1, u2, ..., u100)
+    DB-->>DL: All orders in one result set
+    DL-->>GQL: Distributes results to each resolver
+    Note over DB: 2 total queries regardless of feed size
 ```
 
 **Caching is hard:** REST uses URL-based HTTP caching naturally. GraphQL queries are POST requests — no URL to cache on. Solutions:

@@ -11,20 +11,13 @@ params:
   editURL:
 ---
 
-Database replication is a technique used to create and maintain multiple copies of a database, often referred to as replicas. The purpose of replication is to provide redundancy, improve availability, and distribute the load for both read and write operations.
-
-### Benefits of Database Replication
-
-**Load Distribution**:
-Read queries can be directed to the replicas, reducing the load on the primary database and improving overall performance.
-
-**Redundancy**:
-Replicas serve as backups in case of data loss or corruption on the master database.
-
-**Geographic Distribution**:
-Replicas can be located in different geographic regions, providing lower latency access for users in different parts of the world.
-
-**High Availability**:
-Replication provides failover capability. If the master database goes down, one of the replicas can take over, minimizing downtime.
+{{< cards >}}
+    {{< card link="read-replicas" title="Read Replicas & Replication Lag" subtitle="Sync vs async replication, replication lag, read-your-writes, monotonic reads, and replica promotion" >}}
+    {{< card link="leader-based-replication" title="Leader-Based Replication" subtitle="Single-leader write path, follower catch-up, and failover" >}}
+    {{< card link="multi-leader-replication" title="Multi-Leader Replication" subtitle="Write conflicts, conflict resolution, and cross-datacenter topologies" >}}
+    {{< card link="replication-lag" title="Replication Lag" subtitle="Read-your-writes, monotonic reads, and consistent prefix reads" >}}
+    {{< card link="consistency-models" title="Consistency Models" subtitle="Strong, eventual, causal, and linearizability" >}}
+    {{< card link="replication-implementations" title="Replication Implementations" subtitle="Statement-based, WAL shipping, row-based, and logical replication" >}}
+{{< /cards >}}
 
 

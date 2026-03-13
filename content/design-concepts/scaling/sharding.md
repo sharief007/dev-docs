@@ -193,15 +193,27 @@ Scatter-gather latency is dominated by the slowest shard. A single slow shard (G
 A write that must atomically modify rows on two different shards requires distributed coordination.
 
 **Two-Phase Commit (2PC):**
-```
-Phase 1 — Prepare:
-  Coordinator → Shard A: "prepare to debit user 42"
-  Coordinator → Shard B: "prepare to credit user 99"
-  Both shards lock rows and write to WAL; return "ready" or "abort"
 
-Phase 2 — Commit (if both returned "ready"):
-  Coordinator → Shard A: "commit"
-  Coordinator → Shard B: "commit"
+```mermaid
+sequenceDiagram
+    participant Co as Coordinator
+    participant A as Shard A
+    participant B as Shard B
+
+    Note over Co,B: Phase 1 — Prepare
+    Co->>A: PREPARE (debit user 42)
+    Co->>B: PREPARE (credit user 99)
+    A->>A: Lock row, write to WAL
+    B->>B: Lock row, write to WAL
+    A-->>Co: READY
+    B-->>Co: READY
+
+    Note over Co,B: Phase 2 — Commit
+    Co->>A: COMMIT
+    Co->>B: COMMIT
+    A-->>Co: ACK
+    B-->>Co: ACK
+    Note over Co: If coordinator crashes after Phase 1,<br/>shards hold locks indefinitely
 ```
 
 2PC is **blocking** — if the coordinator fails after Phase 1, shards hold locks indefinitely until the coordinator recovers. It also adds at minimum 2 RTTs to every cross-shard write.
@@ -210,11 +222,22 @@ Phase 2 — Commit (if both returned "ready"):
 
 Break the transaction into a sequence of local transactions, each with a compensating transaction for rollback.
 
-```
-Debit user 42 on Shard A
-  → success: Publish "debit_succeeded" event
-  → Credit user 99 on Shard B
-     → failure: Execute compensating transaction (re-credit user 42 on Shard A)
+```mermaid
+sequenceDiagram
+    participant O as Orchestrator
+    participant A as Shard A
+    participant B as Shard B
+
+    O->>A: Debit user 42 (local txn)
+    A-->>O: debit_succeeded
+
+    O->>B: Credit user 99 (local txn)
+    B-->>O: credit_failed
+
+    Note over O: Failure — run compensating transaction
+    O->>A: Re-credit user 42 (compensating txn)
+    A-->>O: compensated
+    Note over O,B: Eventually consistent — brief window where A is debited but B is not
 ```
 
 Sagas are eventually consistent — there is a window where Shard A is debited but Shard B is not yet credited. This is acceptable for many use cases (order fulfillment, payment processing) and avoids distributed locks.
