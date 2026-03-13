@@ -22,4 +22,8 @@ params:
     {{< card link="document-stores" title="Document Stores (MongoDB)" subtitle="BSON, aggregation pipeline, replication, and sharding" >}}
     {{< card link="object-storage" title="Object Storage (S3)" subtitle="Flat namespace, multipart upload, consistency model, and durability" >}}
     {{< card link="time-series-databases" title="Time-Series Databases" subtitle="Append-mostly writes, compression, retention, and downsampling" >}}
+    {{< card link="consistent-hashing" title="Consistent Hashing" subtitle="Hash ring, virtual nodes, replication, hotspot mitigation, and real-world applications" >}}
+    {{< card link="bloom-filters" title="Bloom Filters & HyperLogLog" subtitle="Probabilistic membership testing, false positive tuning, counting variants, and cardinality estimation" >}}
+    {{< card link="caching-patterns" title="Caching Patterns" subtitle="Cache-aside, write-through, write-back, write-around, stampede, penetration, and avalanche" >}}
+    {{< card link="cache-eviction" title="Cache Eviction" subtitle="LRU, LFU, ARC, W-TinyLFU, CLOCK, FIFO, and choosing the right policy" >}}
 {{< /cards >}}
