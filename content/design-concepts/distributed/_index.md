@@ -14,4 +14,6 @@ sidebar:
   {{< card link="idempotency" title="Idempotency & Exactly-Once Semantics" subtitle="Safe retries, idempotency keys, delivery guarantees, Kafka exactly-once, deduplication patterns" >}}
   {{< card link="distributed-locking" title="Distributed Locking" subtitle="Redis SETNX, Redlock, fencing tokens, ZooKeeper znodes, and when not to use locks" >}}
   {{< card link="leader-election" title="Leader Election" subtitle="Bully algorithm, Raft election, ZooKeeper znodes, split-brain prevention, STONITH" >}}
+  {{< card link="gossip-protocol" title="Gossip Protocol" subtitle="Fan-out convergence, phi accrual failure detection, SWIM, Merkle tree anti-entropy" >}}
+  {{< card link="quorum" title="Quorum Reads & Writes" subtitle="R + W > N overlap rule, tuning configurations, sloppy quorum, hinted handoff, read repair" >}}
 {{< /cards >}}
