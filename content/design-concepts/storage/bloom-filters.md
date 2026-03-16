@@ -98,7 +98,7 @@ k = 0.693 × (9,585,058 / 1,000,000) ≈ 6.6 → use k = 7
 
 **Cassandra SSTable negative lookups (the most important FAANG example)**
 
-Each SSTable in Cassandra (and RocksDB) has an associated Bloom filter. When a read arrives for a key:
+This is the primary use of Bloom filters in [LSM trees](../lsm-trees). Each SSTable in Cassandra (and RocksDB) has an associated Bloom filter. When a read arrives for a key:
 1. Check the Bloom filter for this SSTable
 2. "Definitely not here" → skip the SSTable entirely (no disk I/O)
 3. "Probably here" → do the actual disk read

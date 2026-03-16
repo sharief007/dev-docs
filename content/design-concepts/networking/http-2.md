@@ -125,7 +125,7 @@ Request 2: Authorization: Bearer eyJhbGc...  → sent as index 62 (single byte)
 Literal values that can't be indexed are Huffman-encoded — common characters use fewer bits. Average compression: **~85–95% reduction** in header bytes on subsequent requests.
 
 {{< callout type="warning" >}}
-**CRIME/BREACH attacks** exploit HPACK (and TLS compression) on secrets like CSRF tokens. Never mix user-controlled input with sensitive values in compressed headers.
+Compression oracle attacks (CRIME targeted DEFLATE inside TLS/SPDY; BREACH targeted gzip-compressed HTTP response bodies) exploit the fact that secret bytes compress more efficiently when they appear alongside known plaintext. HPACK uses Huffman encoding — not DEFLATE — so it is not directly vulnerable to those specific attacks. However, the same class of attack applies if attacker-controlled values can be injected into the same compression context as secrets. Never mix user-controlled input with sensitive values in the same compressed header block.
 {{< /callout >}}
 
 ## Server Push

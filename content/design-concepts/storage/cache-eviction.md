@@ -13,6 +13,10 @@ params:
 
 When a cache reaches its memory limit, it must evict an existing entry to make room for a new one. The eviction policy determines which entry to remove. The right policy depends on the access pattern: recency-based policies work well for most workloads; frequency-based policies handle skewed hot-key access better; adaptive policies automatically tune between the two.
 
+{{< callout type="info" >}}
+This file covers what gets evicted when the cache is full. For read/write patterns, invalidation strategies, stampede, and penetration see [Caching Patterns](../caching-patterns).
+{{< /callout >}}
+
 ## LRU (Least Recently Used)
 
 Evicts the entry that was accessed least recently. The assumption: if a key hasn't been read in a while, it is less likely to be read again soon.
@@ -140,7 +144,7 @@ The ghost lists are the key insight: they give ARC a memory of what was recently
 **Used by:** ZFS (FreeBSD, Linux ZFS), IBM DB2 buffer pool, some storage controllers.
 
 **Strengths over LRU:** scan resistant (scanned entries stay in T1 and don't displace T2 entries), adapts to workload shift automatically.
-**Weakness:** ARC is patented by IBM (US patent 6,996,676), which is why it is absent from Linux kernel page cache and Redis (they use CLOCK and approximate-LRU respectively instead).
+**Weakness:** ARC was covered by IBM's US patent 6,996,676 (filed 2002, expired ~2022). Linux kernel page cache and Redis both chose alternatives during the patent's active period — CLOCK and approximate-LRU respectively — and have retained those implementations since.
 
 ## W-TinyLFU (Window TinyLFU)
 

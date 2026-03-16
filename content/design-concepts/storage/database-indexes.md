@@ -13,6 +13,10 @@ params:
 
 An index is a separate data structure maintained by the database that lets it find rows without scanning the entire table. Every index you add speeds up reads and slows down writes — the art is knowing which tradeoff to make.
 
+{{< callout type="info" >}}
+This file covers index types, query compatibility, and when to index. For deeper internals see: [B+ Tree Internals](../b-plus-tree) (pages, fan-out, page splits, write amplification) and [Hash Index](../hash-index) (O(1) mechanics, InnoDB Adaptive Hash Index, Bitcask).
+{{< /callout >}}
+
 ## The Cost of Not Indexing
 
 ```sql
@@ -180,6 +184,6 @@ Key things to spot:
 | `Seq Scan` | Full table scan — missing index or optimizer chose not to use one |
 | `Index Scan` | Index used, but heap fetch still needed for non-covered columns |
 | `Index Only Scan` | Covering index — no heap access |
-| `Bitmap Heap Scan` | Multiple indexes combined; rows batched for sequential heap access |
+| `Bitmap Heap Scan` | Row pointers collected from index scan(s) sorted by physical block location; heap pages read sequentially — avoids random I/O per row; also produced when multiple indexes are OR'd or AND'd together |
 | `rows=` estimate vs actual | Large gap → stale statistics; run `ANALYZE` |
 | `Buffers: hit=X read=Y` | `hit` = from cache, `read` = from disk — high `read` indicates cache pressure |

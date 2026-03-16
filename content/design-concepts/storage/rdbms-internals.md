@@ -100,6 +100,10 @@ This is why Read Committed and Repeatable Read behave differently:
 - **Read Committed:** each SQL statement gets a fresh snapshot → sees committed changes from other transactions that committed before the statement started
 - **Repeatable Read:** snapshot is taken once at transaction start → same query returns the same result no matter what other transactions commit during the transaction
 
+{{< callout type="info" >}}
+**PostgreSQL vs InnoDB MVCC implementation:** PostgreSQL writes new row versions alongside old ones directly in the heap — an `UPDATE` leaves the old tuple in place and writes a new one; `VACUUM` reclaims dead tuples. InnoDB stores the latest row version in the data page and maintains older versions in a separate **undo log chain**. Both achieve equivalent MVCC semantics but with different operational tradeoffs: PostgreSQL's approach is simpler but causes table bloat without regular vacuuming; InnoDB's undo log is cleaned up more aggressively but adds write overhead on every update.
+{{< /callout >}}
+
 ### Vacuum and Dead Tuples
 
 Updated or deleted row versions are not immediately removed — they become **dead tuples**. MVCC requires keeping them until no active transaction could still need them.
@@ -165,6 +169,10 @@ sequenceDiagram
 ## Buffer Pool
 
 The buffer pool (PostgreSQL: `shared_buffers`) is an in-memory cache of 8 KB data pages. All reads and writes go through it — the database never reads from or writes to data files directly.
+
+{{< callout type="info" >}}
+The 8 KB page is the same unit as a B+ tree node — [B+ Tree Internals](../b-plus-tree) covers how page size determines fan-out, tree height, and the number of disk I/Os required to answer a query.
+{{< /callout >}}
 
 ```
 Query: SELECT * FROM orders WHERE id = 42

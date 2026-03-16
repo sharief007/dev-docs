@@ -55,7 +55,7 @@ Read key "foo"
 
 **Read amplification:** In the worst case, every level must be checked. This is why LSM trees have higher read latency than B-trees for point lookups — a B-tree finds any key in O(log n) in a single structure; an LSM tree may check O(L) SSTables.
 
-**Bloom filters** are the key optimization that makes reads practical. A Bloom filter can say "this key is definitely NOT in this SSTable" in O(1), allowing the database to skip the vast majority of SSTables on a point lookup.
+**Bloom filters** are the key optimization that makes reads practical. A Bloom filter can say "this key is definitely NOT in this SSTable" in O(1), allowing the database to skip the vast majority of SSTables on a point lookup. See [Bloom Filters & HyperLogLog](../bloom-filters) for the mechanics, false positive math, and sizing formulas.
 
 ## Compaction
 

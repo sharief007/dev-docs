@@ -11,7 +11,7 @@ params:
   editURL:
 ---
 
-Cassandra is a leaderless, distributed wide-column store built for high write throughput and linear horizontal scale. It uses LSM trees for storage (identical mechanics to what was covered in the LSM Trees section) and consistent hashing for data distribution. Every architectural decision in Cassandra is a deliberate tradeoff: writes are always fast, reads are bounded, and consistency is tunable per operation.
+Cassandra is a leaderless, distributed wide-column store built for high write throughput and linear horizontal scale. It uses [LSM trees](../lsm-trees) for storage and [consistent hashing](../consistent-hashing) for data distribution. Every architectural decision in Cassandra is a deliberate tradeoff: writes are always fast, reads are bounded, and consistency is tunable per operation.
 
 ## Data Model
 

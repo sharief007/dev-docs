@@ -95,7 +95,7 @@ XREADGROUP GROUP fulfillment worker1 COUNT 10 STREAMS orders >
 XACK orders fulfillment <message-id>    # mark processed
 ```
 
-**Stream vs Pub/Sub:** Pub/Sub is fire-and-forget — if no subscriber is listening, the message is lost. Streams persist messages; a consumer that restarts reads from where it left off.
+**Stream vs Pub/Sub:** Pub/Sub is fire-and-forget — if no subscriber is listening, the message is lost. Streams persist messages; a consumer that restarts reads from where it left off. Use `XADD key MAXLEN ~ N ...` to cap a stream at approximately N entries — Redis trims old messages as new ones arrive, preventing unbounded memory growth.
 
 ## Persistence
 

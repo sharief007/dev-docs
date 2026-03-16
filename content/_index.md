@@ -21,19 +21,3 @@ Welcome to DevDocs: Your Ultimate Resource Hub for Documentation, Gists, and Mor
     {{< card link="low-level-design" title="Low Level Design Problems" subtitle="Object-Oriented Design Challenges" >}}
     {{< card link="machine-learning" title="Machine Learning" subtitle="ML Algorithms and Implementations" >}}
 {{< /cards >}}
-
-**topics**
-- Consistent Hashing
-- Count-Min Sketch
-- HyperLogLog
-- Cuckoo Filter
-- Perfect Hashing
-- Cryptographic Hashing
-- Distributed Hash Tables (DHTs)
-
-**others**
-- Trie / Radix tree
-- LSM Tree
-- Skip List
-- vector clock
-- Gossip Protocol

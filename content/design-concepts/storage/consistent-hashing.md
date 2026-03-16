@@ -174,7 +174,7 @@ With vnodes: the R successive clockwise virtual nodes must belong to R **differe
 
 ### Cassandra Token Ring
 
-Cassandra uses consistent hashing as its core partitioning mechanism. The ring positions are called **tokens**.
+Cassandra uses consistent hashing as its core partitioning mechanism. The ring positions are called **tokens**. See [Wide-Column Stores](../wide-column-stores) for how Cassandra builds its full read and write path on top of this ring.
 
 ```
 Row key → Murmur3 hash → token (64-bit integer)

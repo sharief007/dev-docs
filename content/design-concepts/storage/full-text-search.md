@@ -65,7 +65,7 @@ Input: "The Quick-Brown FOX jumped over the LAZY dog!"
    stop words (remove):  ["quick", "brown", "fox", "jumped", "lazy", "dog"]
    stemming (Porter):    ["quick", "brown", "fox", "jump", "lazi", "dog"]
                                                           ↑         ↑
-                                             "jumped"→"jump"  "lazy"→"lazi"
+                                             "jumped"→"jump"  "lazy"→"lazi"  ← correct Porter Stemmer output, not a typo
 
 Stored in index: ["quick", "brown", "fox", "jump", "lazi", "dog"]
 ```

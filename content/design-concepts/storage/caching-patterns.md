@@ -13,6 +13,10 @@ params:
 
 A cache reduces latency and origin load by storing computed or fetched results closer to where they are consumed. The hard part is not reading from a cache — it is keeping the cache consistent with the source of truth and handling the failure modes that emerge at scale.
 
+{{< callout type="info" >}}
+This file covers read/write patterns, invalidation, and cache failure modes. For eviction policy internals (LRU, LFU, ARC, W-TinyLFU) see [Cache Eviction](../cache-eviction).
+{{< /callout >}}
+
 ## Read Patterns
 
 ### Cache-Aside (Lazy Loading)
@@ -46,6 +50,7 @@ WRITE (invalidate on update):
 **Weaknesses:**
 - First request after a miss (or after startup) is slow — pays the DB round trip
 - Race condition on concurrent writes: two requests can fetch stale data from DB simultaneously and both write it to cache, one overwriting the other's fresher value
+- Stale-write-after-invalidation race: Thread A reads key → MISS → fetches old value from DB; Thread B writes new value to DB → `DEL key`; Thread A writes the now-stale value back into cache — cache holds stale data indefinitely with no further invalidation until the next write. Mitigate with short TTLs or conditional SET (e.g., `SET key value NX EX ttl` so the stale write loses a race with an empty slot rather than overwriting).
 
 ### Read-Through
 

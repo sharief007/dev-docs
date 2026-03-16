@@ -116,7 +116,7 @@ Request routes to next backend clockwise on the ring
 3. Achieves near-optimal load distribution with O(1) selection cost
 ```
 - **Benefit:** Avoids thundering herd effect of pure Least Connections
-- **Use case:** Microservices, service mesh (Envoy, Linkerd default)
+- **Use case:** Microservices, service mesh — Envoy's default least-request routing uses P2C; Linkerd uses EWMA (Exponentially Weighted Moving Average), which weights recent latency history rather than raw connection count
 
 ### Algorithm Selection Guide
 

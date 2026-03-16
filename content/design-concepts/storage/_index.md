@@ -13,6 +13,8 @@ params:
 
 {{< cards >}}
     {{< card link="database-indexes" title="Database Indexes" subtitle="B-tree, hash, composite, covering indexes, write overhead, and when not to index" >}}
+    {{< card link="b-plus-tree" title="B+ Tree Internals" subtitle="Pages, fan-out, tree height, node structure, read and write paths, page splits, and write amplification" >}}
+    {{< card link="hash-index" title="Hash Index" subtitle="O(1) equality lookups, collision resolution, PostgreSQL USING HASH, InnoDB Adaptive Hash Index, and Bitcask" >}}
     {{< card link="lsm-trees" title="LSM Trees" subtitle="Memtable, SSTables, Bloom filters, compaction strategies, and B-tree vs LSM tradeoffs" >}}
     {{< card link="columnar-storage" title="Columnar Storage" subtitle="Row vs columnar layout, compression, vectorized execution, Parquet, and OLAP vs OLTP" >}}
     {{< card link="rdbms-internals" title="RDBMS Internals" subtitle="ACID, MVCC, WAL, buffer pool, and query planner" >}}
