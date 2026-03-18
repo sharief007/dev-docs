@@ -12,16 +12,10 @@ params:
 ---
 
 {{< cards >}}
-    {{< card link="networking" title="Networking" subtitle="HTTP, DNS, Load Balancing, and Transport Protocols" >}}
-    {{< card link="scaling" title="System Scaling" subtitle="Strategies for Handling Growing Workloads" >}}
-    {{< card link="replication" title="Replication" subtitle="Data Replication Strategies and Consistency" >}}
-    {{< card link="partitioning" title="Partitioning" subtitle="Data Partitioning and Sharding Techniques" >}}
-    {{< card link="hashing" title="Hashing" subtitle="Hash Functions and Probabilistic Data Structures" >}}
-    {{< card link="rate-limiting" title="Rate Limiting" subtitle="Traffic Control and Throttling Algorithms" >}}
-    {{< card link="load-balancing" title="Load Balancing" subtitle="Distributing Load Across Multiple Servers" >}}
-    {{< card link="storage-engine" title="Storage Engines" subtitle="Database Storage and Indexing Mechanisms" >}}
-    {{< card link="storage" title="Storage & Databases" subtitle="Indexes, RDBMS internals, SQL vs NoSQL, Redis, Cassandra, S3, and time-series" >}}
-    {{< card link="transactions" title="Transactions" subtitle="ACID Properties and Isolation Levels" >}}
-    {{< card link="consensus" title="Consensus" subtitle="Distributed Consensus Algorithms" >}}
-    {{< card link="misc" title="Miscellaneous" subtitle="Additional System Design Concepts" >}}
+    {{< card link="networking" title="Networking" subtitle="TCP/UDP, DNS, HTTP, reverse proxy, load balancing, CDN, WebSockets, and API protocols" >}}
+    {{< card link="storage" title="Storage & Databases" subtitle="Indexes, RDBMS internals, SQL vs NoSQL, Redis, Cassandra, S3, caching, and full-text search" >}}
+    {{< card link="scaling" title="Scaling" subtitle="Database sharding — hash, range, directory strategies and cross-shard operations" >}}
+    {{< card link="replication" title="Replication" subtitle="Leader-based replication, read replicas, replication lag, and consistency models" >}}
+    {{< card link="distributed" title="Distributed Systems" subtitle="CAP, PACELC, consistency models, idempotency, distributed locking, leader election, gossip, and quorum" >}}
+    {{< card link="consensus" title="Consensus & Coordination" subtitle="Two-Phase Commit, Raft consensus, log replication, and safety guarantees" >}}
 {{< /cards >}}
