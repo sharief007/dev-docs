@@ -18,4 +18,5 @@ params:
     {{< card link="replication" title="Replication" subtitle="Leader-based replication, read replicas, replication lag, and consistency models" >}}
     {{< card link="distributed" title="Distributed Systems" subtitle="CAP, PACELC, consistency models, idempotency, distributed locking, leader election, gossip, and quorum" >}}
     {{< card link="consensus" title="Consensus & Coordination" subtitle="Two-Phase Commit, Raft consensus, log replication, and safety guarantees" >}}
+    {{< card link="messaging" title="Messaging & Event-Driven" subtitle="Message queues vs event streams, RabbitMQ, SQS, Kafka, consumer groups, and hybrid patterns" >}}
 {{< /cards >}}
