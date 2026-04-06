@@ -190,6 +190,104 @@ When a transaction modifies a row, the page containing that row is updated in th
 
 The **background writer** (PostgreSQL) and **page cleaner** (InnoDB) continuously flush dirty pages to disk in the background, smoothing out I/O. The **checkpointer** forces all dirty pages to disk at checkpoint time.
 
+## Query Planner and EXPLAIN
+
+Before executing a query, the database builds an **execution plan** — a tree of physical operators (scan, join, sort, aggregate) that defines how rows flow from base tables to the final result. The planner evaluates many possible plans and picks the one with the lowest estimated cost.
+
+### Reading EXPLAIN Output
+
+`EXPLAIN` shows the plan the optimizer chose. `EXPLAIN ANALYZE` actually runs the query and adds real timing.
+
+```sql
+EXPLAIN ANALYZE
+SELECT o.id, c.name
+FROM orders o
+JOIN customers c ON o.customer_id = c.id
+WHERE o.total > 100
+ORDER BY o.created_at DESC
+LIMIT 20;
+```
+
+```
+Limit  (cost=1250.42..1250.47 rows=20 width=36) (actual time=3.2..3.3 rows=20 loops=1)
+  ->  Sort  (cost=1250.42..1262.15 rows=4693 width=36) (actual time=3.2..3.2 rows=20 loops=1)
+        Sort Key: o.created_at DESC
+        Sort Method: top-N heapsort  Memory: 27kB
+        ->  Hash Join  (cost=25.00..1132.80 rows=4693 width=36) (actual time=0.5..2.8 rows=4820 loops=1)
+              Hash Cond: (o.customer_id = c.id)
+              ->  Seq Scan on orders o  (cost=0.00..1095.00 rows=4693 width=20) (actual time=0.01..1.9 rows=4820 loops=1)
+                    Filter: (total > 100)
+                    Rows Removed by Filter: 45180
+              ->  Hash  (cost=15.00..15.00 rows=1000 width=20) (actual time=0.4..0.4 rows=1000 loops=1)
+                    ->  Seq Scan on customers c  (cost=0.00..15.00 rows=1000 width=20) (actual time=0.01..0.2 rows=1000 loops=1)
+```
+
+Key fields in each node:
+
+| Field | Meaning |
+|-------|---------|
+| `cost=startup..total` | Estimated cost in arbitrary units (sequential page reads ≈ 1.0). Startup cost is time before the first row is emitted. |
+| `rows` | Estimated number of rows output by this node |
+| `actual time` | Real wall-clock time in milliseconds (only with `ANALYZE`) |
+| `loops` | How many times this node was executed (e.g., inner side of nested loop) |
+| `Rows Removed by Filter` | How many rows were scanned but didn't pass the `WHERE` condition — high values signal a missing index |
+
+### Common Plan Nodes
+
+| Node | What it does | When it appears |
+|------|-------------|-----------------|
+| **Seq Scan** | Reads every row in the table | No usable index, or optimizer estimates sequential scan is cheaper than index scan |
+| **Index Scan** | Traverses B+ tree index, then fetches heap tuple | Selective filter on indexed column |
+| **Index Only Scan** | Answers query from the index alone (covering index) | All selected columns are in the index and visibility map says tuple is visible |
+| **Bitmap Index Scan** | Builds a bitmap of matching pages, then does a single pass over the heap | Medium selectivity — too many rows for index scan, too few for seq scan |
+| **Nested Loop** | For each outer row, scans the inner relation | Small outer set, indexed inner |
+| **Hash Join** | Builds hash table from one input, probes with the other | Equi-join, larger datasets that fit in `work_mem` |
+| **Merge Join** | Merges two sorted inputs | Both inputs already sorted (e.g., index-ordered) or sort is cheap |
+| **Sort** | Sorts input rows | `ORDER BY`, merge join input, or `DISTINCT` |
+| **Aggregate** | `COUNT`, `SUM`, `GROUP BY` | Aggregation query |
+
+### Why Plans Go Wrong
+
+The optimizer relies on **table statistics** — row counts, distinct values per column, most common values, histogram buckets. If statistics are stale, the planner makes bad estimates, which lead to bad plans.
+
+```sql
+-- PostgreSQL: force a statistics refresh
+ANALYZE orders;
+
+-- Check when statistics were last updated
+SELECT relname, last_analyze, last_autoanalyze
+FROM pg_stat_user_tables
+WHERE relname = 'orders';
+```
+
+Common symptoms of stale statistics:
+- **Nested Loop where Hash Join would be better** — planner underestimates the row count
+- **Seq Scan on a large table with a selective WHERE** — planner overestimates matching rows, thinks index scan isn't worth it
+- **Hash Join with spill to disk** — planner underestimates join cardinality, allocates too little `work_mem`
+
+{{< callout type="warning" >}}
+**`EXPLAIN` without `ANALYZE` shows estimates only — not what actually happened.** A plan that looks fine may hide a 10x row-count misestimate. Always use `EXPLAIN ANALYZE` (with `BUFFERS` for I/O detail) when diagnosing performance. Be careful running `EXPLAIN ANALYZE` on `DELETE`/`UPDATE` — it executes the statement. Wrap destructive statements in a transaction and `ROLLBACK`.
+{{< /callout >}}
+
+### Practical Workflow
+
+```
+1. Identify slow query         → pg_stat_statements or slow query log
+2. Run EXPLAIN (ANALYZE, BUFFERS)
+3. Look for:
+   - Seq Scan on large table   → missing index?
+   - High "Rows Removed"       → filter not pushed to index
+   - Nested Loop with high     → row estimate wrong, ANALYZE table
+     loop count
+   - Sort with disk spill      → increase work_mem or add index
+4. Fix: add index, rewrite query, ANALYZE, or adjust work_mem
+5. Re-run EXPLAIN ANALYZE to confirm improvement
+```
+
+{{< callout type="info" >}}
+**Interview tip:** When discussing database performance, say: "I'd start with `EXPLAIN ANALYZE` to see the actual execution plan. The most common issue I look for is a Seq Scan on a large table where an Index Scan is expected — that usually means either a missing index or stale statistics. Running `ANALYZE` refreshes the planner's statistics; if the plan still chooses Seq Scan, I'd check if the filter selectivity is too low for an index to help." This shows you debug from evidence, not guesswork.
+{{< /callout >}}
+
 ```
 shared_buffers = 25% of RAM       ← PostgreSQL rule of thumb
 innodb_buffer_pool_size = 70–80%  ← MySQL InnoDB rule of thumb (dedicated server)
