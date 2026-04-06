@@ -50,7 +50,7 @@ You cannot fix this by reordering the writes. Publishing first means events can 
 
 ## The Outbox Solution
 
-Instead of publishing directly to Kafka, write the event to an **outbox table** in the **same database transaction** as the business data:
+Instead of publishing directly to [Kafka](../../messaging/kafka), write the event to an **outbox table** in the **same database transaction** as the business data:
 
 ```mermaid
 sequenceDiagram
@@ -160,7 +160,7 @@ Relay reads outbox row → publishes to Kafka → 💥 crash before marking publ
 On restart: reads same row again → publishes to Kafka AGAIN → duplicate event
 ```
 
-This is inherent to the pattern. The outbox guarantees **at-least-once** delivery, not exactly-once. Consumers **must be idempotent**.
+This is inherent to the pattern. The outbox guarantees **at-least-once** delivery, not exactly-once. Consumers **must be [idempotent](../idempotency)**.
 
 ## The Inbox Pattern (Consumer-Side Deduplication)
 
@@ -238,7 +238,7 @@ The end-to-end guarantee is **effectively exactly-once**: at-least-once delivery
 | Scenario | Use Outbox? | Why |
 |----------|------------|-----|
 | Service writes to DB and needs to notify other services | **Yes** | The canonical use case |
-| Saga orchestrator sending commands | **Yes** | Orchestrator's state + outgoing command must be atomic |
+| [Saga](../saga-pattern) orchestrator sending commands | **Yes** | Orchestrator's state + outgoing command must be atomic |
 | Service writes to DB and updates a cache | **Maybe** | CDC-based cache invalidation is simpler (no outbox table, just read the WAL) |
 | Service only publishes events (no DB write) | **No** | No dual-write problem — publish directly |
 | Service needs exactly-once Kafka production | **Consider** | Kafka's idempotent producer + transactions may suffice within a single Kafka pipeline |

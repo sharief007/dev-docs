@@ -48,9 +48,9 @@ B detects D is down:
 
 The Bully algorithm is a teaching concept. Production systems use Raft or ZooKeeper-based election.
 
-## Raft Leader Election
+## [Raft](../../consensus/raft) Leader Election
 
-Raft is the dominant consensus algorithm for modern distributed systems (etcd, CockroachDB, TiKV, Kafka KRaft). Its election protocol ensures the leader always has the most complete log.
+[Raft](../../consensus/raft) is the dominant consensus algorithm for modern distributed systems (etcd, CockroachDB, TiKV, Kafka KRaft). Its election protocol ensures the leader always has the most complete log.
 
 ### Terms and States
 

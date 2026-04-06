@@ -276,5 +276,5 @@ Leadership is spread across nodes for load balancing.
 This allows the system to scale writes linearly with the number of ranges, while each individual range maintains strong consistency via Raft.
 
 {{< callout type="info" >}}
-**Interview framing:** When asked "how does CockroachDB achieve both strong consistency and horizontal scaling," the answer is: "Each data range is a separate Raft group. Writes within a range go through Raft for linearizable consistency. Ranges are split across nodes so different ranges can accept writes in parallel — that's the horizontal scaling. Cross-range transactions use 2PC on top of Raft."
+**Interview framing:** When asked "how does CockroachDB achieve both strong consistency and horizontal scaling," the answer is: "Each data range is a separate Raft group. Writes within a range go through Raft for linearizable consistency. Ranges are split across nodes so different ranges can accept writes in parallel — that's the horizontal scaling. Cross-range transactions use [2PC](../two-phase-commit) on top of Raft."
 {{< /callout >}}

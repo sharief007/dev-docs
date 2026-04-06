@@ -113,7 +113,7 @@ sequenceDiagram
     Note over U1,U2: Concurrent writes (unrelated) can arrive in any order
 ```
 
-**Detecting causality:** Systems use **vector clocks** or **logical timestamps** to track causal dependencies. A write carries the vector clock of its causal predecessors; a replica delays applying a write until all its causal predecessors have been applied.
+**Detecting causality:** Systems use [**vector clocks**](../logical-clocks) or **logical timestamps** to track causal dependencies. A write carries the vector clock of its causal predecessors; a replica delays applying a write until all its causal predecessors have been applied.
 
 **Used by:** MongoDB (causal sessions using `operationTime` and `clusterTime`), some CRDT-based systems, DynamoDB with vector clocks for conflict detection.
 

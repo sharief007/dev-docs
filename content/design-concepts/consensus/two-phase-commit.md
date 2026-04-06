@@ -231,8 +231,8 @@ Application (Transaction Manager)
 | Scenario | Use | Why |
 |----------|-----|-----|
 | Cross-shard commit within one database (Spanner, CockroachDB) | **2PC** | Controlled environment, low latency between shards, database manages coordinator |
-| Cross-service business transaction (Order → Payment → Inventory) | **Saga** | Services are independent, locks across services are impractical |
-| Database + message queue atomicity | **Outbox pattern** | Avoids distributed transaction entirely |
+| Cross-service business transaction (Order → Payment → Inventory) | [**Saga**](../distributed/saga-pattern) | Services are independent, locks across services are impractical |
+| Database + message queue atomicity | [**Outbox pattern**](../distributed/outbox-pattern) | Avoids distributed transaction entirely |
 | Read-only cross-node query | **Neither** | No atomicity needed for reads |
 
 {{< callout type="warning" >}}

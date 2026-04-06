@@ -9,7 +9,7 @@ sidebar:
 
 A Saga is a sequence of **local transactions** across multiple services, where each step has a **compensating transaction** that undoes its effect if a later step fails. It replaces distributed transactions (2PC) in microservice architectures where holding cross-service locks is impractical.
 
-## Why Not 2PC Across Services?
+## Why Not [2PC](../../consensus/two-phase-commit) Across Services?
 
 In a monolith, a single database transaction handles atomicity. In microservices, each service owns its database — there is no shared transaction manager.
 
@@ -140,7 +140,7 @@ In system design interviews, **default to orchestration**. Say: "We'll use a sag
 
 Compensating transactions are the hardest part of implementing sagas. They must follow strict rules:
 
-### 1. Idempotent
+### 1. [Idempotent](../idempotency)
 
 A compensation may be retried if the orchestrator crashes and restarts. Calling `RefundPayment(paymentId=7)` twice must not issue two refunds.
 
