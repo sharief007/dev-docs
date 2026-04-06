@@ -138,6 +138,10 @@ sequenceDiagram
 
 **Cassandra consistency level `ANY`:** accepts a write even if only a hint is stored somewhere. The most available but weakest durability option — data isn't safe until hinted handoff completes.
 
+{{< callout type="warning" >}}
+**Sloppy quorum breaks the R + W > N guarantee.** With sloppy quorum, a write may land on non-designated nodes. A subsequent QUORUM read from the designated replicas will miss the write entirely — even with R + W > N — because the write is on a different set of nodes. Use sloppy quorum only when write availability is more important than immediate read consistency. For strong consistency, require strict quorum (`QUORUM` or `LOCAL_QUORUM` in Cassandra, not `ANY`).
+{{< /callout >}}
+
 ## Read Repair
 
 Even with R + W > N, replicas accumulate staleness over time: a replica that was briefly down may have missed a write; background compaction may not have run; anti-entropy repair may be overdue. Read repair is the mechanism that fixes divergence opportunistically — during reads — without waiting for scheduled repair jobs.

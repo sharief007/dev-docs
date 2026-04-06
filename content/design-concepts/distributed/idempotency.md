@@ -102,7 +102,7 @@ Every message-passing system — queues, event streams, RPCs — provides one of
 
 **Exactly-once** requires coordination and is significantly more expensive. The claim "exactly-once delivery" often hides the caveat "exactly-once within a specific component" — true end-to-end exactly-once across heterogeneous systems requires careful design.
 
-## Exactly-Once in Kafka
+## Exactly-Once in [Kafka](../../messaging/kafka)
 
 Kafka provides exactly-once semantics through two mechanisms that work together.
 
@@ -176,6 +176,16 @@ CREATE TABLE processed_events (
 INSERT INTO processed_events (event_id) VALUES ($1)
 ON CONFLICT (event_id) DO NOTHING
 RETURNING event_id;
+```
+
+{{< callout type="warning" >}}
+**Race condition in deduplication.** Two concurrent retries with the same idempotency key can both pass the "does this key exist?" check before either inserts. Use `INSERT ... ON CONFLICT` or `SETNX` (atomic check-and-set) — never a read-then-write pattern. Even with atomic inserts, ensure the business logic (e.g., charging a payment) is inside the same transaction as the dedup insert, or you risk charging twice with only one dedup record.
+{{< /callout >}}
+
+```sql
+-- WRONG: read-then-write race
+SELECT 1 FROM processed_events WHERE event_id = $1;  -- both threads see: not found
+INSERT INTO processed_events (event_id) VALUES ($1);  -- both threads insert
 
 -- If no row returned → duplicate, skip processing
 -- If row returned → first time, proceed with business logic in same transaction

@@ -11,7 +11,7 @@ params:
   editURL:
 ---
 
-PACELC extends CAP by adding the tradeoff that exists in **normal operation** — when there is no partition. CAP forces a choice between Availability and Consistency only during a fault. PACELC says that even when the system is healthy, you must still choose between **Latency** and **Consistency** on every request.
+PACELC extends [CAP](../cap-theorem) by adding the tradeoff that exists in **normal operation** — when there is no partition. CAP forces a choice between Availability and Consistency only during a fault. PACELC says that even when the system is healthy, you must still choose between **Latency** and **Consistency** on every request.
 
 ```
 If Partition:    choose A  (availability)  or  C (consistency)
@@ -101,6 +101,10 @@ W + R = 4 > N = 3 ✓ → consistent
 RF=3, ONE: W=1, R=1
 W + R = 2 ≤ N = 3 ✗ → stale reads possible
 ```
+
+{{< callout type="warning" >}}
+**"Tunable consistency" does not mean free consistency.** Raising the consistency level from ONE to QUORUM increases read/write latency proportionally (you wait for more replicas). In a geo-distributed cluster, a QUORUM read may cross datacenter boundaries, adding 50–200ms. Per-operation tuning is powerful, but every consistency upgrade has a latency and availability cost — there is no setting that gives you strong consistency at ONE-level latency.
+{{< /callout >}}
 
 ## DynamoDB: PA/EL with an Escape Hatch
 

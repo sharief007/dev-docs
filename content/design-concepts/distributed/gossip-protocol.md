@@ -95,6 +95,10 @@ If the network becomes slower over time (higher jitter), the distribution adapts
 
 **Cassandra default:** `phi_convict_threshold = 8` (configurable). Lowering it speeds up failure detection but increases false positives. Raising it reduces false positives but slows detection.
 
+{{< callout type="warning" >}}
+**False positives trigger cascading failures.** If the phi threshold is too low, a brief GC pause or network blip marks a healthy node as dead. The cluster then rebalances data away from the "dead" node, generating massive I/O. When the node comes back, it must stream data back — doubling the recovery cost. In production, err on the side of slower detection (higher phi) rather than faster detection with false positives. Cassandra recommends `phi_convict_threshold = 8` for most deployments; cloud environments with variable latency often benefit from 10–12.
+{{< /callout >}}
+
 ### SWIM: Scalable Weakly-consistent Infection-style Membership
 
 Used by Consul and Serf. SWIM separates failure detection from membership propagation and adds **indirect probing** to reduce false positives caused by point-to-point network issues.

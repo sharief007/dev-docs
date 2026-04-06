@@ -21,6 +21,10 @@ Every read returns the most recent write or an error. All nodes see the same dat
 
 This is **linearizability** in CAP terms — the system behaves as if there is one copy of the data, and every operation takes effect atomically at some point between its start and completion. It is not the same as eventual consistency.
 
+{{< callout type="warning" >}}
+**CAP "consistency" ≠ ACID "consistency".** CAP's C means linearizability — every read sees the most recent write across all nodes. ACID's C means the database transitions between valid states (constraints satisfied). A system can be ACID-consistent (all constraints hold) while being CAP-inconsistent (replicas return stale data). Confusing the two in an interview is a common red flag.
+{{< /callout >}}
+
 ```
 Node A  ──── write x=2 ────►  Node A: x=2
                                Node B: x=2   ← must reflect the write immediately
@@ -100,7 +104,7 @@ After partition heals, ZooKeeper guarantees all nodes see the same state.
 
 ### etcd
 
-etcd uses **Raft** consensus. Raft requires a majority quorum to commit any entry to the log. A minority partition cannot elect a leader and will reject all client requests with `etcdserver: request timed out`.
+etcd uses [**Raft**](../../consensus/raft) consensus. Raft requires a majority quorum to commit any entry to the log. A minority partition cannot elect a leader and will reject all client requests with `etcdserver: request timed out`.
 
 ```
 3-node etcd cluster, network splits into [2, 1]:
@@ -215,4 +219,4 @@ The binary CP/AP framing is a simplification. Real systems are more nuanced:
 | **Optimistic concurrency** | AP system accepts all writes; detect conflicts on read using version vectors; resolve in application |
 | **Fencing tokens** | Accept writes on both sides of partition; use monotonic tokens to discard stale writers after reconnection |
 
-The PACELC model extends CAP to describe the latency vs. consistency tradeoff that exists even in the **absence** of partitions — which is the more common operating condition.
+The [PACELC](../pacelc) model extends CAP to describe the latency vs. consistency tradeoff that exists even in the **absence** of partitions — which is the more common operating condition.

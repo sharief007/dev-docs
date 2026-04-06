@@ -7,7 +7,7 @@ sidebar:
   open: true
 ---
 
-Multi-region architecture deploys an application across geographically separated datacenters to reduce latency, survive regional outages, and comply with data residency laws. The core tension is between **consistency** (all regions see the same data) and **latency** (cross-region round trips cost 50–200ms).
+Multi-region architecture deploys an application across geographically separated datacenters to reduce latency, survive regional outages, and comply with data residency laws. The core tension is between **[consistency](../consistency-models)** (all regions see the same data) and **latency** (cross-region round trips cost 50–200ms) — the [PACELC](../pacelc) tradeoff at scale.
 
 ## Why Go Multi-Region?
 
@@ -164,6 +164,10 @@ Conflict resolution: ts=1001 > ts=1000 → keep 'Alicia', discard 'Alice'
 
 **Pros:** Simple, deterministic, no user intervention.
 **Cons:** **Data loss.** The "losing" write is silently dropped. Clock skew can cause the "earlier" write to win. Acceptable for low-value data (last-seen timestamps, analytics counters), dangerous for high-value data (account balances, orders).
+
+{{< callout type="warning" >}}
+**LWW silently discards data — this is not a bug, it's the design.** If two users update the same row in different regions within the replication window, one update disappears with no error, no conflict notification, and no audit trail. For data where every write matters (financial transactions, inventory counts, user-facing content), LWW is not acceptable. Use CRDTs (below), application-level merge, or route all writes for a given entity to a single region.
+{{< /callout >}}
 
 ### CRDTs (Conflict-Free Replicated Data Types)
 
