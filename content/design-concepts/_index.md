@@ -24,4 +24,5 @@ params:
     {{< card link="api" title="API Design" subtitle="Pagination strategies, idempotency keys, API versioning, breaking vs non-breaking changes, and sunset lifecycle" >}}
     {{< card link="architecture" title="Architecture" subtitle="Microservices vs monolith, service discovery, API gateway, BFF pattern, and service mesh" >}}
     {{< card link="capacity-estimation" title="Capacity Estimation" subtitle="Latency numbers, estimation framework, worked examples, peak load patterns, and interview worksheet" >}}
+    {{< card link="specialized" title="Search & Geospatial" subtitle="Typeahead autocomplete, GeoHash encoding, QuadTree spatial indexing, and Uber-style location indexing" >}}
 {{< /cards >}}
