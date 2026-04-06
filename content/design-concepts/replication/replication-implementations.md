@@ -11,66 +11,168 @@ params:
   editURL:
 ---
 
-### Statement-Based Replication:
+A leader-based replication system needs a mechanism to get data changes from the leader to the followers. The choice of mechanism affects what you can do with the replicated data — version compatibility, cross-engine replication, change data capture, and zero-downtime upgrades all depend on it.
 
-In statement-based replication, the leader records and shares every executed write request (statement) with its followers. Each follower processes these statements, such as INSERT, UPDATE, or DELETE, similar to client-generated SQL statements.
+## Statement-Based Replication
 
-#### Challenges:
+The leader logs every write statement (`INSERT`, `UPDATE`, `DELETE`) and sends them to each follower. The follower parses and executes each statement as if it received it from a client.
 
-**Nondeterministic Functions:** Statements calling functions like `NOW()` or `RAND()` may produce different results on each replica.
+```mermaid
+sequenceDiagram
+    participant L as Leader
+    participant F as Follower
 
-Workaround: The leader can replace nondeterministic function calls with a fixed return value in the statement log for consistency across followers.
+    L->>L: Execute INSERT INTO orders VALUES (...)
+    L->>F: Forward statement text
+    F->>F: Parse and execute same statement
+    Note over F: Result must match leader — but might not
+```
 
-**Side Effects from Statements:**  Statements with side effects (e.g., triggers, stored procedures) may generate varied results on different replicas. Resolving inconsistencies in side effects can be complex and may require specific handling.
+**Where it breaks:**
 
-Due to numerous edge cases and potential challenges in maintaining consistency, statement-based replication is often considered less preferable in favor of alternative replication methods.
+| Problem | Example | Why it fails |
+|---------|---------|-------------|
+| Nondeterministic functions | `NOW()`, `RAND()`, `UUID()` | Each replica evaluates independently → different values |
+| Auto-increment columns | `INSERT` with `AUTO_INCREMENT` | Followers must execute in the exact same order as the leader |
+| Side effects | Triggers, stored procedures, UDFs | May depend on local state that differs across replicas |
 
-### Write-Ahead Log (WAL) Shipping:
+**Workaround:** The leader can replace nondeterministic function calls with fixed return values in the statement log (MySQL did this in early versions).
 
-In scenarios involving structures like B-trees, where individual disk blocks are overwritten, modifications are initially recorded in a write-ahead log (WAL). This practice ensures that the index can be restored to a consistent state following a crash.
+**Verdict:** Fragile. Largely abandoned in favor of row-based replication. MySQL used statement-based replication by default before version 5.7.7.
 
-The leader not only writes the log to disk but also transmits it across the network to its followers. The follower, upon receiving the log, reconstructs identical data structures as those on the leader.
+## Write-Ahead Log (WAL) Shipping
 
-The WAL contains details about which bytes were altered in specific disk blocks. This close coupling with the storage engine makes replication intricately linked to the underlying storage format.
+The leader's WAL — the sequential log of every byte-level change to data pages — is streamed directly to the follower. The follower replays the same page-level changes to reconstruct an identical on-disk state.
 
-#### Limitations:
+```mermaid
+sequenceDiagram
+    participant L as Leader
+    participant W as WAL (disk)
+    participant F as Follower
 
-- WAL shipping, while efficient, closely ties replication to the storage engine. Careful consideration of version compatibility is crucial to maintain a consistent database state. 
-- Leveraging this approach for zero-downtime upgrades requires a replication protocol that supports running different software versions on the leader and followers.
+    L->>W: Write WAL record (page 42, offset 128, old→new bytes)
+    L->>F: Stream WAL record
+    F->>F: Apply byte-level change to local page 42
+    Note over L,F: Physical replication — follower is byte-identical to leader
+```
 
+**PostgreSQL streaming replication** uses this approach. The standby connects to the primary and continuously receives WAL records:
 
-### Logical (Row-Based) Log Replication:
+```
+# postgresql.conf on primary
+wal_level = replica
+max_wal_senders = 5
 
-An alternative approach involves using distinct log formats for replication and storage engine, enabling decoupling of the replication log from storage engine internals. This specialized replication log is known as a logical log.
+# recovery.conf on standby (or standby.signal in PG 12+)
+primary_conninfo = 'host=primary-host port=5432'
+```
 
-#### Log Content:
+### Limitation: Storage Engine Coupling
 
-**Inserted Row:** Log contains new values of all columns for the inserted row.
+WAL records describe **which bytes changed in which disk blocks**. This ties replication to the exact storage format — the leader and follower must run:
+- The same storage engine
+- The same database version (or a compatible one)
 
-**Deleted Row:** Log provides sufficient information to uniquely identify the deleted row. If no primary key exists, old values of all columns need to be logged.
+This makes **zero-downtime rolling upgrades** difficult: you cannot run the leader on v15 and a follower on v16 if the on-disk page format changed between versions. The standard approach is to upgrade the follower first, promote it, then upgrade the old leader — but this requires the WAL format to be backward-compatible between those two versions.
 
-**Updated Row:** Log includes adequate details to uniquely identify the updated row, along with new values of all columns.
+## Logical (Row-Based) Log Replication
 
-**Transaction Modification:** A transaction modifying multiple rows generates several log records. Followed by a record indicating the transaction's commitment.
+Instead of shipping physical byte changes, the leader writes a **logical log** — a description of what changed at the row level, decoupled from the storage engine format.
 
-#### Advantages:
+### Log Content
 
-**Backward Compatibility:** Logical log, being decoupled from storage engine internals, facilitates better backward compatibility. Allows the leader and follower to run different database software versions or even different storage engines.
+| Operation | What the log records |
+|-----------|---------------------|
+| `INSERT` | New values of all columns |
+| `DELETE` | Enough to identify the row (primary key, or all column values if no PK) |
+| `UPDATE` | Row identifier + new values of changed columns |
+| `COMMIT` | Marker indicating a transaction's set of changes is complete |
 
-**Ease of Parsing:** Logical log format is simpler for external applications to parse. Useful for sending database contents to external systems like data warehouses for offline analysis or building custom indexes and caches. This technique is called **change data capture**.
+```mermaid
+sequenceDiagram
+    participant L as Leader
+    participant Log as Logical Log
+    participant F as Follower
+    participant CDC as External Consumer
 
-### Trigger-Based Replication:
+    L->>Log: Row-level change record (INSERT, id=7, name='Alice', ...)
+    Log->>F: Replicate via logical decoding
+    Log->>CDC: Stream to Kafka / data warehouse
+    Note over F,CDC: Same log serves replication AND change data capture
+```
 
-When specific requirements arise, such as replicating a subset of data, moving data between different types of databases, or implementing conflict resolution logic, it becomes necessary to elevate the replication process to the application layer. This shift allows for more customized and tailored solutions to address unique needs and scenarios.
+**MySQL binlog** (in `ROW` format, default since 5.7.7) and **PostgreSQL logical replication** (via `pgoutput` plugin) both implement this approach:
 
-#### Tools and Techniques:
+```sql
+-- PostgreSQL: create a logical replication publication
+CREATE PUBLICATION my_pub FOR TABLE orders, customers;
 
-**Database Log Reading Tools:** Tools like Oracle GoldenGate can extract data changes from the database log and make them available to an application.
+-- On the subscriber
+CREATE SUBSCRIPTION my_sub
+  CONNECTION 'host=primary-host dbname=mydb'
+  PUBLICATION my_pub;
+```
 
-**Triggers and Stored Procedures:** Relational databases offer features like triggers and stored procedures. A trigger allows the registration of custom application code automatically executed on data change (write transaction). The trigger can log this change into a separate table, accessible for reading by an external process.
+```sql
+-- MySQL: verify binlog format
+SHOW VARIABLES LIKE 'binlog_format';  -- should return ROW
+```
 
-#### Considerations:
+### Why This Is the Standard Today
 
-**Overheads and Limitations:** Trigger-based replication typically incurs higher overheads compared to other methods and may be more susceptible to bugs and limitations.
+| Advantage | Why it matters |
+|-----------|---------------|
+| **Version independence** | Leader and follower can run different DB versions — the log format is stable across releases |
+| **Cross-engine replication** | PostgreSQL → MySQL is possible via logical decoding |
+| **Change data capture (CDC)** | External systems (Kafka, data warehouses) consume the same log stream — this is the foundation of the [Outbox Pattern](../distributed/outbox-pattern) |
+| **Selective replication** | Replicate a subset of tables or columns |
+| **Human-readable** | Row-level changes are easier to debug than byte-level diffs |
 
-**Flexibility:** Despite potential drawbacks, the flexibility of trigger-based replication makes it valuable in specific use cases.
+## Trigger-Based Replication
+
+When replication requirements go beyond what the database engine provides — replicating a subset of data, moving between different database types, or applying custom conflict resolution — the replication logic moves to the application layer.
+
+**Mechanisms:**
+
+| Tool | How it works |
+|------|-------------|
+| **Triggers + stored procedures** | A `BEFORE`/`AFTER` trigger fires on every write, logging the change to a separate audit table. An external process reads that table and applies changes to the target. |
+| **Log-reading tools** | Oracle GoldenGate, Debezium, Maxwell read the database's transaction log and emit change events to an external system (Kafka, another database). |
+
+```sql
+-- Example: trigger-based change capture
+CREATE TABLE orders_changelog (
+    id SERIAL PRIMARY KEY,
+    order_id INT,
+    operation VARCHAR(10),
+    changed_at TIMESTAMP DEFAULT NOW(),
+    new_data JSONB
+);
+
+CREATE OR REPLACE FUNCTION capture_order_change() RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO orders_changelog (order_id, operation, new_data)
+    VALUES (NEW.id, TG_OP, row_to_json(NEW)::jsonb);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER orders_audit
+    AFTER INSERT OR UPDATE ON orders
+    FOR EACH ROW EXECUTE FUNCTION capture_order_change();
+```
+
+**Trade-off:** higher overhead per write (trigger execution + changelog table insert) and more moving parts to maintain. Use this only when built-in replication cannot satisfy the requirement.
+
+## Comparison
+
+| Method | Coupling | Version Compat | CDC Support | Performance | Status |
+|--------|----------|---------------|-------------|-------------|--------|
+| Statement-based | Low | Good | Poor | Good | Legacy — largely replaced |
+| WAL shipping | **High** (byte-level) | Poor (same version) | None | Best (no transformation) | Standard for physical standbys |
+| Logical (row-based) | Low | Good | **Excellent** | Good (slight overhead) | **Standard for most use cases** |
+| Trigger-based | Low | Good | Custom | Worst (trigger overhead) | Niche — custom requirements only |
+
+{{< callout type="info" >}}
+**Interview tip:** When discussing database replication, say: "I'd use logical replication — it decouples the replication format from the storage engine, supports cross-version upgrades, and doubles as a CDC stream. For a hot standby where byte-identical state and minimal lag matter (like a failover target), WAL shipping is better because it skips the logical decoding overhead." This shows you understand the tradeoff, not just the mechanism.
+{{< /callout >}}
