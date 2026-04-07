@@ -3,8 +3,6 @@ title: API Design
 weight: 10
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

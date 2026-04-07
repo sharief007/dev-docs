@@ -2,8 +2,6 @@
 title: Microservices vs Monolith
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 A team of 5 engineers building an early-stage product does not need microservices. A single deployable unit with a well-structured codebase is faster to build, simpler to debug, and cheaper to operate. Microservices become justified when the organization scales — multiple teams, independent release cadences, and workloads with vastly different scaling profiles. The architecture choice is driven by **team structure and operational maturity**, not by technology hype.

@@ -2,8 +2,6 @@
 title: Real-time Leaderboard System
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 Imagine you are tasked with designing a real-time leaderboard system for a massive multiplayer online game. This system needs to track player scores from millions of matches, provide players with their live ranking instantly, and be highly available and scalable to handle peak tournament traffic.

@@ -1,8 +1,6 @@
 ---
 title: Blocking Queue
 type: docs
-sidebar:
-  open: true
 ---
 
 {{< tabs items="python" >}}

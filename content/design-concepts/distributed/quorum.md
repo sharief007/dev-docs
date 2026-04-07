@@ -2,8 +2,6 @@
 title: Quorum Reads & Writes
 weight: 8
 type: docs
-sidebar:
-  open: true
 ---
 
 A quorum is the minimum number of nodes that must participate in an operation for the result to be considered valid. In a replicated system with N copies of the data, configuring how many nodes must acknowledge a write (W) and how many must respond to a read (R) lets you trade consistency for availability and latency — per operation if needed.

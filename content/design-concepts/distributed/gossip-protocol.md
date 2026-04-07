@@ -2,8 +2,6 @@
 title: Gossip Protocol
 weight: 7
 type: docs
-sidebar:
-  open: true
 ---
 
 A gossip protocol (also called an epidemic protocol) is a peer-to-peer communication method where each node periodically selects a small number of random peers and exchanges state. Information spreads through the cluster the way a rumor spreads through a social network — exponentially, without any central coordinator.

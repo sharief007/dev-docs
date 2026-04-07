@@ -2,8 +2,6 @@
 title: Database Sharding
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 Sharding is horizontal partitioning — splitting a single database into multiple independent databases (shards), each owning a subset of the data. It is the last resort for scaling writes past what a single primary can handle, and it introduces operational complexity that cannot be undone without a full migration.

@@ -2,8 +2,6 @@
 title: 'Replication Lag'
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 The delay, known as **replication lag**, between a write occurring on the leader and being reflected on a follower may be minimal, often just a fraction of a second, making it practically imperceptible.

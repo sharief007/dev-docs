@@ -2,8 +2,6 @@
 title: Read Replicas & Replication Lag
 weight: 10
 type: docs
-sidebar:
-  open: true
 ---
 
 A read replica is a copy of the primary database that serves read traffic. The primary handles all writes; replicas receive those writes asynchronously (usually) and apply them to their local state. The gap between a write landing on the primary and becoming visible on a replica is **replication lag**.

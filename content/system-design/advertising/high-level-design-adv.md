@@ -2,8 +2,6 @@
 title: 'High Level Design'
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 **Functional Requirements:**

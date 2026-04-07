@@ -2,8 +2,6 @@
 title: HTTP Evolution
 weight: 6
 type: docs
-sidebar:
-  open: true
 ---
 
 A side-by-side view of what changed across HTTP versions, who benefits from each, and how the protocol is handled at CDN edges and reverse proxies.

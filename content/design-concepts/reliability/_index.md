@@ -3,8 +3,6 @@ title: Reliability Patterns
 weight: 9
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

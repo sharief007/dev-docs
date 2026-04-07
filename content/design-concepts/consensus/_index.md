@@ -3,8 +3,6 @@ title: Consensus & Coordination
 weight: 6
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

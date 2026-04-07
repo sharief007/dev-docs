@@ -1,8 +1,6 @@
 ---
 title: Distributed Unique ID Generator
 type: docs
-sidebar:
-  open: true
 ---
 
 The goal is to design a **Distributed ID Generation System** that can generate globally unique IDs across multiple services and datacenters without coordination. This system should be highly available, fault-tolerant, and able to generate IDs at high throughput. **Twitter's Snowflake ID** is a popular example, but we will generalize its concept.

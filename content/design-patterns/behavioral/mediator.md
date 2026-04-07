@@ -1,8 +1,6 @@
 ---
 title: Mediator
 type: docs
-sidebar:
-  open: true
 ---
 
 The Mediator design pattern is a behavioral design pattern that encapsulates how a set of objects interact. It promotes loose coupling by preventing objects from referring to each other explicitly and allows their interaction to be varied independently. Instead of having each object communicate directly with each other, they communicate through a mediator.

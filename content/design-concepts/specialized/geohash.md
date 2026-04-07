@@ -2,8 +2,6 @@
 title: GeoHash
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 "Find all restaurants within 1km of my location." The database has 50 million restaurant records with latitude and longitude columns. A naive query computes the Haversine distance from your location to every single restaurant — a full table scan. GeoHash solves this by encoding a 2D coordinate into a 1D string so that **nearby points share a common prefix**, turning a spatial proximity query into a simple string prefix match.

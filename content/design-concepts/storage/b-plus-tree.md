@@ -2,8 +2,6 @@
 title: B+ Tree
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 A B+ tree is the index structure underneath PostgreSQL, MySQL (InnoDB), Oracle, and SQL Server. [Database Indexes](../database-indexes) covers what queries a B-tree supports and when to use one. This file goes one level deeper: how the structure actually works on disk, why it is fast, and what happens when you write.

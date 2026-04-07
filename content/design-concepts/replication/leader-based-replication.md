@@ -2,8 +2,6 @@
 title: 'Master Slave Replication'
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 In this setup, there is one primary database (master) that handles write operations. The changes made on the master are then replicated to one or more secondary databases (slaves) for read operations. Slaves are read-only copies.

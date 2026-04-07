@@ -2,8 +2,6 @@
 title: HTTP/3 and QUIC
 weight: 5
 type: docs
-sidebar:
-  open: true
 ---
 
 HTTP/3 (RFC 9114, 2022) replaces TCP with **QUIC** (RFC 9000) as the transport layer. QUIC is built on UDP and reimplements reliable transport in user space, solving the two remaining problems of HTTP/2: TCP-level HOL blocking and slow connection establishment.

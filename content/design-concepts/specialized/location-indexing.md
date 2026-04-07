@@ -2,8 +2,6 @@
 title: Uber-Style Location Indexing
 weight: 4
 type: docs
-sidebar:
-  open: true
 ---
 
 A rider opens the Uber app and taps "Request Ride." Within 2 seconds, the app shows 8 nearby drivers on the map. Behind the scenes, the system must answer: "Which available drivers are within 3km of latitude 40.7128, longitude -74.0060?" — and answer it in under 100ms, while simultaneously ingesting **millions of GPS updates per second** from drivers moving in real-time. This is a fundamentally different problem from static nearby search (Yelp restaurants don't move). The write rate is extreme, the data is constantly stale, and reads must still be fast.

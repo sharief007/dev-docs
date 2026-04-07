@@ -3,8 +3,6 @@ title: Distributed Systems
 weight: 5
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

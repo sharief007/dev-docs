@@ -2,8 +2,6 @@
 title: 'Multi Leader Replication'
 weight: 4
 type: docs
-sidebar:
-  open: true
 ---
 
 Leader-based replication, with its single leader processing all writes, presents a significant drawback: if connectivity to the leader is lost due to network interruptions or other reasons, writing to the database becomes impossible.

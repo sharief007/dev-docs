@@ -2,8 +2,6 @@
 title: Bloom Filter Basics
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 **Scenario:** You're building a user registration system for a large-scale web service (e.g., Twitter or GitHub).

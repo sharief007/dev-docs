@@ -2,8 +2,6 @@
 title: Leader Election
 weight: 6
 type: docs
-sidebar:
-  open: true
 ---
 
 Leader election is the process by which a cluster of nodes agrees on exactly one node to act as the coordinator. The leader handles decisions that require a single authoritative source: accepting writes in a replicated database, assigning work in a distributed scheduler, or managing cluster topology.

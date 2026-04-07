@@ -2,8 +2,6 @@
 title: Circuit Breaker Pattern
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 Your order service calls a payment service. The payment service is down. Every order request now waits 30 seconds for a TCP timeout, exhausting your thread pool. Within minutes, the order service itself appears down — not because of its own bug, but because it kept calling a dead dependency. The circuit breaker pattern prevents this cascade: after detecting repeated failures, it **stops making calls** to the failing service and fails fast with a fallback response.

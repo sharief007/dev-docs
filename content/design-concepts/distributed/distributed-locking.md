@@ -2,8 +2,6 @@
 title: Distributed Locking
 weight: 5
 type: docs
-sidebar:
-  open: true
 ---
 
 A distributed lock ensures that only one process across a cluster can enter a critical section at a time. The core problem: how do you coordinate access to a shared resource when the processes live on different machines and communicate only over a network that can fail?

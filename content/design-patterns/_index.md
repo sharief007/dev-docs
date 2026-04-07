@@ -2,8 +2,6 @@
 title: Design Patterns
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

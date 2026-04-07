@@ -2,8 +2,6 @@
 title: Saga Pattern
 weight: 9
 type: docs
-sidebar:
-  open: true
 ---
 
 A Saga is a sequence of **local transactions** across multiple services, where each step has a **compensating transaction** that undoes its effect if a later step fails. It replaces distributed transactions (2PC) in microservice architectures where holding cross-service locks is impractical.

@@ -2,8 +2,6 @@
 title: API Pagination
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 An API endpoint returns 2 million records. The client doesn't need them all at once — it needs page 1 of 20 results. Pagination splits a large result set into manageable chunks, each retrieved with a separate request. The method you choose determines performance at scale, stability under concurrent writes, and client implementation complexity.

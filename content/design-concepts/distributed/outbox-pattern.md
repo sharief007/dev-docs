@@ -2,8 +2,6 @@
 title: Outbox Pattern
 weight: 10
 type: docs
-sidebar:
-  open: true
 ---
 
 The Outbox Pattern solves the **dual-write problem**: how do you atomically update a database **and** publish an event to a message broker? The answer is — you don't. You write both to the database in a single transaction, and a separate process publishes the event later.

@@ -2,8 +2,6 @@
 title: Hot-Key / Hotspot Problems
 weight: 15
 type: docs
-sidebar:
-  open: true
 ---
 
 A hotspot occurs when a disproportionate fraction of traffic concentrates on a single key, partition, node, or shard. Consistent hashing and sharding distribute *different keys* across nodes — they cannot distribute *traffic for the same key* across nodes. That distinction is the root of every hotspot problem.

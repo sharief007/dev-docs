@@ -2,8 +2,6 @@
 title: REST vs gRPC vs GraphQL
 weight: 11
 type: docs
-sidebar:
-  open: true
 ---
 
 Three dominant API paradigms used at FAANG — each optimized for a different problem. Knowing when to reach for each is a system design interview staple.

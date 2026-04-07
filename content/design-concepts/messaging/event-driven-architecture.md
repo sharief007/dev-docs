@@ -2,8 +2,6 @@
 title: Event-Driven Architecture
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 Event-Driven Architecture (EDA) is a design paradigm where services communicate by producing and consuming **events** — immutable facts about things that have happened. Instead of Service A calling Service B directly (synchronous RPC), Service A publishes an event and moves on. Any number of services can react independently.

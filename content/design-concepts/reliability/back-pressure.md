@@ -2,8 +2,6 @@
 title: Back-Pressure & Load Shedding
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 A producer generates events faster than the consumer can process them. Without intervention, the in-between buffer grows without bound — first exhausting memory, then triggering OOM kills, cascading failures, or silent data loss when the buffer is eventually dropped. **Back-pressure** and **load shedding** are two complementary strategies for handling overload: back-pressure slows down the producer; load shedding drops excess work to protect the system.

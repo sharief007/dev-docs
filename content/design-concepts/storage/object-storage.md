@@ -2,8 +2,6 @@
 title: Object Storage (S3)
 weight: 9
 type: docs
-sidebar:
-  open: true
 ---
 
 Object storage is the backbone of modern data infrastructure — not just for user uploads, but for data lakes, ML training sets, backups, and static asset delivery at any scale. S3 is the canonical implementation; understanding its design explains why it works differently from block or file storage.

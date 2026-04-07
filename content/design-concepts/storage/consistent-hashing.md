@@ -2,8 +2,6 @@
 title: Consistent Hashing
 weight: 11
 type: docs
-sidebar:
-  open: true
 ---
 
 Consistent hashing solves a specific problem: how to distribute keys across a dynamic cluster of nodes such that adding or removing a node moves the minimum possible number of keys. It is the foundation of distributed caches, Cassandra's storage layer, and any system where the set of servers is not fixed.

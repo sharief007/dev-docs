@@ -2,8 +2,6 @@
 title: 'Digital Advertising Terminology'
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 1. **Impression**  

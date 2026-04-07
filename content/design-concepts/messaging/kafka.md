@@ -2,8 +2,6 @@
 title: Kafka Deep Dive
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 Apache Kafka is a distributed, persistent, append-only commit log designed for high-throughput event streaming. It sits at the center of most modern event-driven architectures — acting as the durable backbone between services that produce events and the many systems that consume them.

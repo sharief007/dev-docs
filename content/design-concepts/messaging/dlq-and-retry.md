@@ -2,8 +2,6 @@
 title: Dead Letter Queues & Retry Strategies
 weight: 5
 type: docs
-sidebar:
-  open: true
 ---
 
 When a consumer fails to process a message — bad data, downstream timeout, transient bug — the system has two options: retry forever (blocking the queue) or drop the message (losing data). Neither is acceptable. **Dead Letter Queues (DLQs)** and **retry strategies** solve this by giving failed messages a structured path: retry with backoff, and if retries are exhausted, move the message to a separate queue for inspection rather than blocking or losing it.

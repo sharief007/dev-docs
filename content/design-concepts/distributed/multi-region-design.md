@@ -2,8 +2,6 @@
 title: Multi-Region Design & Geo-Replication
 weight: 13
 type: docs
-sidebar:
-  open: true
 ---
 
 Multi-region architecture deploys an application across geographically separated datacenters to reduce latency, survive regional outages, and comply with data residency laws. The core tension is between **[consistency](../consistency-models)** (all regions see the same data) and **latency** (cross-region round trips cost 50–200ms) — the [PACELC](../pacelc) tradeoff at scale.

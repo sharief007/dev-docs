@@ -3,8 +3,6 @@ title: Messaging & Event-Driven
 weight: 7
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

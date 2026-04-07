@@ -2,8 +2,6 @@
 title: 'Consensus'
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 Consensus in distributed computing is a crucial and fundamental problem, aiming to achieve agreement among multiple nodes. At its core, the objective is to ensure that several nodes reach a unanimous decision or agreement on a certain matter. Despite its seemingly straightforward goal, the challenge of achieving consensus has proven to be complex.

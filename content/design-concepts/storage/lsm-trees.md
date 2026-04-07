@@ -2,8 +2,6 @@
 title: LSM Trees
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 A Log-Structured Merge-tree (LSM tree) is a write-optimized storage structure used by Cassandra, RocksDB, LevelDB, HBase, and InfluxDB. It trades read amplification for dramatically faster writes by converting random I/O into sequential I/O.

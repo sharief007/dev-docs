@@ -2,8 +2,6 @@
 title: Consistency Models
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 A consistency model defines the contract between a distributed system and its clients: which reads and writes are guaranteed to reflect which other reads and writes. The models form a spectrum from strongest (most expensive) to weakest (most performant).

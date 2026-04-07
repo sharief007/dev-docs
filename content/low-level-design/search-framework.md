@@ -1,8 +1,6 @@
 ---
 title: Search Framework
 type: docs
-sidebar:
-  open: true
 ---
 
 ### Abstract Storage

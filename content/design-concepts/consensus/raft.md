@@ -2,8 +2,6 @@
 title: Raft Consensus
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 Raft is a consensus algorithm that ensures a cluster of servers agrees on a **replicated log** — the same sequence of commands applied in the same order on every node. It is designed to be understandable (unlike Paxos) while providing the same safety guarantees.

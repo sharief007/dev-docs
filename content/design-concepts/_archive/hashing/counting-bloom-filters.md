@@ -2,8 +2,6 @@
 title: 'Counting Bloom Filter'
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 

@@ -2,8 +2,6 @@
 title: Hashing
 weight: 4
 type: docs
-sidebar:
-  open: true
 ---
 
 

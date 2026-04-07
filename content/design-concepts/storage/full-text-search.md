@@ -2,8 +2,6 @@
 title: Full-Text Search
 weight: 16
 type: docs
-sidebar:
-  open: true
 ---
 
 Full-text search is not a database problem — it is an information retrieval problem. The data structures and algorithms that power Elasticsearch and Solr are fundamentally different from those in a relational database. Understanding why requires starting with the inverted index.

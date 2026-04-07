@@ -2,8 +2,6 @@
 title: QuadTree
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 [GeoHash](../specialized/geohash) divides the world into a fixed grid — every cell at a given precision is the same size, whether it covers Manhattan with 10,000 restaurants or the Sahara Desert with none. This wastes precision on empty regions and provides too little resolution in dense ones. A QuadTree solves this by **adapting its resolution to data density**: dense areas are subdivided into smaller cells, sparse areas remain as large cells.

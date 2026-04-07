@@ -2,8 +2,6 @@
 title: Consistency Models
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 The consistency model your system provides is a direct consequence of how you configure replication. Choose synchronous replication and you get strong consistency — at the cost of availability and write latency. Choose asynchronous and you get low latency and high availability — but clients can observe stale or out-of-order data. Every production database sits somewhere on this spectrum, and the right answer depends on the operation.

@@ -2,8 +2,6 @@
 title: "CQRS: Command Query Responsibility Segregation"
 weight: 4
 type: docs
-sidebar:
-  open: true
 ---
 
 CQRS is an architectural pattern that splits a system into two distinct models: a **write model** (handles commands — state mutations) and a **read model** (handles queries — data retrieval). Instead of a single database schema serving both reads and writes, each side gets its own model, optimized for its specific workload.

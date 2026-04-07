@@ -2,8 +2,6 @@
 title: 'Streaming Deep Dive'
 weight: 5
 type: docs
-sidebar:
-  open: true
 ---
 
 

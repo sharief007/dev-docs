@@ -3,8 +3,6 @@ title: Search & Geospatial
 weight: 12
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

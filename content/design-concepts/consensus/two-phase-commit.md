@@ -2,8 +2,6 @@
 title: Two-Phase Commit (2PC)
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 Two-Phase Commit is a protocol that ensures all participants in a distributed transaction either **all commit** or **all abort**. It solves the **atomic commit problem**: when a transaction spans multiple nodes, how do you guarantee that no node commits while another aborts?

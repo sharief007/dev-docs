@@ -2,8 +2,6 @@
 title: API Idempotency Keys & Versioning
 weight: 2
 type: docs
-sidebar:
-  open: true
 ---
 
 A client sends `POST /payments` to charge $100. The response times out. The client retries. Your API charges $200. This is the fundamental problem that idempotency keys solve: making retries safe. API versioning solves a different but equally important problem: evolving your API without breaking existing clients.

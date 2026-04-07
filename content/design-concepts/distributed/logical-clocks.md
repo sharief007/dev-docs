@@ -2,8 +2,6 @@
 title: Logical Clocks
 weight: 12
 type: docs
-sidebar:
-  open: true
 ---
 
 In a distributed system, there is no global clock. Each machine has its own physical clock that drifts independently. NTP synchronization keeps clocks within ~1–10ms of each other, but that error is large enough to make wall-clock timestamps unreliable for ordering events across machines.

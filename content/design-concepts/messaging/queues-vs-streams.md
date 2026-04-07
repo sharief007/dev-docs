@@ -2,8 +2,6 @@
 title: Message Queues vs Event Streams
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 Message queues and event streams both decouple producers from consumers, but they have fundamentally different semantics. A **message queue** distributes work — each message goes to exactly one consumer and is deleted after acknowledgement. An **event stream** is a persistent log — messages are retained, and multiple independent consumers can each read the entire stream at their own pace.

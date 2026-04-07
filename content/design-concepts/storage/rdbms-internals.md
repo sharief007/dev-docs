@@ -2,8 +2,6 @@
 title: RDBMS Internals
 weight: 4
 type: docs
-sidebar:
-  open: true
 ---
 
 Understanding how a relational database works internally — not just how to query it — is what separates system design answers that sound credible from ones that sound rehearsed. These internals directly explain why PostgreSQL and MySQL behave the way they do at scale.

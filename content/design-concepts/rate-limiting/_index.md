@@ -3,8 +3,6 @@ title: Rate Limiting
 weight: 8
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

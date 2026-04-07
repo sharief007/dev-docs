@@ -2,8 +2,6 @@
 title: 'Replication Implementations'
 weight: 4
 type: docs
-sidebar:
-  open: true
 ---
 
 A leader-based replication system needs a mechanism to get data changes from the leader to the followers. The choice of mechanism affects what you can do with the replicated data — version compatibility, cross-engine replication, change data capture, and zero-downtime upgrades all depend on it.

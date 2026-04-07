@@ -3,8 +3,6 @@ title: Scaling
 weight: 13
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

@@ -2,8 +2,6 @@
 title: HTTP Headers
 weight: 8
 type: docs
-sidebar:
-  open: true
 ---
 
 Headers are key-value pairs sent in both requests and responses. Names are **case-insensitive**. Values are strings. Multiple values can be comma-separated or sent as multiple header lines.

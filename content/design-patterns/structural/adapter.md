@@ -2,8 +2,6 @@
 title: Adapter Pattern
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 The Adapter design pattern is a structural pattern that allows objects with incompatible interfaces to work together. It acts as a bridge between two incompatible interfaces, providing a way for objects to collaborate without modifying their existing code.

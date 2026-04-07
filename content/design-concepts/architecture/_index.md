@@ -3,8 +3,6 @@ title: Architecture
 weight: 11
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

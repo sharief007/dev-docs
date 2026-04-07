@@ -2,8 +2,6 @@
 title: Caching Patterns
 weight: 13
 type: docs
-sidebar:
-  open: true
 ---
 
 A cache reduces latency and origin load by storing computed or fetched results closer to where they are consumed. The hard part is not reading from a cache — it is keeping the cache consistent with the source of truth and handling the failure modes that emerge at scale.

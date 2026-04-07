@@ -2,8 +2,6 @@
 title: Hash Index
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 A hash index maps each key through a hash function to a bucket, then stores a pointer to the row in that bucket. Lookups are O(1) average — there is no tree to traverse. The tradeoff is absolute: a hash index answers only equality predicates. It cannot range-scan, sort, or match prefixes. [Database Indexes](../database-indexes) covers when to choose one over a B+ tree; this file covers how it works and where it appears in real systems.

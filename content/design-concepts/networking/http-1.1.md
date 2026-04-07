@@ -2,8 +2,6 @@
 title: HTTP/1.1
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 HTTP/1.1 (RFC 2616, updated by RFC 7230–7235) is a text-based, stateless, request-response protocol over TCP. It became the dominant web protocol from 1997 and introduced persistent connections, chunked transfer, and request pipelining.

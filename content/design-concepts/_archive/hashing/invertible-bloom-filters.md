@@ -2,8 +2,6 @@
 title: 'Invertible Bloom Filter'
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 ### ✅ Problem Statement

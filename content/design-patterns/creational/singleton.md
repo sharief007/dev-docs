@@ -2,8 +2,6 @@
 title: Singleton Pattern
 type: docs
 weight: 1
-sidebar:
-  open: true
 ---
 
 ## Simple singleton with Draconian synchronization

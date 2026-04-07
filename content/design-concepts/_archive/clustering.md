@@ -2,8 +2,6 @@
 title: 'Database Clustering'
 weight: 3
 type: docs
-sidebar:
-  open: true
 ---
 
 Database clustering is a method used to enhance the performance, availability, and scalability of databases. It involves creating multiple copies of a database, called nodes, and distributing the workload across them. This not only increases the capacity to handle more requests but also provides fault tolerance in case one node fails.

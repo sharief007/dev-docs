@@ -1,8 +1,6 @@
 ---
 title: Meeting Scheduler
 type: docs
-sidebar:
-  open: true
 ---
 
 Design a meeting scheduler.

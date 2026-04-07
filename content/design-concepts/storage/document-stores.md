@@ -2,8 +2,6 @@
 title: Document Stores (MongoDB)
 weight: 8
 type: docs
-sidebar:
-  open: true
 ---
 
 MongoDB stores data as BSON documents in schemaless collections. The central design decision is not which queries to support — it is whether to **embed** related data inside a document or **reference** it from a separate collection. Getting that decision right eliminates most of the pain that comes from using MongoDB at scale.

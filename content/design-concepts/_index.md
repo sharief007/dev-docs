@@ -3,8 +3,6 @@ title: System Design Concepts
 weight: 1
 type: docs
 toc: false
-sidebar:
-  open: true
 ---
 
 {{< cards >}}

@@ -2,8 +2,6 @@
 title: 'Cycle in Directed Graphs'
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 Practice: https://practice.geeksforgeeks.org/problems/detect-cycle-in-a-directed-graph/1

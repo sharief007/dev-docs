@@ -2,8 +2,6 @@
 title: 'Ad Click Event Aggregation'
 weight: 1
 type: docs
-sidebar:
-  open: true
 ---
 
 
