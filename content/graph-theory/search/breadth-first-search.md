@@ -2,12 +2,8 @@
 title: Breadth First Search
 type: docs
 weight: 1
-toc: true
 sidebar:
   open: true
-next: depth-first-search
-params:
-  editURL: 
 ---
 
 Breadth-First Search (BFS) is a graph traversal algorithm that explores a graph level by level, starting from a chosen source node. It visits all the immediate neighbors of the source node first, then moves on to their neighbors, and so forth, until it has visited all reachable nodes.

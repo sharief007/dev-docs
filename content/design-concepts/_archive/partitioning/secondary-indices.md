@@ -2,11 +2,6 @@
 title: 'Secondary indices'
 weight: 2
 type: docs
-toc: true
-prev: 
-next:
-params:
-  editURL:
 ---
 
 When records are exclusively accessed through their primary key, the partition can be derived from that key. This enables the routing of read and write requests to the specific partition responsible for that key.

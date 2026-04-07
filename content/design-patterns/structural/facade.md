@@ -2,11 +2,8 @@
 title: Facade Pattern
 type: docs
 weight: 4
-toc: true
 sidebar:
   open: false
-params:
-  editURL: 
 ---
 
 The Facade design pattern is a structural design pattern that provides a simplified interface to a complex system of classes, objects, or subsystems. It acts as a unified interface that hides the complexities of the underlying system and provides a higher-level, easier-to-use interface for the client code.

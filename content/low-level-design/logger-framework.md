@@ -2,13 +2,8 @@
 title: Logger Framework
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev: 
-next: 
-params:
-  editURL: 
 ---
 
 Designing a logging framework using object-oriented principles requires careful consideration of flexibility, extensibility, and adherence to the SOLID principles. Here's a design that covers various requirements:

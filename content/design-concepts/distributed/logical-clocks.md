@@ -2,7 +2,6 @@
 title: Logical Clocks
 weight: 12
 type: docs
-toc: true
 sidebar:
   open: true
 ---

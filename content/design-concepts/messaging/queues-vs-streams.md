@@ -2,7 +2,6 @@
 title: Message Queues vs Event Streams
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
 ---

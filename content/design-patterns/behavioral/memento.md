@@ -3,9 +3,6 @@ title: Memento
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 The Memento design pattern is a behavioral design pattern that allows you to capture and externalize an object's internal state without violating its encapsulation so that the object can be restored to this state later. This is particularly useful for implementing undo or rollback functionality.

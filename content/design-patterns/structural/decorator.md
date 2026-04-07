@@ -2,11 +2,8 @@
 title: Decorator Pattern
 type: docs
 weight: 3
-toc: true
 sidebar:
   open: true
-params:
-  editURL: 
 ---
 
 The Decorator design pattern is a structural design pattern that allows you to add behavior or responsibilities to objects dynamically, without altering their code. It is one of the Gang of Four design patterns and is used to achieve flexibility in object composition by allowing behavior to be added or removed from individual objects, rather than modifying the entire class hierarchy. 

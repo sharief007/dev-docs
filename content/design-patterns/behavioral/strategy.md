@@ -3,9 +3,6 @@ title: Strategy
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 The Strategy design pattern is a behavioral design pattern that defines a family of algorithms, encapsulates each one, and makes them interchangeable. The strategy pattern lets the algorithm vary independently from the clients that use it.

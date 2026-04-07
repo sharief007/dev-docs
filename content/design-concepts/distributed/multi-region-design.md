@@ -2,7 +2,6 @@
 title: Multi-Region Design & Geo-Replication
 weight: 13
 type: docs
-toc: true
 sidebar:
   open: true
 ---

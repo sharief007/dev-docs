@@ -2,7 +2,6 @@
 title: Dead Letter Queues & Retry Strategies
 weight: 5
 type: docs
-toc: true
 sidebar:
   open: true
 ---

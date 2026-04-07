@@ -2,11 +2,6 @@
 title: 'Database Anomalies'
 weight: 2
 type: docs
-toc: true
-prev: 
-next: isolation-levels
-params:
-  editURL:
 ---
 
 

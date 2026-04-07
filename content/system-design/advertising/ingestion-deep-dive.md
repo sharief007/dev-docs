@@ -5,10 +5,6 @@ type: docs
 toc: false
 sidebar:
   open: false
-prev: high-level-design-adv
-next: streaming-deep-dive
-params:
-  editURL: 
 ---
 
 ### 1. Push-Based Model: Direct to Broker vs. Intermediate Service

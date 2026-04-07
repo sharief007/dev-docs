@@ -2,13 +2,8 @@
 title: 'Deep Dive'
 weight: 3
 type: docs
-toc: true
 sidebar:
   open: true
-prev: high-level-design-lb
-next: 
-params:
-  editURL: 
 ---
 
 ### 1. Why Introduce a Message Broker (Kafka)? Is it Just for Asynchronicity?

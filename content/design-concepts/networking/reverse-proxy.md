@@ -2,13 +2,8 @@
 title: Reverse Proxy vs Forward Proxy
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev: tcp-vs-udp
-next: load-balancing
-params:
-  editURL:
 ---
 
 A proxy sits between two parties in a connection. The direction it faces determines the name, capabilities, and use cases.

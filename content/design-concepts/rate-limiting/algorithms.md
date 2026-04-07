@@ -2,13 +2,8 @@
 title: Rate Limiting Algorithms
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Your API receives 10,000 requests per second from a single client. Without rate limiting, that client's traffic saturates your database connection pool, causing timeouts for every other user. Rate limiting caps how many requests a client can make in a given time period — protecting backend resources, enforcing fair usage, and preventing abuse.

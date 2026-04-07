@@ -3,9 +3,6 @@ title: Iterator
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 The Iterator design pattern is a behavioral design pattern that provides a way to access the elements of an aggregate object sequentially without exposing its underlying representation. This pattern is particularly useful for collections like lists, trees, and other complex data structures.

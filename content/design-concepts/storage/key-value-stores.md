@@ -2,13 +2,8 @@
 title: Key-Value Stores (Redis)
 weight: 6
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Redis is an in-memory data structure store. It is not just a cache — it is a shared, persistent, structured state layer that multiple services can read and write concurrently. Understanding what Redis actually is (versus what people assume it is) is the difference between using it well and misusing it.

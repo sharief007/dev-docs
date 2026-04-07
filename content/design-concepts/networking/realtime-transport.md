@@ -2,13 +2,8 @@
 title: WebSockets vs Long Polling vs SSE
 weight: 10
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 HTTP is request-response — the client always initiates. Real-time features (notifications, live feeds, chat) need the server to push data to the client. Three patterns exist, each with different tradeoffs.

@@ -2,13 +2,8 @@
 title: 'Database Partitioning'
 weight: 2
 type: docs
-toc: true
 sidebar:
     open: false
-prev: 
-next:
-params:
-  editURL:
 ---
 
 In the realm of replication, where data is duplicated across various nodes, the concept of having multiple copies is effective. However, for extensive datasets or high query throughput, this approach may fall short. To address these challenges, data is often divided into partitions, a strategy known as **sharding**.

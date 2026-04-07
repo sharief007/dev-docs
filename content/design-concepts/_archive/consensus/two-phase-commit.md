@@ -1,13 +1,8 @@
 ---
 title: 'Two Phase Commit'
 type: docs
-toc: true
 sidebar:
   open: false
-prev: 
-next:
-params:
-  editURL:
 ---
 
 #### Atomic Commit

@@ -2,13 +2,8 @@
 title: Cache Eviction
 weight: 14
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 When a cache reaches its memory limit, it must evict an existing entry to make room for a new one. The eviction policy determines which entry to remove. The right policy depends on the access pattern: recency-based policies work well for most workloads; frequency-based policies handle skewed hot-key access better; adaptive policies automatically tune between the two.

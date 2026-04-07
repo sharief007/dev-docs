@@ -2,13 +2,8 @@
 title: 'High Level Design'
 weight: 3
 type: docs
-toc: true
 sidebar:
   open: true
-prev: digital-ads-terminology
-next: ingestion-deep-dive
-params:
-  editURL: 
 ---
 
 **Functional Requirements:**

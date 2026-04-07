@@ -2,13 +2,8 @@
 title: CAP Theorem
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev: 
-next: 
-params:
-  editURL: 
 ---
 
 The CAP theorem, proposed by Eric Brewer, states that in a distributed system, you can achieve at most two out of the three properties: Consistency (C), Availability (A), and Partition Tolerance (P).

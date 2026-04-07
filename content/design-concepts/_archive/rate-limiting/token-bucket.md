@@ -2,13 +2,8 @@
 title: Token Bucket Algorithm
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev: 
-next: 
-params:
-  editURL: 
 ---
 
 The **Token Bucket** algorithm is used to control the rate of requests, allowing bursts up to a certain limit while maintaining a steady rate over time.

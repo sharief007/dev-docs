@@ -2,13 +2,8 @@
 title: Capacity Estimation
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 System design interviews start with requirements, and requirements include **scale**. "How many users?" is not trivia — it determines whether you need one PostgreSQL instance or a sharded cluster, whether a single Redis node handles the load or you need a distributed cache, and whether your storage fits on one disk or requires an object store. Capacity estimation turns vague requirements into concrete numbers: requests per second, storage in terabytes, bandwidth in Gbps.

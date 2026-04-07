@@ -2,13 +2,8 @@
 title: Idempotency & Exactly-Once Semantics
 weight: 4
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 An operation is **idempotent** if applying it N times produces the same result as applying it once. Idempotency is the foundation of safe retry logic — without it, every network failure becomes a potential double-charge, double-insert, or duplicate event.

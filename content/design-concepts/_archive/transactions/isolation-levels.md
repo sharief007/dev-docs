@@ -2,13 +2,8 @@
 title: Isolation Levels
 weight: 3
 type: docs
-toc: true
 sidebar:
   open: true
-prev: 
-next: 
-params:
-  editURL: 
 ---
 
 Transaction isolation levels define the degree to which the operations in one transaction are isolated from those in other transactions. 

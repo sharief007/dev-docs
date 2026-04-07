@@ -2,11 +2,8 @@
 title: Proxy Pattern
 type: docs
 weight: 5
-toc: true
 sidebar:
   open: true
-params:
-  editURL: 
 ---
 
 The Proxy design pattern is a structural design pattern that provides a surrogate or placeholder for another object to control access to it. In other words, the Proxy pattern is all about controlling access to an object and adding some extra functionality while keeping the interface consistent.

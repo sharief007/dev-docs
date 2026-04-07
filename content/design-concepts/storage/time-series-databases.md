@@ -2,13 +2,8 @@
 title: Time-Series Databases
 weight: 10
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 A time-series database is not just "a database with a timestamp column." It is a storage engine built around a specific and unusual combination of constraints: **extremely high write throughput, sequential time-ordered access, temporal compression, and automatic data expiry**. Understanding why each design decision exists is what makes this topic answerable at a FAANG interview.

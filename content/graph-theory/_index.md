@@ -5,10 +5,6 @@ type: docs
 toc: false
 sidebar:
   open: true
-prev: 
-next: 
-params:
-  editURL: 
 ---
 
 {{< cards >}}

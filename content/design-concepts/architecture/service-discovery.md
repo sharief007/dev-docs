@@ -2,13 +2,8 @@
 title: Service Discovery & API Gateway
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 In a monolith, the order module calls the payment module with a local function call. In a microservices architecture, the order service needs to know the **network address** of the payment service — and that address changes as instances scale up, fail, and redeploy. Service discovery solves this: it maintains a registry of available service instances and their addresses. An API gateway solves a different problem: it provides a single entry point for external clients, handling routing, authentication, and protocol translation.

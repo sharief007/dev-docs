@@ -2,13 +2,8 @@
 title: Behavioral Patterns
 weight: 3
 type: docs
-toc: true
 sidebar:
   open: true
-prev: 
-next: 
-params:
-  editURL: 
 ---
 
 {{< cards >}}

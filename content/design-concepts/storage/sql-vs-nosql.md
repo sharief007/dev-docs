@@ -2,13 +2,8 @@
 title: SQL vs NoSQL Decision Framework
 weight: 5
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 The single biggest mistake in system design interviews — and in real systems — is choosing a database before understanding the access patterns. The database is the consequence of the access pattern, not the starting point.

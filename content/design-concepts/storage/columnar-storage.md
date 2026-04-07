@@ -2,13 +2,8 @@
 title: Columnar Storage
 weight: 3
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Row-oriented and columnar storage are two fundamentally different ways to lay out table data on disk. The choice determines which workloads are fast and which are expensive. OLTP systems use row storage; OLAP / analytics systems use columnar.

@@ -2,13 +2,8 @@
 title: Bloom Filters & HyperLogLog
 weight: 12
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Bloom filters and HyperLogLog are probabilistic data structures that trade exact answers for dramatic space savings. Both give you a bounded error guarantee in exchange for near-constant memory — making problems that would otherwise require gigabytes solvable in kilobytes.

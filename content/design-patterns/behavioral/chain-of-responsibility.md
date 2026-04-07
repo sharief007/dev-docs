@@ -3,9 +3,6 @@ title: Chain Of Responsibility
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 The Chain of Responsibility is a behavioral design pattern that helps in passing a request along a chain of handlers. 

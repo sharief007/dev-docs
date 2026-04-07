@@ -3,9 +3,6 @@ title: Meeting Scheduler
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 Design a meeting scheduler.

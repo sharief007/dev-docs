@@ -2,11 +2,6 @@
 title: 'Rate Limiting'
 weight: 1
 type: docs
-toc: true
-prev: 
-next: 
-params:
-  editURL:
 ---
 
 ### What ?

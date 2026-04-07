@@ -2,13 +2,8 @@
 title: 'Storage Deep Dive'
 weight: 6
 type: docs
-toc: true
 sidebar:
   open: true
-prev: streaming-deep-dive
-next:
-params:
-  editURL: 
 ---
 
 ## Why Two Storage Layers: Time-Series Aggregate DB & Long-Term Storage (S3)

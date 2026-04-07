@@ -2,7 +2,6 @@
 title: Outbox Pattern
 weight: 10
 type: docs
-toc: true
 sidebar:
   open: true
 ---

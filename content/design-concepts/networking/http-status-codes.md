@@ -2,13 +2,8 @@
 title: HTTP Status Codes
 weight: 7
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Status codes are three-digit integers in the response status line. The first digit defines the class.

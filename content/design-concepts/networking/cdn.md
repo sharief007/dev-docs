@@ -2,13 +2,8 @@
 title: CDN
 weight: 9
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 A CDN is a globally distributed network of servers (Points of Presence, PoPs) that cache and serve content close to the user. Every request that hits a CDN edge instead of your origin saves a round trip that might otherwise cross continents.

@@ -2,13 +2,8 @@
 title: DNS
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Every network call your application makes — whether to an external API, a database, a microservice, or a CDN — starts with a DNS lookup. DNS translates a hostname into an IP address. Understanding it explains why deploys don't propagate instantly, why some users are routed to different servers than others, and why changing a DNS record is not the same as changing a config value.

@@ -2,11 +2,8 @@
 title: Composite Pattern
 type: docs
 weight: 2
-toc: true
 sidebar:
   open: true
-params:
-  editURL: 
 ---
 
 The Composite pattern organizes objects into tree structures, making them work together like one. It lets clients treat individual objects and compositions of objects in a similar way.

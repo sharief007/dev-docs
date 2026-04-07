@@ -2,11 +2,6 @@
 title: 'Leaking Bucket Algorithm'
 weight: 2
 type: docs
-toc: true
-prev: 
-next: 
-params:
-  editURL:
 ---
 
 The **Leaking Bucket** algorithm is used to control the rate of requests with a fixed processing rate. It ensures that requests are handled at a constant rate, regardless of traffic spikes. It works similarly to the Token Bucket but differs in how requests are processed.

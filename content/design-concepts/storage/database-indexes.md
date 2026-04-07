@@ -2,13 +2,8 @@
 title: Database Indexes
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 An index is a separate data structure maintained by the database that lets it find rows without scanning the entire table. Every index you add speeds up reads and slows down writes — the art is knowing which tradeoff to make.

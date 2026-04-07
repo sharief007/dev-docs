@@ -2,11 +2,8 @@
 title: Singleton Pattern
 type: docs
 weight: 1
-toc: true
 sidebar:
   open: true
-params:
-  editURL:
 ---
 
 ## Simple singleton with Draconian synchronization

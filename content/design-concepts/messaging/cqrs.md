@@ -2,7 +2,6 @@
 title: "CQRS: Command Query Responsibility Segregation"
 weight: 4
 type: docs
-toc: true
 sidebar:
   open: true
 ---

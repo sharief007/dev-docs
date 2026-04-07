@@ -2,13 +2,8 @@
 title: CAP Theorem
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 The CAP theorem states that a distributed system can satisfy at most two of three properties simultaneously: **Consistency**, **Availability**, and **Partition Tolerance**. During a network partition, you must choose between consistency and availability — you cannot have both.

@@ -3,10 +3,6 @@ title: 'Dev Docs'
 toc: false
 sidebar:
   open: false
-prev: 
-next:
-params:
-  editURL: https://github.com/sharief007/my-docs/content/_index.md
 ---
 
 Welcome to DevDocs: Your Ultimate Resource Hub for Documentation, Gists, and More! Explore a curated collection of resources to empower your journey in software development and problem-solving. 

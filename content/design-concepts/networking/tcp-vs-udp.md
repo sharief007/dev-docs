@@ -2,13 +2,8 @@
 title: TCP vs UDP
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 TCP and UDP are the two transport-layer protocols that almost everything on the internet runs on. They sit above IP and below application protocols like HTTP, DNS, and WebSocket.

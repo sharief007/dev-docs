@@ -2,7 +2,6 @@
 title: Kafka Deep Dive
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
 ---

@@ -2,13 +2,8 @@
 title: 'Ad Click Event Aggregation'
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev: 
-next: digital-ads-terminology
-params:
-  editURL: 
 ---
 
 

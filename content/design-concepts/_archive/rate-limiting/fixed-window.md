@@ -2,11 +2,6 @@
 title: 'Fixed Window Algorithm'
 weight: 3
 type: docs
-toc: true
-prev: 
-next: 
-params:
-  editURL:
 ---
 
 ### How it works

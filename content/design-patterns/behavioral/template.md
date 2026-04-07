@@ -3,9 +3,6 @@ title: Template
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 The Template Method design pattern is a behavioral design pattern that defines the skeleton of an algorithm in a method, deferring some steps to subclasses. This pattern lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.

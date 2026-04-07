@@ -2,13 +2,8 @@
 title: 'Counting Bloom Filter'
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev: bloom-filters
-next: invertible-bloom-filters
-params:
-  editURL: 
 ---
 
 

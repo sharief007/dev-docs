@@ -2,13 +2,8 @@
 title: Bulkhead Pattern
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Named after the watertight compartments in a ship's hull — if one compartment floods, the bulkheads prevent water from reaching the rest of the ship. The bulkhead pattern applies the same principle to software: isolate failure domains so one slow or failing dependency cannot exhaust the resources shared by all other operations.

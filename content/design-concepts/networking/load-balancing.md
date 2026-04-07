@@ -2,13 +2,8 @@
 title: Load Balancing
 weight: 3
 type: docs
-toc: true
 sidebar:
   open: true
-prev: reverse-proxy  
-next: dns
-params:
-  editURL:
 ---
 
 Load balancing distributes incoming requests across multiple backend servers to achieve higher throughput, availability, and fault tolerance. The type of load balancer and algorithm chosen determines performance characteristics and failure behavior.

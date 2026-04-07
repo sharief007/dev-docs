@@ -3,9 +3,6 @@ title: Blocking Queue
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 {{< tabs items="python" >}}

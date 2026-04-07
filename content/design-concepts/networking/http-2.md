@@ -2,13 +2,8 @@
 title: HTTP/2
 weight: 4
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 HTTP/2 (RFC 7540, 2015) keeps the same semantics as HTTP/1.1 — methods, status codes, headers — but replaces the text-based wire format with a **binary framing layer**. The primary goals: eliminate HOL blocking at the application layer, reduce header overhead, and allow multiple requests to share a single TCP connection.

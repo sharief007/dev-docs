@@ -1,11 +1,8 @@
 ---
 title: 'Travelling Salesman Problem'
 type: docs
-toc: true
 sidebar:
   open: true
-params:
-  editURL: 
 ---
 
 The Traveling Salesman Problem (TSP) can be viewed as finding a Hamiltonian cycle in a weighted graph (where the weights represent distances or costs), with the additional constraint that this cycle must have the minimum total weight. In other words, TSP seeks the shortest possible tour that visits each city exactly once and returns to the starting city.

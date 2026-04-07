@@ -2,7 +2,6 @@
 title: Two-Phase Commit (2PC)
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
 ---

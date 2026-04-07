@@ -3,9 +3,6 @@ title: Visitor
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 The Visitor design pattern is a behavioral design pattern that allows you to add further operations to objects without modifying them. This pattern follows the open/closed principle, allowing you to add new functionality to classes without changing their structure. It involves four main components:

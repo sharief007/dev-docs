@@ -2,13 +2,8 @@
 title: Search Autocomplete / Typeahead
 weight: 1
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 A user types "how to b" into a search bar. Within 100ms, a dropdown shows "how to boil eggs", "how to build a resume", "how to bake a cake" — ranked by popularity. This is typeahead autocomplete. The challenge isn't returning *some* results for a prefix; it's returning the **top-k most popular** completions for any prefix out of billions of search queries, in under 100ms, for millions of concurrent users.

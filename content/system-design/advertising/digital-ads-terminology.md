@@ -2,13 +2,8 @@
 title: 'Digital Advertising Terminology'
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev: _index
-next: high-level-design-adv
-params:
-  editURL: 
 ---
 
 1. **Impression**  

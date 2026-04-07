@@ -2,13 +2,8 @@
 title: 'High Level Design'
 weight: 2
 type: docs
-toc: true
 sidebar:
   open: true
-prev: _index
-next: deep-dive
-params:
-  editURL: 
 ---
 
 #### **Functional Requirements:**

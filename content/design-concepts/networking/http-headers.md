@@ -2,13 +2,8 @@
 title: HTTP Headers
 weight: 8
 type: docs
-toc: true
 sidebar:
   open: true
-prev:
-next:
-params:
-  editURL:
 ---
 
 Headers are key-value pairs sent in both requests and responses. Names are **case-insensitive**. Values are strings. Multiple values can be comma-separated or sent as multiple header lines.

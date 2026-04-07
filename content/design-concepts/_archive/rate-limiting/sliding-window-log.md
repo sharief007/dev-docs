@@ -2,11 +2,6 @@
 title: 'Leaking Bucket Algorithm'
 weight: 4
 type: docs
-toc: true
-prev: 
-next: 
-params:
-  editURL:
 ---
 
 The **Sliding Window Log** algorithm is a rate-limiting mechanism that uses a log of timestamps to track and evaluate requests. Each incoming request's timestamp is recorded in a data structure, and only requests within the current window are considered.  

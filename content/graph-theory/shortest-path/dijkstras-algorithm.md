@@ -2,12 +2,8 @@
 title: Dijkstra's Algorithm
 type: docs
 weight: 1
-toc: true
 sidebar:
   open: true
-next: depth-first-search
-params:
-  editURL: 
 ---
 
 Dijkstra's Algorithm is a method used to find the shortest path from a specified starting point (source) to all other points (nodes) in a weighted graph, where the edge weights represents `non-negative distances` between nodes. It ensures that the shortest path to each node is determined accurately, considering all possible routes through the graph, and is commonly employed in navigation and network routing applications.

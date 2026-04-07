@@ -2,7 +2,6 @@
 title: Saga Pattern
 weight: 9
 type: docs
-toc: true
 sidebar:
   open: true
 ---

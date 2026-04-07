@@ -2,11 +2,6 @@
 title: 'Rebalancing Partitions'
 weight: 3
 type: docs
-toc: true
-prev: 
-next:
-params:
-  editURL:
 ---
 
 In a database, things can change over time. For example, when more people are using it, you might need to add more computing power. If the amount of data gets bigger, you may want to add more storage space and memory. Sometimes, a machine might stop working, and others have to take on its tasks.

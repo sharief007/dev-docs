@@ -3,9 +3,6 @@ title: Search Framework
 type: docs
 sidebar:
   open: true
-toc: true
-params:
-  editURL: 
 ---
 
 ### Abstract Storage
