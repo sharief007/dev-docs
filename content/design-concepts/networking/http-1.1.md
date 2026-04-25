@@ -4,7 +4,9 @@ weight: 3
 type: docs
 ---
 
-HTTP/1.1 (RFC 2616, updated by RFC 7230–7235) is a text-based, stateless, request-response protocol over TCP. It became the dominant web protocol from 1997 and introduced persistent connections, chunked transfer, and request pipelining.
+You're profiling a slow page load and notice the browser opens six TCP connections to your origin even though only one CSS file is being fetched. Looking deeper, you see headers like `User-Agent` and `Cookie` — hundreds of bytes — repeated verbatim on every single asset request. Welcome to HTTP/1.1: the protocol that powered the web for two decades, and whose limitations are the entire reason HTTP/2 and HTTP/3 exist.
+
+HTTP/1.1 (originally RFC 2616, replaced by RFC 7230–7235 in 2014, and currently specified by RFC 9110/9112 in 2022) is a text-based, stateless, request-response protocol over TCP. It became the dominant web protocol from 1997 and introduced persistent connections, chunked transfer, and request pipelining.
 
 ## Message Structure
 
@@ -307,3 +309,7 @@ Enabled via `Accept-Encoding` (request) and `Content-Encoding` (response).
 | No request prioritization | All requests treated equally | Critical resources compete with non-critical ones |
 
 These limitations motivated **HTTP/2** (binary framing, multiplexing, header compression, server push) and **HTTP/3** (QUIC, no TCP-level HOL blocking).
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about HTTP/1.1 limitations, frame it concretely: "I'd point to three structural problems. First, head-of-line blocking — pipelining was supposed to fix it but FIFO response ordering means a slow `/checkout` blocks every request behind it, which is why every browser disables pipelining and instead opens six parallel TCP connections per origin as a workaround. Second, header bloat — `User-Agent` and `Cookie` get sent as plaintext on every request, which is hundreds of bytes per asset on a page with 50 sub-resources. Third, no multiplexing — the protocol is fundamentally one outstanding request per connection. These three problems are exactly what HTTP/2's binary framing, HPACK, and stream multiplexing were designed to solve. I'd still default to HTTP/1.1 for simple infrequent requests and IoT clients where the protocol stack matters more than throughput."
+{{< /callout >}}

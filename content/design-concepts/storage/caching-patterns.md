@@ -1,6 +1,6 @@
 ---
 title: Caching Patterns
-weight: 13
+weight: 15
 type: docs
 ---
 
@@ -239,24 +239,33 @@ sequenceDiagram
 
 Cost: a brief wait for non-first requests. Risk: if the lock holder crashes, others wait until timeout.
 
-**Mitigation 2 — Probabilistic Early Recomputation (PER):**
+**Mitigation 2 — Probabilistic Early Recomputation (XFetch):**
 
-Before a key expires, recompute it with increasing probability as the TTL approaches zero. No locking required.
+Before a key expires, recompute it with increasing probability as the TTL approaches zero. No locking required. The canonical formula (Vattani–Chierichetti–Lowenstein, 2015) is:
 
 ```
-# On every cache read:
-remaining_ttl = cache.TTL(key)
-recompute_probability = exp(-remaining_ttl / β)  # β controls aggressiveness
+# On every cache read, alongside the cached value, the writer also stored:
+#   delta = time the last recompute took (measured)
+#   expiry = absolute time when this entry expires
+# Choose to recompute early when:
+#
+#     now - delta * beta * ln(random()) >= expiry
+#
+# where random() is uniform in (0, 1] and beta > 0 (typically 1.0).
+# Note ln(random()) is negative, so the left-hand side is greater than `now`;
+# as `now` approaches `expiry` the inequality fires with rising probability,
+# and slow-to-recompute keys (large delta) refresh sooner.
 
-if random() < recompute_probability:
+if now() - delta * beta * math.log(random()) >= expiry:
     value = db.fetch(key)               # recompute early
-    cache.SET(key, value, full_TTL)     # reset TTL
+    new_delta = measure(...)            # time the recompute
+    cache.SET(key, (value, new_delta), full_TTL)
     return value
 else:
     return cached_value                 # serve current value
 ```
 
-With β tuned to ~2–5× the recompute cost, entries are refreshed before expiry with high probability — the cache never actually expires for hot keys.
+With `beta` tuned around 1.0, hot, expensive-to-recompute keys are refreshed before expiry with high probability — the cache never actually expires for them, while cheap or rarely-read keys aren't refreshed unnecessarily.
 
 **Mitigation 3 — Background Refresh:**
 
@@ -359,3 +368,7 @@ Request:
 ```
 
 **L1 consistency challenge:** Each application instance has its own L1 cache. A write on one instance invalidates L1 on that instance, but other instances' L1 caches remain stale until TTL expires. This is acceptable for data that tolerates a short staleness window (product prices, user profile data). Not acceptable for inventory counts or session data that must be immediately consistent.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about caching, I'd default to cache-aside with explicit invalidation — "the application reads from cache, falls back to DB on miss, and on writes I update the DB then DEL the cache key, never write to both." Updating the cache on write is unsafe because the two writes aren't atomic. I'd then walk through the three failure modes interviewers expect: stampede (a hot key expires and 500 requests hit the DB at once — fix with single-flight locks or probabilistic early recomputation), penetration (requests for keys that don't exist always miss — fix with cached-null sentinels or a Bloom filter), and avalanche (bulk-loaded keys expire simultaneously — fix with TTL jitter). For multi-region or multi-service systems I'd use CDC-driven invalidation rather than dual writes, and I'd add a 1-second L1 in-process cache as a hot-key defense.
+{{< /callout >}}

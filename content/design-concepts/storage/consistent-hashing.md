@@ -1,6 +1,6 @@
 ---
 title: Consistent Hashing
-weight: 11
+weight: 13
 type: docs
 ---
 
@@ -224,3 +224,7 @@ Virtual nodes reduce statistical load imbalance, but they cannot solve **applica
 | Load distribution | Uniform (by math) | Skewed without vnodes; uniform with vnodes |
 | Hot key handling | Same problem | Same problem — needs application layer |
 | Complexity | O(1) lookup | O(log N) lookup (binary search on sorted ring) |
+
+{{< callout type="info" >}}
+**Interview tip:** When the design needs to distribute keys across a dynamic cluster — caches, Cassandra, sharded Redis — I'd say: "I'd use consistent hashing with virtual nodes. Naive `hash(key) % N` remaps roughly `(N-1)/N` of all keys when one node is added — for a 10-node cluster, adding one node invalidates ~90% of the cache, which is a thundering herd against the origin. Consistent hashing only moves about `1/(N+1)` of keys, and vnodes (typically 128–256 per physical node) smooth out the load distribution and let me weight more powerful machines with more arcs." I'd also call out the limit honestly: consistent hashing distributes different keys evenly, but it cannot split traffic for the same key — a viral key is still a single-node hotspot, and that needs an application-level layer like local caching or random-suffix replication.
+{{< /callout >}}

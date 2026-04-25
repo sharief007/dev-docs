@@ -20,7 +20,7 @@ The write rate dominates. Any storage system for this problem must handle **mill
 
 ### Core Idea
 
-1. Hash each driver's location to a [GeoHash](../specialized/geohash) cell at a fixed precision
+1. Hash each driver's location to a [GeoHash](../geohash) cell at a fixed precision
 2. Store drivers in Redis sorted sets, one per GeoHash cell
 3. To find nearby drivers: compute the 9 surrounding GeoHash cells, query all 9 sorted sets
 

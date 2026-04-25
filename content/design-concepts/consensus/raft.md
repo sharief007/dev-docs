@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+You're building Kubernetes' control plane. Every kubectl apply, every pod scheduling decision, every secret update needs to be durably committed to a cluster store that survives node failures and never loses a write. If two API servers both believed they were authoritative and accepted conflicting updates to a Deployment spec, your cluster state would diverge irrecoverably. **etcd solves this with Raft** — a small group of nodes elects one leader, that leader sequences every write into a replicated log, and a majority must persist each entry before it counts as committed. The same algorithm powers CockroachDB's per-range replication, TiKV, Consul, and Kafka's KRaft controller.
+
 Raft is a consensus algorithm that ensures a cluster of servers agrees on a **replicated log** — the same sequence of commands applied in the same order on every node. It is designed to be understandable (unlike Paxos) while providing the same safety guarantees.
 
 If every server starts in the same state and applies the same deterministic commands in the same order, they all reach the same final state. This is **replicated state machine** — the foundation of etcd, CockroachDB, TiKV, and Kafka KRaft.
@@ -274,4 +276,8 @@ This allows the system to scale writes linearly with the number of ranges, while
 
 {{< callout type="info" >}}
 **Interview framing:** When asked "how does CockroachDB achieve both strong consistency and horizontal scaling," the answer is: "Each data range is a separate Raft group. Writes within a range go through Raft for linearizable consistency. Ranges are split across nodes so different ranges can accept writes in parallel — that's the horizontal scaling. Cross-range transactions use [2PC](../two-phase-commit) on top of Raft."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When asked how to build a strongly consistent metadata store, I'd say: "I'd use a Raft group of 3 or 5 nodes — odd-sized so we always have a clear majority. Writes go to the leader, which appends to its log and replicates to followers; an entry is committed only when a majority has persisted it, which guarantees durability across one or two failures. The vote-grant rule — candidates must have at least as up-to-date a log as any voter — gives us the leader-completeness property, so no committed entry is ever lost across leader changes." For reads, I'd default to ReadIndex (one round-trip to confirm leadership) rather than reading from local state, since a stale leader can't safely serve linearizable reads. For scale, I'd shard with multi-Raft like CockroachDB rather than running one giant Raft group.
 {{< /callout >}}

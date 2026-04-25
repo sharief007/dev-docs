@@ -1,6 +1,6 @@
 ---
 title: Wide-Column Stores (Cassandra)
-weight: 7
+weight: 8
 type: docs
 ---
 
@@ -241,3 +241,7 @@ Secondary indexes in Cassandra (`CREATE INDEX`) scatter queries across all nodes
 | Append-only logs and activity feeds | Complex joins across entities |
 | Multi-datacenter active-active replication | Small datasets (operational overhead not justified) |
 | Linear horizontal scale with no single point of failure | Frequent deletes (tombstone accumulation) |
+
+{{< callout type="info" >}}
+**Interview tip:** When the question is "how would you store a billion messages a day?", I'd reach for Cassandra and immediately explain the schema is query-driven: "I'd design one table per query pattern — `messages_by_user` partitioned on `user_id`, `messages_by_conversation` partitioned on `conv_id` — and accept that I'm storing each message twice. Denormalization isn't a workaround in Cassandra, it's the design." I'd bound partition size with a time bucket like `(user_id, year_month)` to avoid unbounded partitions, run `LOCAL_QUORUM` reads and writes for strong consistency within a DC at one-replica-failure tolerance, and explicitly call out the hot-partition problem as the most common production failure mode — fixing it with random suffixing or sharded counters when needed. I'd avoid Cassandra secondary indexes; they scatter queries across every node and become a performance trap.
+{{< /callout >}}

@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+Your application uses auto-increment primary keys and inserts a few thousand rows per second. Throughput looks fine — until you add a second index on `created_at`, then a third on `(user_id, status)`, and suddenly the database is spending most of its I/O budget rewriting B+ tree pages and the rightmost leaf becomes a write hotspot. Understanding how a B+ tree actually lays out pages, splits, and amplifies writes is what separates "we added an index and it got slow" from a real diagnosis.
+
 A B+ tree is the index structure underneath PostgreSQL, MySQL (InnoDB), Oracle, and SQL Server. [Database Indexes](../database-indexes) covers what queries a B-tree supports and when to use one. This file goes one level deeper: how the structure actually works on disk, why it is fast, and what happens when you write.
 
 ## B-Tree vs B+ Tree
@@ -168,3 +170,7 @@ A table with 8 indexes amplifies this across 8 B+ trees — every INSERT must up
 | **Used by** | PostgreSQL, MySQL (InnoDB), Oracle, SQL Server | Cassandra, RocksDB, LevelDB, HBase, InfluxDB |
 
 The rule of thumb: **B+ tree for read-heavy OLTP, LSM tree for write-heavy time-series or log workloads.** Most OLTP databases are read-dominated (10:1 to 100:1 read/write ratio), which is why B+ trees dominate relational databases.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked "why is PostgreSQL so fast for point lookups even on a billion-row table?", I'd say: "Because the index is a B+ tree with a fan-out of 200–500 keys per page, so even a billion rows is reachable in 3 to 4 levels — and the upper levels stay pinned in the buffer pool, so a typical lookup is one disk I/O at the leaf level." For write-heavy workloads I'd flag the cost: every secondary index multiplies write amplification, page splits dirty multiple pages, and monotonically increasing keys create a right-edge hotspot on the rightmost leaf. That's the moment to consider an LSM-backed engine or to deliberately scatter inserts with a less ordered key.
+{{< /callout >}}

@@ -4,6 +4,8 @@ weight: 6
 type: docs
 ---
 
+Your team is debating whether to enable HTTP/3 on the public CDN. The mobile team says it'll fix tail-latency complaints from users on flaky LTE; the security team is worried about UDP firewalls; the backend team argues that HTTP/2 is "good enough" for the origin. Each team is right for a different reason — and the decision depends on which segment of the connection you're optimizing.
+
 A side-by-side view of what changed across HTTP versions, who benefits from each, and how the protocol is handled at CDN edges and reverse proxies.
 
 ## Protocol Comparison
@@ -82,3 +84,7 @@ Alt-Svc: h3=":443"; ma=86400
 - **Low CDN → origin latency**: CDN PoPs are colocated with origin DCs. RTT is 1–5ms — HTTP/3's 1 RTT handshake savings are negligible.
 - **UDP firewall rules**: corporate and cloud firewalls commonly allow TCP 443 but block UDP 443.
 - **Operational complexity**: QUIC runs in user space and requires more expertise than TCP-based HTTP/2.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked which HTTP version to use, say: "I'd pick the protocol per segment. For browser-to-CDN I'd negotiate HTTP/3 with HTTP/2 fallback via `Alt-Svc` — QUIC's stream independence and 0-RTT resumption are huge wins on mobile and lossy WiFi, and connection migration survives WiFi-to-LTE handoffs without re-handshaking. For CDN-to-origin I'd stay on HTTP/2 over TCP because the RTT is 1–5ms, connection collapsing already amortizes handshakes across thousands of users, and UDP 443 is frequently blocked by corporate firewalls. For internal service-to-service traffic I'd use HTTP/2 — gRPC requires it, and service meshes like Istio handle the upgrade transparently. The trap I'd flag is HTTP/2 on a single TCP connection actually makes TCP-level HOL blocking *worse* than HTTP/1.1's six connections, so HTTP/3 is the real fix for lossy networks."
+{{< /callout >}}

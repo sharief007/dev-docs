@@ -4,6 +4,8 @@ weight: 3
 type: docs
 ---
 
+Your auth service does 200K req/s of "look up user by API token" — pure equality, never range, never sorted. The B-tree on `tokens(token)` works fine at 3 I/Os per lookup, but you wonder if hashing it could shave latency under load. Then you remember InnoDB has been silently building an in-memory hash index for you the whole time, and Riak's Bitcask uses a hash index as its entire storage engine. Knowing when O(1) hashing actually beats a 3-level B-tree — and when it doesn't — is what separates picking the right index from cargo-culting one.
+
 A hash index maps each key through a hash function to a bucket, then stores a pointer to the row in that bucket. Lookups are O(1) average — there is no tree to traverse. The tradeoff is absolute: a hash index answers only equality predicates. It cannot range-scan, sort, or match prefixes. [Database Indexes](../database-indexes) covers when to choose one over a B+ tree; this file covers how it works and where it appears in real systems.
 
 ## Mechanics
@@ -174,3 +176,7 @@ Read("k1"):
 | Default general-purpose index | ❌ (use B+ tree) |
 
 The default for any new index should be a B+ tree. Reach for a hash index only when profiling confirms that equality-only lookups on a specific high-cardinality column are a measured bottleneck, and range/sort queries on that column will never exist.
+
+{{< callout type="info" >}}
+**Interview tip:** If an interviewer asks "should we use a hash index?", I'd say: "Almost never as the default — a 3-level B+ tree finds 64 million rows in 3 I/Os, so O(log n) versus O(1) is rarely the bottleneck in practice. The real differentiator is that a hash index can't do range scans, ORDER BY, prefix LIKE, or composite leftmost-prefix lookups, so the moment requirements evolve you have to reindex." I'd mention InnoDB's Adaptive Hash Index as the case where hashing actually helps invisibly — accelerating buffer-pool-resident lookups — and Bitcask as the case where the entire storage engine is a hash index, with the tradeoff that the keydir must fit in RAM.
+{{< /callout >}}

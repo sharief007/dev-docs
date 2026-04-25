@@ -4,7 +4,7 @@ weight: 3
 type: docs
 ---
 
-[GeoHash](../specialized/geohash) divides the world into a fixed grid — every cell at a given precision is the same size, whether it covers Manhattan with 10,000 restaurants or the Sahara Desert with none. This wastes precision on empty regions and provides too little resolution in dense ones. A QuadTree solves this by **adapting its resolution to data density**: dense areas are subdivided into smaller cells, sparse areas remain as large cells.
+[GeoHash](../geohash) divides the world into a fixed grid — every cell at a given precision is the same size, whether it covers Manhattan with 10,000 restaurants or the Sahara Desert with none. This wastes precision on empty regions and provides too little resolution in dense ones. A QuadTree solves this by **adapting its resolution to data density**: dense areas are subdivided into smaller cells, sparse areas remain as large cells.
 
 ## How a QuadTree Works
 
@@ -161,7 +161,7 @@ Game world stored in QuadTree. To check if a bullet hits any enemy, query the bu
 
 ## QuadTree vs GeoHash
 
-| Property | QuadTree | [GeoHash](../specialized/geohash) |
+| Property | QuadTree | [GeoHash](../geohash) |
 |----------|----------|---------| 
 | **Cell size** | Adaptive — dense areas have small cells, sparse areas have large cells | Fixed — all cells at precision 6 are the same angular size |
 | **Storage** | In-memory tree structure (pointers between nodes) | String column in any database with a B-tree index |

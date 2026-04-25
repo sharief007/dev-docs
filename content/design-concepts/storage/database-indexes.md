@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+Your `orders` table grows from 100K to 50M rows. The dashboard query that filtered by `customer_id` in 80ms now takes 22 seconds, and on Black Friday it times out entirely. Adding one B-tree index on `customer_id` brings it back to single-digit milliseconds — but every additional index slows down every INSERT and UPDATE, and the wrong choice (or the wrong column order in a composite) leaves the planner doing a Seq Scan anyway.
+
 An index is a separate data structure maintained by the database that lets it find rows without scanning the entire table. Every index you add speeds up reads and slows down writes — the art is knowing which tradeoff to make.
 
 {{< callout type="info" >}}
@@ -180,3 +182,7 @@ Key things to spot:
 | `Bitmap Heap Scan` | Row pointers collected from index scan(s) sorted by physical block location; heap pages read sequentially — avoids random I/O per row; also produced when multiple indexes are OR'd or AND'd together |
 | `rows=` estimate vs actual | Large gap → stale statistics; run `ANALYZE` |
 | `Buffers: hit=X read=Y` | `hit` = from cache, `read` = from disk — high `read` indicates cache pressure |
+
+{{< callout type="info" >}}
+**Interview tip:** When an interviewer asks "how would you make this query faster?", I'd say: "First I'd check `EXPLAIN ANALYZE` to see if the planner is actually using an index — a lot of perceived 'index problems' are really stale statistics or composite indexes that violate the leftmost-prefix rule. For composite indexes I put equality columns first and range columns last, because a range predicate stops the index from being useful for any column after it. And I'd push back on adding more indexes reflexively — every index multiplies write amplification, so on a write-heavy table I'd rather have three carefully chosen composite or covering indexes than eight single-column ones."
+{{< /callout >}}

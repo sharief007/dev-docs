@@ -4,6 +4,8 @@ weight: 13
 type: docs
 ---
 
+A user in Frankfurt opens your app. Their request crosses the Atlantic, hits your us-east-1 cluster, and 180ms later they finally see something on screen — for every page load. Meanwhile, GDPR requires their personal data never leave the EU, and your CFO just asked what happens if AWS us-east-1 has another all-day outage. **Multi-region is the answer to all three problems at once** — but the moment you put a database in two places, you collide head-on with [PACELC](../pacelc): every cross-region write either pays 50–200ms of synchronous coordination or accepts a window where the regions silently disagree. Picking which side of that tradeoff to take, per data type, is most of the design work.
+
 Multi-region architecture deploys an application across geographically separated datacenters to reduce latency, survive regional outages, and comply with data residency laws. The core tension is between **[consistency](../consistency-models)** (all regions see the same data) and **latency** (cross-region round trips cost 50–200ms) — the [PACELC](../pacelc) tradeoff at scale.
 
 ## Why Go Multi-Region?
@@ -286,4 +288,8 @@ flowchart TD
 
 {{< callout type="info" >}}
 **Interview framing:** "For a globally distributed app, I'd use active-active with geo-partitioned writes — each user is homed to their nearest region, all their writes go there, so there are no write conflicts. Reads can go to any region using causal consistency tokens to ensure read-your-writes. For data that's truly global (product catalog, configuration), I'd use CRDTs or accept eventual consistency with LWW. Cross-region replication is async to keep write latency low, with semi-synchronous for critical data."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** The framing I'd lead with is **geo-partitioning by user home region** — pin each user's writes to one region so there are no cross-region write conflicts to resolve, and serve reads from the nearest region using causal tokens (LSN/HLC) for read-your-writes. I'm explicit that **last-write-wins silently drops data** — fine for view counts and last-seen timestamps, never for financial or user-generated content; for those I'd use CRDTs (counters, OR-sets) or application-level merge. For the rare data that must be globally linearizable (account balances, inventory across regions), I'd use Spanner-style synchronous Paxos and accept the +100ms write latency as the cost of correctness. The active-passive vs active-active call comes down to RPO/RTO: active-passive is simpler with ~1min RTO and replication-lag RPO; active-active is near-zero RTO but you're paying for full capacity in every region and inheriting the conflict-resolution problem.
 {{< /callout >}}

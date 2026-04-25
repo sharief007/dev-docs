@@ -4,7 +4,9 @@ weight: 4
 type: docs
 ---
 
-HTTP/2 (RFC 7540, 2015) keeps the same semantics as HTTP/1.1 — methods, status codes, headers — but replaces the text-based wire format with a **binary framing layer**. The primary goals: eliminate HOL blocking at the application layer, reduce header overhead, and allow multiple requests to share a single TCP connection.
+You're loading a product page that pulls 40 sub-resources from the same origin. Over HTTP/1.1, the browser opens 6 parallel TCP connections and serializes the rest behind them; the page renders in 2.1 seconds. Flip the server to HTTP/2 and the same request set finishes in 700ms over a single connection — same bytes on the wire, no code changes, no extra hardware. The difference is the binary framing layer.
+
+HTTP/2 (originally RFC 7540 in 2015, now superseded by RFC 9113 in 2022) keeps the same semantics as HTTP/1.1 — methods, status codes, headers — but replaces the text-based wire format with a **binary framing layer**. The primary goals: eliminate HOL blocking at the application layer, reduce header overhead, and allow multiple requests to share a single TCP connection.
 
 ## Binary Framing Layer
 
@@ -187,3 +189,7 @@ Each stream and the connection itself has a **receive window** — the maximum a
 | Header compression | ❌ (plaintext, repeated) | ✅ (HPACK) |
 | Server push | ❌ | ✅ (deprecated in practice) |
 | TLS required | No | No (but enforced by all browsers) |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about HTTP/2, lead with the wins and call out the catch: "I'd default to HTTP/2 between any HTTP/2-capable client and origin — binary framing eliminates application-level HOL blocking via stream multiplexing, HPACK compresses repeated headers by 85–95% on subsequent requests, and a single TCP connection replaces the 6-connection-per-origin browser hack. That said, HTTP/2 still rides TCP, so a single dropped packet stalls *every* in-flight stream simultaneously — TCP-level HOL blocking is actually worse than HTTP/1.1's six connections on lossy networks. That's why I'd reach for HTTP/3 for mobile clients and lossy networks. Two tactical notes: skip server push and use `103 Early Hints` with `Link: rel=preload` instead because Chrome deprecated push in 2022, and never mix user-controlled values with secrets in the same compressed header block to avoid HPACK-adjacent compression-oracle attacks."
+{{< /callout >}}

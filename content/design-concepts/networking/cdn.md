@@ -4,6 +4,8 @@ weight: 9
 type: docs
 ---
 
+Your origin runs in `us-east-1`. A user in Sydney requests `logo.png` and pays 200ms RTT crossing the Pacific — even though that file hasn't changed in two years. Multiply that by every image, JS bundle, video segment, and you've got a slow, expensive site. Now put a Cloudflare PoP 5ms from that user in Sydney with the same logo cached at the edge: 200ms becomes 5ms, your origin egress bill drops 90%, and your origin survives Black Friday because most of the load never reaches it.
+
 A CDN is a globally distributed network of servers (Points of Presence, PoPs) that cache and serve content close to the user. Every request that hits a CDN edge instead of your origin saves a round trip that might otherwise cross continents.
 
 ## How a Request Flows Through a CDN
@@ -174,3 +176,7 @@ For live streaming, the most recent segments are requested by every viewer withi
 | **Bot management** | Fingerprint and rate-limit scrapers, credential stuffing bots at the PoP |
 | **TLS termination** | CDN handles TLS negotiation; origin can accept plain HTTP on a private network |
 | **IP allowlisting at origin** | Lock origin to accept traffic only from CDN IP ranges — prevents origin bypass attacks |
+
+{{< callout type="info" >}}
+**Interview tip:** When CDN comes up, separate static from dynamic: "For immutable assets (JS bundles, images, video segments) I'd use content-hashed URLs with `Cache-Control: public, max-age=31536000, immutable` — versioned URLs eliminate cache-invalidation problems entirely because the URL itself changes on deploy. For cacheable HTML and API responses I'd use shorter TTLs with explicit purge as a backstop. The trap I'd flag is `Vary: Authorization` or `Vary: Cookie` on dynamic endpoints — every unique token creates its own cache entry, which fills the CDN with uncacheable junk; gate user-specific responses with `Cache-Control: private` instead. For thundering-herd scenarios after deploys or live-stream segment drops I'd enable origin shield (CloudFront) or tiered cache (Cloudflare) so 300 PoPs collapse to one origin request. Even for non-cacheable APIs the CDN earns its keep through persistent origin connections, TLS termination at the edge, and DDoS absorption — the wall-clock proximity optimization matters as much as the cache hit rate."
+{{< /callout >}}

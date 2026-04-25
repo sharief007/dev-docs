@@ -1,6 +1,6 @@
 ---
 title: Bloom Filters & HyperLogLog
-weight: 12
+weight: 14
 type: docs
 ---
 
@@ -239,3 +239,7 @@ PFMERGE dau:2024-01-week users:day1 users:day2 ... users:day7  # weekly unique u
 | **Supports deletion** | No (standard) | No |
 | **Merge two sketches** | Yes (bitwise OR) | Yes (register max) |
 | **Memory** | ~10 bits/element | ~12 KB fixed, any cardinality |
+
+{{< callout type="info" >}}
+**Interview tip:** When the interviewer asks about LSM-tree reads, cache penetration, or counting unique users at scale, probabilistic structures are the right answer. For Bloom filters I'd say: "Roughly 10 bits per element gives a 1% false-positive rate, no false negatives ever — perfect for telling Cassandra or RocksDB which SSTables to skip on a point lookup, or for blocking cache-penetration attacks before they hit the DB." For HyperLogLog: "12 KB to count any cardinality up to 2^64 with 0.81% error, and two HLL sketches merge by taking the per-register max — so I can compute weekly DAU as the merge of seven daily HLLs without ever touching the raw user IDs." The thing I'd flag is that standard Bloom filters can't delete — for that I'd reach for a Counting Bloom filter or a Cuckoo filter, accepting 4x or ~1.05x more memory respectively.
+{{< /callout >}}

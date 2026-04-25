@@ -87,7 +87,7 @@ flowchart TB
 | Cost | Detail |
 |------|--------|
 | **Network overhead** | Every cross-service call is an RPC — serialization, latency, failure handling. A local function call becomes a distributed system problem. |
-| **Data consistency** | No shared transactions. Cross-service consistency requires [Saga pattern](../distributed/saga-pattern) or [eventual consistency](../distributed/consistency-models). |
+| **Data consistency** | No shared transactions. Cross-service consistency requires [Saga pattern](../../distributed/saga-pattern) or [eventual consistency](../../distributed/consistency-models). |
 | **Operational complexity** | N services = N build pipelines, N monitoring dashboards, N deployment configurations. Requires container orchestration (Kubernetes), service discovery, distributed tracing. |
 | **Debugging difficulty** | A request touches 5 services. Finding the root cause requires distributed tracing (Jaeger, Zipkin), correlated logs, and service dependency maps. |
 

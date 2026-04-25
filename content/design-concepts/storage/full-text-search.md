@@ -1,6 +1,6 @@
 ---
 title: Full-Text Search
-weight: 16
+weight: 18
 type: docs
 ---
 
@@ -297,4 +297,8 @@ Query-time synonyms are generally preferred for flexibility.
 
 {{< callout type="info" >}}
 In a system design interview, Elasticsearch is the right answer when the question involves full-text search, autocomplete, relevance ranking, or log analytics. It is a **derived data store** — populated from a primary database (PostgreSQL, MySQL) via CDC or dual writes, not the authoritative record of truth. Never let the interviewer assume Elasticsearch replaces your primary database.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When the question involves full-text search, autocomplete, or "find products like X", I'd reach for Elasticsearch and explain: "It's built on Lucene's inverted index — terms map to sorted posting lists, intersected at query time, with BM25 scoring that handles term-frequency saturation and document-length normalization better than TF-IDF." I'd flag two sharp edges: shard count is fixed at index creation, so I'd size 10–50 GB per shard from day one and use the `_split` API later if needed; and Elasticsearch is near-real-time, not real-time — there's a 1-second refresh lag by default, which I'd raise or lower depending on the workload. Most importantly, Elasticsearch is a derived data store, never the source of truth — I'd populate it from PostgreSQL via CDC (Debezium → Kafka → ES sink) so the primary stays authoritative and ES handles search.
 {{< /callout >}}

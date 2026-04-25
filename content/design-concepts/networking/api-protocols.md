@@ -4,6 +4,8 @@ weight: 11
 type: docs
 ---
 
+You're designing the APIs for a new product. The mobile team wants to fetch exactly the fields they render to save bytes on metered connections. The backend team wants compile-time-safe contracts and streaming for the order pipeline that processes 100K events/sec. The third-party developers integrating your API want a familiar REST-over-JSON surface they can hit from `curl`. Three teams, three different right answers — REST, gRPC, and GraphQL each solve a different problem, and shipping all three is the standard FAANG pattern.
+
 Three dominant API paradigms used at FAANG — each optimized for a different problem. Knowing when to reach for each is a system design interview staple.
 
 ## At a Glance
@@ -170,4 +172,8 @@ GraphQL introspection — the ability to query the schema itself — is useful i
 
 {{< callout type="info" >}}
 These are not mutually exclusive. A common pattern at FAANG: **gRPC** between internal microservices, **REST** for the public API gateway, and **GraphQL** as the BFF layer that aggregates internal gRPC calls into client-optimized responses.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When asked REST vs gRPC vs GraphQL, refuse the false dichotomy: "I'd use all three for different layers. REST for the public-facing API because HTTP caching with `ETag`, every HTTP client supports it, and third-party developers can `curl` it. gRPC between internal microservices because Protobuf is 3–10× smaller than JSON, contracts are compile-time-checked, and deadlines propagate through the call graph so a slow root request cancels every downstream call instead of pile-up. GraphQL as the mobile BFF because clients fetch exactly the fields they render — no over-fetch on metered cellular connections, and one schema serves web, iOS, and Android. Two pitfalls I'd flag: GraphQL's N+1 resolver problem requires DataLoader batching from day one, and GraphQL caching is hard because it's POST-only — solve it with persisted queries over GET so the CDN can cache by hash. For browser gRPC, you need gRPC-Web behind an Envoy proxy because browsers can't speak HTTP/2 trailers. And use idempotency keys on POST endpoints in REST — payments and order creation must be retry-safe."
 {{< /callout >}}

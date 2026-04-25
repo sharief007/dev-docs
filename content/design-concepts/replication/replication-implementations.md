@@ -117,7 +117,7 @@ SHOW VARIABLES LIKE 'binlog_format';  -- should return ROW
 |-----------|---------------|
 | **Version independence** | Leader and follower can run different DB versions — the log format is stable across releases |
 | **Cross-engine replication** | PostgreSQL → MySQL is possible via logical decoding |
-| **Change data capture (CDC)** | External systems (Kafka, data warehouses) consume the same log stream — this is the foundation of the [Outbox Pattern](../distributed/outbox-pattern) |
+| **Change data capture (CDC)** | External systems (Kafka, data warehouses) consume the same log stream — this is the foundation of the [Outbox Pattern](../../distributed/outbox-pattern) |
 | **Selective replication** | Replicate a subset of tables or columns |
 | **Human-readable** | Row-level changes are easier to debug than byte-level diffs |
 

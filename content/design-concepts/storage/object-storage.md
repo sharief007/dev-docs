@@ -1,6 +1,6 @@
 ---
 title: Object Storage (S3)
-weight: 9
+weight: 10
 type: docs
 ---
 
@@ -251,4 +251,8 @@ SELECT * FROM S3Object WHERE status = 'error' LIMIT 1000
 
 {{< callout type="info" >}}
 The key design principle: **size objects for your read unit**. If you always read a day's worth of logs together, store them as one object per day — not one object per log line. The per-request API cost and latency make many tiny objects expensive; fewer large objects with byte-range fetches is almost always more efficient.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When the design involves user uploads, media, or a data lake, I'd say: "I'd put it in S3 with presigned PUT URLs so client uploads bypass our app servers entirely — direct browser-to-S3 with no bandwidth through us." For large files I'd use multipart upload (5 MB minimum part size, 10K part limit) so a failed part doesn't restart the whole transfer. I'd push back on using S3 as a database — its latency is tens of ms versus microseconds for block storage, and there's no in-place update — but I'd use it as the durable backing for data lakes (Parquet with byte-range fetches), backups, and ML training sets. For cost I'd use lifecycle policies to transition cold data to Glacier and call out that strong read-after-write consistency is the post-2020 default, so we don't need to design around eventual consistency anymore — except for cross-region replication.
 {{< /callout >}}

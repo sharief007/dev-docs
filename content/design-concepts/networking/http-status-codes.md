@@ -4,6 +4,8 @@ weight: 7
 type: docs
 ---
 
+Your monitoring dashboard alerts on a spike of 502s — what does that actually tell you? It says your reverse proxy can't reach the backend, which is very different from a 503 (your server is overloaded) or a 504 (your backend is just slow). Status codes are how the entire web — browsers, CDNs, load balancers, retry libraries, monitoring tools — make automatic decisions about what to do next. Picking the wrong one breaks retry logic, caching behavior, and on-call dashboards.
+
 Status codes are three-digit integers in the response status line. The first digit defines the class.
 
 ```
@@ -139,3 +141,7 @@ The server failed to fulfill a valid request.
 | 502 | Reverse proxy can't reach backend |
 | 503 | Server overloaded or deploying |
 | 504 | Backend timed out |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked to design API error semantics, be precise: "I'd map 401 to 'who are you' (authentication missing or invalid) and 403 to 'I know you, but no' (authenticated but unauthorized) — and always include `WWW-Authenticate` on 401 so clients know which scheme to retry with. For validation, 400 means malformed syntax and 422 means semantically invalid (failed business rule) — separating them lets clients distinguish parse errors from rule violations. For redirects on POST/PUT endpoints I'd use 307 or 308 instead of 302/301 because they preserve method and body. For server errors, 502 means upstream returned garbage, 503 means I'm overloaded (include `Retry-After`), 504 means upstream timed out — distinct codes drive distinct on-call runbooks. And for rate limiting I'd return 429 with `Retry-After` so clients can back off cleanly instead of hammering."
+{{< /callout >}}

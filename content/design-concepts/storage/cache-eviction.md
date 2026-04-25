@@ -1,6 +1,6 @@
 ---
 title: Cache Eviction
-weight: 14
+weight: 16
 type: docs
 ---
 
@@ -237,3 +237,7 @@ Eviction:
 | OS kernel page replacement | **CLOCK** | Minimal overhead, good approximation of LRU |
 | Session store (all sessions equally important) | **volatile-ttl** | Evict soonest-to-expire sessions first; access pattern irrelevant |
 | Mixed persistent + ephemeral keys (Redis) | **volatile-lru** or **volatile-lfu** | Evict only keys with TTL; preserve no-TTL keys |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about cache eviction, I'd say: "LRU is the default and it works for most workloads — O(1) get/put with a doubly-linked list plus a hash map. But it falls apart on two patterns: scans (a sequential scan of cold data evicts the entire hot working set) and skewed access (recency loses to frequency for the long tail)." For skewed workloads I'd reach for W-TinyLFU — the policy in Caffeine and Redis 4.0+ LFU mode — because it uses a Count-Min Sketch with periodic decay to handle frequency aging, and a small admission window protects hot entries from scan pollution. For mixed Redis workloads with both ephemeral and persistent keys I'd use `volatile-lfu` to evict only TTL'd keys. The detail I'd flag is that pure LFU has no aging — yesterday's hot key blocks today's trending key forever — which is exactly why W-TinyLFU's decay was invented.
+{{< /callout >}}

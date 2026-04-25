@@ -87,18 +87,36 @@ Instead of separate thread pools, use a **semaphore** (concurrent call counter) 
 ```python
 import asyncio
 
+
+class BulkheadFullException(Exception):
+    pass
+
+
 class SemaphoreBulkhead:
-    def __init__(self, max_concurrent):
+    """Limit concurrent calls per dependency; fail fast when full."""
+
+    def __init__(self, max_concurrent, max_wait_seconds=0.0):
+        self._max = max_concurrent
+        self._max_wait_seconds = max_wait_seconds
         self._semaphore = asyncio.Semaphore(max_concurrent)
 
     async def execute(self, func, *args, **kwargs):
-        acquired = self._semaphore.locked()
-        if self._semaphore._value == 0:
-            raise BulkheadFullException(
-                f"Bulkhead full: {self._semaphore._bound} concurrent calls active"
+        # Try to acquire a slot. With max_wait_seconds=0 this is fail-fast;
+        # raising a non-zero value lets callers queue briefly under burst load.
+        try:
+            await asyncio.wait_for(
+                self._semaphore.acquire(),
+                timeout=self._max_wait_seconds,
             )
-        async with self._semaphore:
+        except asyncio.TimeoutError:
+            raise BulkheadFullException(
+                f"Bulkhead full: {self._max} concurrent calls active"
+            )
+        try:
             return await func(*args, **kwargs)
+        finally:
+            self._semaphore.release()
+
 
 payment_bulkhead = SemaphoreBulkhead(max_concurrent=10)
 db_bulkhead = SemaphoreBulkhead(max_concurrent=20)

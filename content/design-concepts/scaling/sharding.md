@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+Your social platform's `posts` table just crossed 8 TB and the primary is doing 80,000 writes per second at peak. The buffer pool can no longer hold the working set, replica lag is creeping into seconds, and the next hardware tier costs five times more for 30% more capacity. You've already added read replicas, caching, and connection pooling. There's one option left, and it's the one nobody picks lightly: shard the database.
+
 Sharding is horizontal partitioning — splitting a single database into multiple independent databases (shards), each owning a subset of the data. It is the last resort for scaling writes past what a single primary can handle, and it introduces operational complexity that cannot be undone without a full migration.
 
 ## Why Sharding Exists
@@ -270,7 +272,7 @@ Resharding — changing the number of shards — is one of the most disruptive o
 
 ### Consistent Hashing for Minimal Movement
 
-Using consistent hashing instead of `hash % N` means adding one shard moves only ~1/N of keys (see [Consistent Hashing](../consistent-hashing)). This is the standard approach for distributed caches and NoSQL systems (Cassandra token ring, Redis Cluster slot migration).
+Using consistent hashing instead of `hash % N` means adding one shard moves only ~1/N of keys (see [Consistent Hashing](../../storage/consistent-hashing)). This is the standard approach for distributed caches and NoSQL systems (Cassandra token ring, Redis Cluster slot migration).
 
 ### Double-Write Migration (Zero-Downtime for Relational DBs)
 
@@ -308,3 +310,7 @@ Purpose-built tools manage live shard splits without application changes:
 | **Application code** | Route queries to the correct DB based on shard key | Shopify (per-tenant DB), GitHub (MySQL sharding) | Full control; significant application complexity |
 | **Middleware proxy** | Transparent sharding proxy between app and DB | Vitess (MySQL), ProxySQL, Citus coordinator | App sees one DB; proxy adds latency hop |
 | **Database-native** | Database handles sharding internally | Cassandra, MongoDB, CockroachDB, DynamoDB | Simplest operationally; less control over placement |
+
+{{< callout type="info" >}}
+**Interview tip:** I'd start by saying sharding is a last resort — replicas, caching, and vertical scaling first — because once you shard, cross-shard joins, foreign keys, and multi-shard transactions become permanent application concerns. For shard-key choice I'd use hash sharding by default for even distribution and to avoid monotonic-key hotspots, switching to range sharding only when range queries dominate and I can pre-split to manage hotspots. I'd reach for consistent hashing so adding a shard moves only ~1/N of keys instead of remapping nearly everything, and I'd design the schema to co-locate data that must be written together (shard by `tenant_id` or `user_id`) so the common path stays single-shard. For the queries that genuinely need a global view, I'd serve them from a denormalized secondary store like Elasticsearch rather than scatter-gather across every shard.
+{{< /callout >}}

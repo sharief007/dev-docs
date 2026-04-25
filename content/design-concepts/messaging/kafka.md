@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+Your ride-sharing platform pushes a million GPS pings per second from drivers' phones. The pricing engine needs them to recompute surge in real time, the ETA service needs them to update arrival predictions, the data lake needs them archived for ML training, and the regulatory team needs a 7-year audit trail. They all need the same data, at different paces, with no chance of one slow consumer slowing down the others. This is the workload Kafka was built for.
+
 Apache Kafka is a distributed, persistent, append-only commit log designed for high-throughput event streaming. It sits at the center of most modern event-driven architectures — acting as the durable backbone between services that produce events and the many systems that consume them.
 
 This page covers Kafka's internals at the level expected in a FAANG system design interview.
@@ -434,4 +436,8 @@ The `.index` file maps offsets to byte positions in the `.log` file. It's sparse
 
 {{< callout type="info" >}}
 **Interview framing:** "I'd use Kafka as the event backbone — producers publish OrderCreated events with `key=orderId` so all events for the same order go to the same partition (ordering guarantee). Three consumer groups read independently: analytics for the data warehouse, search for Elasticsearch indexing, and notifications for email. We'd run with `acks=all`, `min.insync.replicas=2`, and `replication.factor=3` for durability. Consumers commit offsets manually after processing and are designed to be idempotent — that gives us at-least-once delivery with effective exactly-once semantics at the application level."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** The mental model I'd anchor on is that the partition is Kafka's unit of both ordering and parallelism — one consumer per partition within a group, so `parallelism = min(partitions, consumers)`. I'd choose the partition key to reflect the entity that needs ordered processing (orderId, userId) and pick partition count for peak throughput plus headroom, since you can add but not remove. For durability I'd say `acks=all` + `min.insync.replicas=2` + `replication.factor=3`; for replay I'd lean on offset commits in `__consumer_offsets`; and if exactly-once is required I'd reach for the idempotent producer plus transactions, but only when the pipeline stays Kafka-to-Kafka — for external sinks I'd fall back to idempotent consumers and the outbox pattern.
 {{< /callout >}}

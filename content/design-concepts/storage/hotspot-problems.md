@@ -1,6 +1,6 @@
 ---
 title: Hot-Key / Hotspot Problems
-weight: 15
+weight: 17
 type: docs
 ---
 
@@ -273,3 +273,7 @@ The celebrity's record is still read by many clients, but the reads are served f
 | **Kafka** | Skewed key | Compound key, null key (round-robin), custom partitioner, repartition topic |
 | **Social feed** | Celebrity write | Hybrid push/pull: push for regular users, pull for celebrities |
 | **Any** | Read hot entity | CDN / edge cache the hot object; requests never reach the origin cluster |
+
+{{< callout type="info" >}}
+**Interview tip:** The first thing I'd say when an interviewer asks about hotspots: "Consistent hashing distributes different keys across nodes — it cannot distribute traffic for the same key. So sharding does not solve viral content, celebrity accounts, or hot counters." For a viral product page in Redis I'd shard the key (`product:99:0` through `product:99:9`) and pick a random replica on read, plus a 1-second L1 in-process cache so most requests never reach Redis. For a hot Cassandra partition I'd add a random suffix to the partition key for writes and scatter-gather on reads, or use a sharded counter for like/view counts. For Kafka skew I'd use a more granular key (`user_id` instead of `provider`) or repartition downstream. And for the celebrity problem I'd describe Twitter's hybrid: push fan-out for users below a follower threshold, pull on read for celebrities — solved at the application layer because it cannot be solved by the storage layer alone.
+{{< /callout >}}

@@ -134,7 +134,7 @@ flowchart TB
 |---------------|-------------|
 | **Routing** | Maps external URL (`/api/orders`) to internal service (`order-service:8080/orders`) |
 | **Authentication** | Validates JWT/OAuth tokens before requests reach services — services trust the gateway's identity headers |
-| **Rate limiting** | Enforces per-client or per-endpoint rate limits (see [Rate Limiting](../rate-limiting/algorithms)) |
+| **Rate limiting** | Enforces per-client or per-endpoint rate limits (see [Rate Limiting](../../rate-limiting/algorithms)) |
 | **SSL termination** | Handles TLS at the edge — internal traffic can be plaintext (within a trusted network) or mTLS |
 | **Protocol translation** | Client speaks REST/JSON; internal services use gRPC/Protobuf. Gateway translates. |
 | **Request aggregation** | Mobile app needs data from 3 services in one screen. Gateway makes 3 internal calls and returns one response. |

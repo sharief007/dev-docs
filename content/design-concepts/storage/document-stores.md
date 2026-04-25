@@ -1,6 +1,6 @@
 ---
 title: Document Stores (MongoDB)
-weight: 8
+weight: 9
 type: docs
 ---
 
@@ -54,7 +54,7 @@ This is the core schema decision. There is no JOIN in MongoDB — related data m
 
 ## Indexes
 
-MongoDB builds indexes on a `mongod` collection level. All index types are B-trees except geospatial (2d/2dsphere use geohash).
+MongoDB builds indexes at the collection level. The default backing structure is a B-tree variant (WiredTiger), but several index types use specialized structures: **geospatial** indexes (2d/2dsphere) use a geohash-based scheme, **text** indexes use an inverted list with token weights, and **hashed** indexes store hashes of field values for shard distribution and equality lookups.
 
 | Index type | Declaration | Behavior |
 |-----------|-------------|---------|
@@ -258,3 +258,7 @@ try {
 ```
 
 Multi-document transactions use the same MVCC snapshot isolation as the replica set oplog. They add coordination overhead — prefer single-document atomicity via embedding where possible. Transactions across shards (distributed transactions) add further latency due to two-phase commit coordination across shard replica sets.
+
+{{< callout type="info" >}}
+**Interview tip:** When discussing MongoDB, I'd center the answer on the embed-vs-reference decision: "I embed when sub-data is bounded and always fetched together — single-document writes are atomic, so embedding is the simplest path to correctness. I reference when growth is unbounded (the 16 MB document limit), the sub-document is shared across documents, or it's queried independently." For sharding I'd flag that the shard key is immutable post-creation, so I'd choose for cardinality, even frequency, and non-monotonic change — never raw `ObjectId` or timestamp because of insert hotspots on the last chunk; usually a hashed `user_id` or compound `(user_id, day)`. For writes I'd specify `w: "majority", j: true` as the default to survive primary failure, and I'd keep `$lookup` joins limited and always indexed on the foreign field.
+{{< /callout >}}

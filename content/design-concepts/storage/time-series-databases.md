@@ -1,6 +1,6 @@
 ---
 title: Time-Series Databases
-weight: 10
+weight: 11
 type: docs
 ---
 
@@ -359,4 +359,8 @@ ClickHouse is a columnar OLAP database, not a purpose-built TSDB — but it is w
 
 {{< callout type="warning" >}}
 The most expensive mistake in time-series systems is storing request-level or user-level data in a TSDB using high-cardinality tags. Use a TSDB for **aggregate** metrics (rate of requests, p99 latency per service). Use distributed tracing (Jaeger, Tempo) for per-request data and use logs (Elasticsearch, Loki) for per-event data. These are three distinct systems solving three distinct problems.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When the workload is metrics, IoT, or any append-mostly time-ordered data, I'd reach for a purpose-built TSDB and explain why PostgreSQL with a timestamp index falls over: "Random B-tree updates on every write, no temporal compression, and DELETE-based retention generates dead tuples that need VACUUM." A TSDB chunks data into time windows that compress 10–100x using delta-of-delta on timestamps and Gorilla XOR on floats, expires data in O(1) by dropping whole chunks, and pre-aggregates rollups so a year-long query hits 1-day buckets, not 31 million 1-second points. The biggest gotcha I'd flag is high cardinality: tagging by `request_id` or `user_id` explodes the series count and OOMs Prometheus reliably. TSDBs are for aggregate metrics; per-request data belongs in tracing, per-event data in logs.
 {{< /callout >}}

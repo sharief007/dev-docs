@@ -4,6 +4,8 @@ weight: 6
 type: docs
 ---
 
+Your PostgreSQL primary in us-east-1 just stopped responding to health checks. Three replicas are alive — one of them needs to take over, fast, before connections start piling up. But here's the danger: maybe the "dead" primary is actually still running, just unable to reach the rest of the cluster, and is still acknowledging writes from a few sticky connections. If a replica gets promoted while the old primary keeps writing, you have **split-brain** — two nodes both think they're authoritative, both accepting conflicting writes that you can never cleanly reconcile. Leader election is how clusters pick exactly one boss, and split-brain prevention is the part that's actually hard.
+
 Leader election is the process by which a cluster of nodes agrees on exactly one node to act as the coordinator. The leader handles decisions that require a single authoritative source: accepting writes in a replicated database, assigning work in a distributed scheduler, or managing cluster topology.
 
 The hard problem is not electing a leader — it's doing so safely when the old leader might still be alive but unreachable, and preventing two nodes from both believing they are the leader (**split-brain**).
@@ -293,4 +295,8 @@ etcd is a pure Raft implementation. The leader handles all writes; followers pro
 
 {{< callout type="info" >}}
 In a system design interview, when you say "one of the nodes will be the leader," follow up immediately with: "leader election uses Raft — any node with an election timeout fires first and gets a majority vote; epoch numbers prevent the old leader from writing after a new one is elected." This shows you understand the failure mode (split-brain) and the mechanism that prevents it (epoch fencing), not just the happy-path "one node is primary."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd default to [Raft](../../consensus/raft) for any election where the leader needs the most up-to-date log (replicated databases, KV stores) — the vote-grant rule guarantees leader completeness, so no committed write is ever lost across failovers. For application-level leader election where I just need "one of these workers is the boss," I'd use ZooKeeper ephemeral sequential znodes or an etcd lease — the session/lease expiry handles cleanup automatically, no TTL tuning. The follow-up I'd raise unprompted is **split-brain prevention**: a quorum requirement is necessary but not sufficient because the old leader may still be alive in a degraded state, so I'd combine it with monotonic epoch/term numbers (Raft terms, ZooKeeper zxid) used as fencing tokens at the resource layer, and for safety-critical systems add STONITH so the old leader is forcibly killed before the new one accepts writes.
 {{< /callout >}}

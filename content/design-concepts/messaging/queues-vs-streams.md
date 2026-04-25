@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+Your e-commerce checkout fires an `OrderPlaced` event. Analytics needs it for the dashboard, search needs it to update Elasticsearch, and notifications needs it to send a confirmation email. One of these — sending the email — must happen exactly once with retries on failure. Picking the wrong messaging primitive here means either duplicate emails or a tangled fan-out topology you'll regret in six months.
+
 Message queues and event streams both decouple producers from consumers, but they have fundamentally different semantics. A **message queue** distributes work — each message goes to exactly one consumer and is deleted after acknowledgement. An **event stream** is a persistent log — messages are retained, and multiple independent consumers can each read the entire stream at their own pace.
 
 Choosing the wrong one causes architectural pain: a queue where you need fan-out means duplicating messages to N queues; a stream where you need single-consumer task processing means building consumer-group coordination that a queue gives you for free.
@@ -83,7 +85,7 @@ RabbitMQ also supports **publisher confirms** (producer gets ACK when message is
 
 | Feature | SQS Standard | SQS FIFO |
 |---------|-------------|----------|
-| **Throughput** | Unlimited | 300 msg/s (3000 with batching) |
+| **Throughput** | Unlimited | 300 msg/s per message group (3000 with batching) on default FIFO; up to ~70k msg/s per region with **High Throughput FIFO** mode |
 | **Ordering** | Best-effort (may reorder) | Strict FIFO per message group |
 | **Deduplication** | None (at-least-once) | Content-based or explicit dedup ID (exactly-once within 5-min window) |
 | **Visibility timeout** | Message hidden from other consumers while being processed; returned to queue on timeout | Same |
@@ -292,4 +294,8 @@ Regardless of the system, **design consumers to be idempotent**. Network failure
 
 {{< callout type="info" >}}
 **Interview framing:** "For the notification fan-out, I'd use Kafka — one OrderCreated event is consumed independently by analytics, search, and notifications. For the actual email sending, I'd bridge from Kafka to SQS — that gives us single-consumer delivery with dead-letter queues for failed sends. Kafka handles the durable event log and fan-out; SQS handles the task distribution with simpler retry semantics."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When asked "queue or stream?", I'd frame it as "what coupling do I want?" — a queue is for work that exactly one worker should do (send this email, resize this image), while a stream is for facts that multiple systems independently react to. The giveaway for a stream is needing replay or fan-out to N consumers without duplicating the producer's writes; the giveaway for a queue is single-consumer task processing with DLQ semantics. Most production systems run both — Kafka as the durable event backbone, SQS or RabbitMQ for the task distribution downstream — and saying that explicitly signals you've built this pattern before.
 {{< /callout >}}

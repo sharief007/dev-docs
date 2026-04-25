@@ -66,7 +66,9 @@ Peak: 1,700 × 5 = ~8,500 write QPS
 **Storage (tweets):**
 
 ```
-Average tweet: 280 chars × 2 bytes (UTF-16) = 560 bytes
+Average tweet body: 280 chars in UTF-8 — assume ~2 bytes/char as
+                    a worst-case upper bound for mixed scripts
+                    (Latin = 1 byte, CJK / emoji = 3–4 bytes)   ≈ 560 bytes
 Metadata (user_id, timestamp, indexes): ~200 bytes
 Media references (URLs, not actual media): ~100 bytes
 Total per tweet: ~860 bytes ≈ 1 KB

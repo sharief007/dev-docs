@@ -1,6 +1,6 @@
 ---
 title: Key-Value Stores (Redis)
-weight: 6
+weight: 7
 type: docs
 ---
 
@@ -8,7 +8,7 @@ Redis is an in-memory data structure store. It is not just a cache — it is a s
 
 ## Why Redis is Fast
 
-Redis processes commands on a **single thread** in an event loop. This eliminates lock contention entirely — no mutex overhead, no deadlocks, no context switching between threads per request. Network I/O is handled via `epoll` / `kqueue` (non-blocking I/O multiplexing), so a single thread serves thousands of clients simultaneously.
+Redis executes every command on a **single thread** in an event loop. This eliminates lock contention entirely — no mutex overhead, no deadlocks, no context switching between threads per request. Network I/O is handled via `epoll` / `kqueue` (non-blocking I/O multiplexing), so a single thread serves thousands of clients simultaneously. (Redis 6+ optionally uses a small pool of helper threads for socket reads/writes and protocol parsing — `io-threads` — but command execution itself remains single-threaded, which is what guarantees the per-key serial-order semantics.)
 
 ```
 Client A ──┐
@@ -337,3 +337,7 @@ maxmemory-policy allkeys-lfu
 **LRU vs LFU:** LRU evicts the key not accessed for the longest time — a key accessed heavily for a week but quiet for 10 minutes could be evicted. LFU tracks access frequency over time and is more resistant to bursty patterns. Prefer `allkeys-lfu` for caches with skewed access distributions.
 
 **Redis memory overhead:** Every key has ~50–80 bytes of overhead (pointer, encoding metadata, expiry). A million small keys adds ~50–80 MB of overhead before storing any values. Monitor `INFO memory` → `mem_fragmentation_ratio`; values above 1.5 indicate memory fragmentation that `MEMORY PURGE` or a restart can reclaim.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about Redis, I'd lead with "it's a single-threaded event-loop server, which is why every single-command operation is atomic without locks — that's why `INCR`, `SETNX`, and Lua scripts are safe primitives for distributed locking, rate limiting, and counters." I'd pick the right data structure rather than treating Redis as a JSON blob store: sorted sets for leaderboards and sliding-window rate limiters, streams (not pub/sub) when consumers must survive restarts, hashes for object fields. For HA I'd use Sentinel for automatic failover on a single primary, Redis Cluster with hash slots for horizontal scale — and I'd flag the hot-key problem (`CRC16(key) % 16384` lands one viral key on one shard) as a separate problem that needs an L1 cache or key sharding above Redis.
+{{< /callout >}}

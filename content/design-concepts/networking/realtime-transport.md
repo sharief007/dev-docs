@@ -4,6 +4,8 @@ weight: 10
 type: docs
 ---
 
+You're building a stock-trading app. Prices need to update on screen the instant they change on the exchange — but HTTP only lets the client ask, not the server tell. Polling every 100ms wastes bandwidth and hammers your servers; polling every 5s shows stale prices. The fix depends on what direction the data flows: SSE for one-way price updates, WebSockets for the bidirectional order entry channel, and long polling as the firewall fallback. Pick wrong and your scaling story falls apart at 100K concurrent users.
+
 HTTP is request-response — the client always initiates. Real-time features (notifications, live feeds, chat) need the server to push data to the client. Three patterns exist, each with different tradeoffs.
 
 ## The Evolution of Server Push
@@ -179,3 +181,7 @@ A single WebSocket server process typically handles 10k–100k concurrent connec
 | Presence indicators ("X is typing") | WebSocket | Client must push events to server |
 | Environment blocks WebSockets (corporate proxy) | SSE or Long Polling | HTTP-based protocols bypass WS restrictions |
 | IoT telemetry ingest | WebSocket | Binary, persistent, bidirectional for command & control |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked how to design real-time features, pick the protocol from the data direction: "If it's server-to-client only — notifications, live dashboards, stock tickers — I'd use SSE. It's plain HTTP so it works through every proxy and load balancer, the browser's `EventSource` API auto-reconnects with `Last-Event-ID` for free, and over HTTP/2 each subscription is a stream so one TCP connection multiplexes thousands of subscribers. For bidirectional flows like chat or collaborative editing I'd use WebSockets and accept the cost: connections are stateful so the LB needs sticky sessions, a single server typically tops out at 10K–100K concurrent connections, and message fan-out across instances requires Redis or NATS pub/sub. I'd reserve long polling for environments where corporate proxies block WebSockets — Stripe and Twilio still use it as a fallback. The scaling math I'd flag: a chat app with 1M online users needs ~10–100 WebSocket processes, and externalize all session state because losing a node loses every connected client."
+{{< /callout >}}

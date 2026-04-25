@@ -4,6 +4,8 @@ weight: 4
 type: docs
 ---
 
+A user clicks "Pay $99" and the spinner hangs for 30 seconds. The mobile app times out and retries. But the original request actually succeeded — the network just dropped the response. Now the user has been charged $198 for one order. Or: a Kafka consumer processes an event, writes to a database, and crashes before committing the offset. On restart, Kafka redelivers the same event and the consumer charges the customer a second time. **Every distributed system has these failure modes**, and the only defense is to make every write operation idempotent so retries are safe by construction.
+
 An operation is **idempotent** if applying it N times produces the same result as applying it once. Idempotency is the foundation of safe retry logic — without it, every network failure becomes a potential double-charge, double-insert, or duplicate event.
 
 ## The Retry Problem
@@ -249,4 +251,8 @@ WHERE id = 42
 
 {{< callout type="info" >}}
 In a system design interview, when you add a payment, inventory decrement, or any write that gets called over a network: immediately say "this must be idempotent." Explain: client generates idempotency key → server stores key+result → duplicate returns cached result. Then address the deduplication storage: Redis SETNX for speed, DB unique constraint for transactional safety. This signals you've thought about failure modes, not just the happy path.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd be careful never to claim "exactly-once delivery" as a network primitive — what you actually get is **at-least-once delivery plus an idempotent consumer**, which together produce exactly-once *processing*. For any non-GET endpoint that touches money, inventory, or external side effects, I'd require a client-supplied idempotency key (UUID v4), store the key + the response in the same DB transaction as the business write using `INSERT ... ON CONFLICT DO NOTHING`, and return the cached response on duplicates. Kafka's transactional producer plus `read_committed` consumers gives exactly-once semantics within Kafka, but the moment you write to an external database in the processing step, you're back to needing the inbox-table dedup pattern. The race I always call out: never read-then-write to check for duplicates — use atomic operations (`SETNX`, unique constraints) so two concurrent retries can't both pass the check.
 {{< /callout >}}

@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+A user transfers $100 between two accounts that happen to live on different database shards. The debit succeeds on shard A; the credit on shard B fails because the network blips just before commit. Now $100 has vanished — left one account but never arrived at the other. Reorder the writes and you get a different inconsistency. This is the **atomic commit problem**: how do you guarantee that *all* participants in a distributed transaction either commit together or abort together, even when any of them can crash at any moment? **Two-Phase Commit** is the canonical answer — used inside Spanner and CockroachDB for cross-shard transactions, and via XA for heterogeneous resources.
+
 Two-Phase Commit is a protocol that ensures all participants in a distributed transaction either **all commit** or **all abort**. It solves the **atomic commit problem**: when a transaction spans multiple nodes, how do you guarantee that no node commits while another aborts?
 
 ## The Atomic Commit Problem
@@ -228,8 +230,8 @@ Application (Transaction Manager)
 | Scenario | Use | Why |
 |----------|-----|-----|
 | Cross-shard commit within one database (Spanner, CockroachDB) | **2PC** | Controlled environment, low latency between shards, database manages coordinator |
-| Cross-service business transaction (Order → Payment → Inventory) | [**Saga**](../distributed/saga-pattern) | Services are independent, locks across services are impractical |
-| Database + message queue atomicity | [**Outbox pattern**](../distributed/outbox-pattern) | Avoids distributed transaction entirely |
+| Cross-service business transaction (Order → Payment → Inventory) | [**Saga**](../../distributed/saga-pattern) | Services are independent, locks across services are impractical |
+| Database + message queue atomicity | [**Outbox pattern**](../../distributed/outbox-pattern) | Avoids distributed transaction entirely |
 | Read-only cross-node query | **Neither** | No atomicity needed for reads |
 
 {{< callout type="warning" >}}
@@ -253,3 +255,7 @@ If the coordinator crashes after pre-commit, participants know the decision was 
 - Network partitions can still cause inconsistency (one side commits, the other aborts)
 - The extra round trip adds latency without solving the real-world problem
 - Paxos/Raft-based commit protocols (e.g., Spanner) solve the problem properly
+
+{{< callout type="info" >}}
+**Interview tip:** I treat 2PC as the right tool for cross-shard transactions *inside one database product* — Spanner and CockroachDB both layer 2PC on top of Paxos/Raft, which makes the coordinator itself fault-tolerant and eliminates the classical blocking-on-coordinator-crash problem. Across microservices, I'd never reach for 2PC: it requires XA support everywhere, holds locks across the network, and tightly couples services that we deliberately decoupled — the correct answer there is the [Saga pattern](../../distributed/saga-pattern) with idempotent compensating transactions. The only time I'd consider XA in microservices is the narrow case of a single transaction spanning a database and a message broker — and even then I'd prefer the [outbox pattern](../../distributed/outbox-pattern) to avoid distributed transactions entirely.
+{{< /callout >}}

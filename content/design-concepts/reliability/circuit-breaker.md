@@ -46,8 +46,7 @@ Threshold: 50% → TRIP → circuit opens
 
 ```python
 class CircuitBreaker:
-    def __init__(self, failure_threshold=0.5, min_calls=20,
-                 window_seconds=60, reset_timeout=30):
+    def __init__(self, failure_threshold=0.5, min_calls=20, reset_timeout=30):
         self.state = "CLOSED"
         self.failure_count = 0
         self.success_count = 0
@@ -57,9 +56,13 @@ class CircuitBreaker:
         self.reset_timeout = reset_timeout
 
     def call(self, func, *args, **kwargs):
+        # OPEN: short-circuit unless reset timeout has elapsed.
         if self.state == "OPEN":
-            if time.time() - self.last_failure_time > self.reset_timeout:
+            if time.time() - self.last_failure_time >= self.reset_timeout:
+                # Transition OPEN -> HALF_OPEN; reset counters so a single
+                # probe failure or success cleanly decides the next state.
                 self.state = "HALF_OPEN"
+                self._reset_counters()
             else:
                 return self.fallback()
 
@@ -67,12 +70,13 @@ class CircuitBreaker:
             result = func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:
+        except Exception:
             self._on_failure()
             return self.fallback()
 
     def _on_success(self):
         if self.state == "HALF_OPEN":
+            # Probe succeeded -> close the circuit and start fresh.
             self.state = "CLOSED"
             self._reset_counters()
         self.success_count += 1
@@ -80,14 +84,20 @@ class CircuitBreaker:
     def _on_failure(self):
         self.failure_count += 1
         self.last_failure_time = time.time()
-        total = self.failure_count + self.success_count
 
-        if total >= self.min_calls:
-            if self.failure_count / total >= self.failure_threshold:
-                self.state = "OPEN"
-
+        # In HALF_OPEN, a single probe failure immediately re-opens.
         if self.state == "HALF_OPEN":
             self.state = "OPEN"
+            return
+
+        # In CLOSED, only trip once we've seen enough calls to be confident.
+        total = self.failure_count + self.success_count
+        if total >= self.min_calls and self.failure_count / total >= self.failure_threshold:
+            self.state = "OPEN"
+
+    def _reset_counters(self):
+        self.failure_count = 0
+        self.success_count = 0
 ```
 
 ## Reset Timeout and Exponential Backoff

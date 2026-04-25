@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+A user complains your video call has a 400ms lag spike every time their WiFi drops a packet. You inspect the protocol — it's running over TCP, which retransmits the lost packet and stalls every byte behind it until recovery. Switch the call to UDP and the lost frame is just gone; the next frame plays immediately. Two seconds later a different user reports their database query came back with corrupted bytes — turns out that one was incorrectly running over UDP. The choice between TCP and UDP is the most foundational protocol decision in any system, and HTTP/3, QUIC, video streaming, and gaming exist precisely because the answer isn't always TCP.
+
 TCP and UDP are the two transport-layer protocols that almost everything on the internet runs on. They sit above IP and below application protocols like HTTP, DNS, and WebSocket.
 
 | | TCP | UDP |
@@ -139,7 +141,7 @@ sequenceDiagram
     Note over C: TIME_WAIT starts (2 × MSL)
 ```
 
-The active closer enters **TIME_WAIT** for `2 × MSL` (Maximum Segment Lifetime — 30–60 seconds on Linux, making TIME_WAIT last 60–120 seconds).
+The active closer enters **TIME_WAIT** for `2 × MSL` (Maximum Segment Lifetime). Linux pins this to a fixed 60 seconds via the `TCP_TIMEWAIT_LEN` constant rather than computing it from MSL; BSD-derived stacks typically use 60–120 seconds.
 
 **Why TIME_WAIT exists:**
 1. Ensures the final ACK reaches the server (if lost, server retransmits FIN; client must be alive to re-ACK)
@@ -230,3 +232,7 @@ See [HTTP/3 and QUIC](../http-3) for the full treatment.
 | UDP | VoIP | Real-time; old audio frames are worthless; retransmit would arrive too late |
 | UDP | QUIC (HTTP/3) | Reliability reimplemented in user space with independent streams |
 | UDP | DHCP, NTP, SNMP | Simple request/response; broadcast support needed |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked TCP vs UDP, frame the choice on what you can tolerate losing: "I'd default to TCP for anything where every byte must arrive in order — HTTP, databases, file transfer, SSH. The cost is the 1-RTT handshake (2 RTT with TLS 1.3) and TCP-level head-of-line blocking, where a single lost packet stalls every byte stream sharing the connection. I'd use UDP when freshness beats completeness — VoIP, live video, multiplayer games — because retransmitting a 50ms-old audio frame is worse than just dropping it. At scale on a high-RPS service I'd watch for TIME_WAIT exhaustion eating local ports — fix it with connection pooling and `tcp_tw_reuse`, never the broken `tcp_tw_recycle` which mangles NAT'd clients. And HTTP/3 chose UDP specifically so QUIC could reimplement reliability per-stream in user space, sidestepping kernel TCP and head-of-line blocking entirely."
+{{< /callout >}}

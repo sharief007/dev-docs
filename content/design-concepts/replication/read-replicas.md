@@ -1,8 +1,10 @@
 ---
 title: Read Replicas & Replication Lag
-weight: 10
+weight: 3
 type: docs
 ---
+
+A user uploads a new profile photo, sees the success toast, refreshes the page — and the old photo is back. They submit a comment, scroll up, and don't see it. Two users both check the inventory count, both see "1 in stock," both buy it, and now you've oversold. **Each of these is a read-replica lag bug** — the write succeeded on the primary, the read hit a replica that hadn't replicated it yet, and the user sees a state that contradicts what just happened. Read replicas are the standard scaling lever for read-heavy workloads, but they only scale safely if you're explicit about which reads can tolerate seconds of staleness and which must come from the primary.
 
 A read replica is a copy of the primary database that serves read traffic. The primary handles all writes; replicas receive those writes asynchronously (usually) and apply them to their local state. The gap between a write landing on the primary and becoming visible on a replica is **replication lag**.
 
@@ -241,4 +243,8 @@ Automated failover tools (Orchestrator for MySQL, Patroni for PostgreSQL, AWS RD
 
 {{< callout type="info" >}}
 In a system design interview, state upfront which reads can tolerate replication lag (feeds, counts, search indexes) and which cannot (inventory checks, balance reads, idempotency lookups). Route the latter to the primary explicitly. This distinction separates candidates who understand distributed systems from those who treat "add read replicas" as a free scaling win.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd be explicit that read replicas are **not** a free scaling win — every replica reintroduces a consistency decision per query. My default routing rule: any read whose result drives a write decision (inventory check before purchase, balance check before debit, idempotency-key lookup) goes to the primary; stale-OK reads (feeds, profiles, search results, counts) go to replicas. For read-your-writes I'd use LSN-based causal tokens — write returns the LSN, the next read includes it, and the replica only serves the read once it has applied that LSN; PostgreSQL supports this natively with `pg_current_wal_lsn()`. For durability I'd configure semi-synchronous replication so the leader waits for at least one replica ACK before confirming the write to the client — that gives zero data loss on failover as long as the confirmed replica is the one promoted.
 {{< /callout >}}

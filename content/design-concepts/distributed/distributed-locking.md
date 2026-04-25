@@ -4,6 +4,8 @@ weight: 5
 type: docs
 ---
 
+Two checkout services, running on different machines, both decide to deduct the last unit of inventory at the same moment. Or two cron workers in different availability zones both pick up the nightly billing job and start charging customers in parallel. **A local mutex won't help** — the processes don't share memory, and the only thing they can coordinate through is a network that drops packets, pauses processes mid-instruction, and lies about whether messages arrived. Distributed locking is how you bridge that gap, and getting it wrong silently produces double-charges, oversold inventory, and split-brain leaders.
+
 A distributed lock ensures that only one process across a cluster can enter a critical section at a time. The core problem: how do you coordinate access to a shared resource when the processes live on different machines and communicate only over a network that can fail?
 
 ## Why Distributed Locks Are Hard
@@ -317,4 +319,8 @@ Locks also add failure modes: what if lock acquisition fails? what if the lock h
 
 {{< callout type="warning" >}}
 A common interview mistake: proposing a distributed lock for every race condition. The follow-up question is always "what happens if the lock holder crashes after acquiring the lock but before completing the operation?" If the operation is not idempotent, a distributed lock just moves the problem — you still need to handle partial state. Design the operation to be idempotent first; add a lock only if you truly need mutual exclusion for the duration of execution (not just for deduplication).
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** My first answer is usually "I wouldn't use a distributed lock" — most race conditions are better solved with [idempotency keys](../idempotency), DB unique constraints, atomic `UPDATE ... WHERE stock > 0` decrements, or optimistic concurrency with version numbers. When I genuinely need mutual exclusion, I distinguish efficiency locks (Redis SETNX with TTL + unique value released via Lua, or Redlock for HA — acceptable if duplicate execution is just wasteful) from correctness locks (ZooKeeper ephemeral sequential znodes, which release immediately on session loss and give you a monotonic zxid as a fencing token). The hard truth I'd call out: **no TTL-based lock is safe under arbitrary process pauses** — a GC stall longer than the TTL means two holders are in the critical section. The only real fix is fencing tokens validated at the resource server, so a stale holder's writes get rejected.
 {{< /callout >}}

@@ -4,6 +4,8 @@ weight: 8
 type: docs
 ---
 
+A user reports that their session keeps logging out on Safari but works fine on Chrome. You inspect the response and find `Set-Cookie: session=abc; SameSite=None` — no `Secure` flag. Safari silently drops it. The whole problem was a single missing header attribute. HTTP headers are how clients, proxies, CDNs, and servers negotiate behavior — and tiny header bugs cascade into outages, broken auth, cache poisoning, and CORS failures.
+
 Headers are key-value pairs sent in both requests and responses. Names are **case-insensitive**. Values are strings. Multiple values can be comma-separated or sent as multiple header lines.
 
 ```
@@ -273,3 +275,7 @@ The `X-` prefix convention was **deprecated by RFC 6648 in 2012**. New custom he
 | `X-Correlation-Id` | Similar to `X-Request-Id`. Common in microservice architectures. |
 | `X-Real-IP` | Original client IP as set by Nginx. Simpler alternative to `X-Forwarded-For`. |
 | `X-Api-Version` | API version indicator. Some APIs use this instead of URL versioning. |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about HTTP headers in a system design discussion, anchor on the high-leverage ones: "For caching I'd use `Cache-Control: public, max-age=31536000, immutable` on content-hashed assets and `private, no-store` for user-specific responses — `no-cache` is the trap because it means revalidate, not don't cache. For security I'd ship HSTS with `preload`, a strict CSP with `default-src 'self'` to mitigate XSS, and `X-Content-Type-Options: nosniff`. For client IP behind a proxy, never trust the leftmost `X-Forwarded-For` value — read the IP added by your first trusted proxy, otherwise spoofed headers break rate limiting and audit logs. For CORS, `Access-Control-Allow-Origin: *` and `Allow-Credentials: true` are mutually exclusive — browsers silently block the response. And cookies always need `HttpOnly`, `Secure`, and `SameSite=Lax` (or `Strict` for CSRF-sensitive flows)."
+{{< /callout >}}

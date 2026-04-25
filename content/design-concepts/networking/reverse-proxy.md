@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+You're running 12 microservices behind a single domain. Clients only know about `api.example.com`, but `/users/*` needs to land on the User service, `/orders/*` on the Order service, TLS needs to be terminated centrally, JWTs need to be validated before any backend sees the request, and you want to deploy a canary version of the Payment service to 5% of traffic. All of that lives in one place: the reverse proxy.
+
 A proxy sits between two parties in a connection. The direction it faces determines the name, capabilities, and use cases.
 
 | | Forward Proxy | Reverse Proxy |
@@ -342,3 +344,7 @@ When designing systems:
 - **Add L4 in front** when you need HA for the proxy itself or handle non-HTTP traffic
 
 The reverse proxy is typically the **first component clients reach** after DNS resolution in any distributed system architecture.
+
+{{< callout type="info" >}}
+**Interview tip:** When designing the edge of a system, say: "I'd put an L4 load balancer like AWS NLB at the very front for HA and to preserve client IP via PROXY protocol, then an L7 reverse proxy like Nginx or Envoy behind it doing TLS termination, path-based routing, connection pooling to backends, and request buffering to defend against slow-client and Slowloris attacks. The reverse proxy is also where I'd land canary deploys and blue/green via weighted upstream pools. Once I need authentication, per-user rate limiting, or request transformation, I'd promote it to an API gateway like Kong or Envoy. Two pitfalls I'd flag: never trust the leftmost `X-Forwarded-For` value because clients can spoof it — read the IP added by your first trusted proxy. And the L7 proxy adds 1–5ms of latency from terminate-and-reoriginate, so for ultra-low-latency or non-HTTP traffic I'd stay at L4 with DSR."
+{{< /callout >}}

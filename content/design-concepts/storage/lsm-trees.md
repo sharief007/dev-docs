@@ -1,8 +1,10 @@
 ---
 title: LSM Trees
-weight: 2
+weight: 4
 type: docs
 ---
+
+Your fleet of 10K IoT devices reports a sensor reading every second — 10K writes/sec sustained, with bursts to 100K. PostgreSQL handles it for a while, but as the table grows, every INSERT pays for a random B-tree page update plus index maintenance, and write latency starts climbing into the hundreds of milliseconds. Cassandra and RocksDB serve the same workload at a fraction of the latency because they convert every random write into a sequential append. That single architectural choice — and what it costs you on the read path — is the LSM tree.
 
 A Log-Structured Merge-tree (LSM tree) is a write-optimized storage structure used by Cassandra, RocksDB, LevelDB, HBase, and InfluxDB. It trades read amplification for dramatically faster writes by converting random I/O into sequential I/O.
 
@@ -112,3 +114,7 @@ RocksDB (built on LevelDB, open-sourced by Meta) is the storage engine embedded 
 A write stall occurs when the memtable fills faster than it can be flushed to disk, or when L0 SSTable count exceeds the compaction threshold. RocksDB will throttle or fully stall incoming writes to prevent unbounded memory growth.
 
 This is a real operational concern at high write throughput — tuning memtable size, flush thread count, and compaction concurrency is necessary for write-heavy workloads.
+
+{{< callout type="info" >}}
+**Interview tip:** When discussing high-write-throughput systems, I'd say: "I'd reach for an LSM-backed engine — Cassandra, RocksDB, or HBase — because every write becomes a sequential append to the memtable plus a WAL fsync, and there's no random page update like in a B-tree." I'd then call out the cost honestly: reads have to merge multiple SSTables, which is what Bloom filters mitigate by letting the engine skip SSTables that definitely don't contain the key. The compaction strategy is the next decision — leveled for read-heavy workloads where you need bounded read amplification, size-tiered for write-heavy time-series where write amplification matters more. And I'd flag write stalls as the operational gotcha: if compaction can't keep up with ingest, the engine throttles writes, which is the real-world failure mode at extreme throughput.
+{{< /callout >}}

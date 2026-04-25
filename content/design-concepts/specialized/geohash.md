@@ -207,7 +207,7 @@ For most applications (ride-sharing, restaurant search) this doesn't matter beca
 
 ### GeoHash vs Other Spatial Indexes
 
-| Property | GeoHash | [QuadTree](../specialized/quadtree) | S2 / H3 |
+| Property | GeoHash | [QuadTree](../quadtree) | S2 / H3 |
 |----------|---------|----------|---------|
 | Cell shape | Rectangle | Rectangle (adaptive) | Hexagon (H3) / Sphere cap (S2) |
 | Cell size uniformity | Varies with latitude | Adapts to data density | Near-uniform globally |

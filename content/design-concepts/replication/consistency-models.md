@@ -62,13 +62,13 @@ ALTER SYSTEM SET synchronous_standby_names = 'FIRST 1 (standby1, standby2)';
 SET LOCAL synchronous_commit = 'local';  -- skip replica confirmation
 ```
 
-**MySQL semi-sync:**
+**MySQL semi-sync** (MySQL 8.0.26+ uses the renamed `_source_` / `_replica_` system variables; the older `_master_` / `_slave_` names still work as deprecated aliases):
 
 ```sql
--- On the primary
-INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';
-SET GLOBAL rpl_semi_sync_master_enabled = 1;
-SET GLOBAL rpl_semi_sync_master_wait_for_slave_count = 1;
+-- On the primary (MySQL 8.0.26+)
+INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so';
+SET GLOBAL rpl_semi_sync_source_enabled = 1;
+SET GLOBAL rpl_semi_sync_source_wait_for_replica_count = 1;
 ```
 
 ## Asynchronous Replication
@@ -99,7 +99,7 @@ sequenceDiagram
 This is the default mode in PostgreSQL (`synchronous_commit = on` only durably writes to the leader; standby replication is async unless configured otherwise) and MySQL (async replication is the default).
 
 {{< callout type="warning" >}}
-**"Eventually consistent" has no time bound.** Asynchronous replication guarantees that followers converge to the leader's state — but "eventually" could mean 50 ms or 5 minutes depending on replication throughput, network conditions, and follower load. Design read paths around this uncertainty: if something must be current, read from the leader or use [session guarantees](../replication-lag).
+**"Eventually consistent" has no time bound.** Asynchronous replication guarantees that followers converge to the leader's state — but "eventually" could mean 50 ms or 5 minutes depending on replication throughput, network conditions, and follower load. Design read paths around this uncertainty: if something must be current, read from the leader or use [session guarantees](../read-replicas).
 {{< /callout >}}
 
 ## Comparison
@@ -119,32 +119,13 @@ The correct answer is almost always **per-operation**, not per-system:
 | Operation | Required Consistency | Replication Mode |
 |-----------|---------------------|-----------------|
 | Account balance before debit | Linearizable | Read from leader or sync replica |
-| User profile after own edit | Read-your-writes | [Session guarantee](../replication-lag) or leader read |
+| User profile after own edit | Read-your-writes | [Session guarantee](../read-replicas) or leader read |
 | News feed timeline | Eventual | Read from nearest async replica |
 | Inventory count before purchase | Strong | Synchronous or leader read with lock |
 | Analytics dashboard | Eventual (seconds-stale acceptable) | Async read replica |
 
-The theoretical underpinnings — linearizability, sequential consistency, causal consistency, eventual consistency — are covered in [Consistency Models (distributed)](../distributed/consistency-models). This page focuses on how replication configuration delivers those guarantees in practice. For the anomalies that arise under asynchronous replication (stale reads, monotonic read violations, causal ordering violations), see [Replication Lag](../replication-lag).
+The theoretical underpinnings — linearizability, sequential consistency, causal consistency, eventual consistency — are covered in [Consistency Models (distributed)](../../distributed/consistency-models). This page focuses on how replication configuration delivers those guarantees in practice. For the anomalies that arise under asynchronous replication (stale reads, monotonic read violations, causal ordering violations), see [Read Replicas & Replication Lag](../read-replicas).
 
 {{< callout type="info" >}}
 **Interview tip:** When an interviewer asks about consistency in a replicated database, connect the replication mode to the consistency guarantee: "For the balance check, I'd read from the leader to get linearizable consistency — the write was synchronously replicated to one standby for durability, so failover is safe. For the activity feed, I'd read from the nearest async replica and tolerate seconds-stale data to keep read latency low." This shows you treat consistency as a per-operation cost decision, not a system-wide toggle.
 {{< /callout >}}
-
-### Hybrid Replication
-
-The Hybrid Replication Model, also known as Semi-Synchronous Replication, combines features of both synchronous and asynchronous replication. In this model, the system processes a write operation synchronously to at least one replica (ensuring immediate acknowledgment to the client) while asynchronously replicating the write to other replicas.
-
-```mermaid
-sequenceDiagram
-  actor c as client
-  participant m as master replica
-  participant s1 as slave replica
-  participant s2 as slave replica
-
-  c ->> +m: Read Write Queries
-  m -->> s1: Replication Request
-  m -->> s2: Replication Request
-  s1 -->> m: Acknowledgement
-  m ->> -c: Query Response
-  s2 -->> m: Acknowledgement
-```

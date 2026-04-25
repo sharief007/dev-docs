@@ -1,6 +1,6 @@
 ---
 title: SQL vs NoSQL Decision Framework
-weight: 5
+weight: 6
 type: docs
 ---
 
@@ -268,4 +268,8 @@ The decision framework above covers systems built today. These categories are be
 
 {{< callout type="info" >}}
 In a system design interview, mentioning vector databases for AI-powered features (semantic search, recommendations using embeddings) signals awareness of modern architectures. Pinecone and Weaviate are managed; pgvector (PostgreSQL extension) is the pragmatic choice if you are already on PostgreSQL and embedding count is in the millions, not billions.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When asked "SQL or NoSQL?", I'd refuse to answer until I've enumerated the access patterns: "What's the read shape — point lookup, range, full-text, aggregation? What's the relationship structure? Is the schema stable? Do we need multi-entity ACID?" Only then would I pick. I'd push back hard on "we chose NoSQL because it scales" — Instagram ran on PostgreSQL at a billion users, GitHub on MySQL — and I'd default to SQL unless a specific access pattern (high-write time-series, full-text, key-value caching) makes it unworkable. Real systems are polyglot: PostgreSQL for transactions, Elasticsearch for search, Redis for sessions, ClickHouse for analytics — kept in sync via CDC, not dual writes.
 {{< /callout >}}

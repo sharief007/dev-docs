@@ -1,6 +1,6 @@
 ---
 title: Columnar Storage
-weight: 3
+weight: 12
 type: docs
 ---
 
@@ -134,4 +134,8 @@ Parquet file layout:
 
 {{< callout type="info" >}}
 A common architecture at FAANG: OLTP data in MySQL/PostgreSQL → CDC pipeline (Debezium/Kafka) → Parquet on S3 → queried by Athena/Spark/BigQuery. The row store handles transactions; the columnar layer handles analytics. This separation avoids OLAP queries degrading OLTP latency.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** If the question is "how do we run analytics on a billion rows?", I'd say: "Don't run it on the OLTP database — push the data into a columnar store." Columnar layouts read only the columns the query touches, compress 5–10x better than row stores because each column is a single type with high repetition (RLE, dictionary, delta, bit-packing), and enable vectorized SIMD execution that processes thousands of values per CPU instruction. The standard architecture I'd propose is OLTP in PostgreSQL → CDC into Parquet on S3 → queried by Athena, Spark, or ClickHouse. I'd flag that columnar is wrong for point lookups and updates — every row touches N column files — so the row store stays authoritative for transactions and the columnar layer is a derived view.
 {{< /callout >}}

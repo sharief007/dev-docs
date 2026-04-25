@@ -4,6 +4,8 @@ weight: 8
 type: docs
 ---
 
+You're configuring a 3-node Cassandra cluster and the team is debating: should writes wait for all 3 replicas, just 1, or 2? If we pick 1 for both reads and writes we get sub-millisecond latency — but a read can easily miss a write that hasn't propagated yet. If we pick all 3, a single slow node stalls every operation. **The math that resolves this is `R + W > N`** — pick read and write quorums that overlap by at least one node, and every read is guaranteed to see the latest write, even though no individual replica has it all. This is the foundation of Dynamo, Cassandra, and Riak's tunable consistency.
+
 A quorum is the minimum number of nodes that must participate in an operation for the result to be considered valid. In a replicated system with N copies of the data, configuring how many nodes must acknowledge a write (W) and how many must respond to a read (R) lets you trade consistency for availability and latency — per operation if needed.
 
 ## The R + W > N Rule
@@ -175,7 +177,7 @@ sequenceDiagram
 
 **Background read repair (Cassandra default):**
 - The stale replica is patched **after** the client response is sent
-- `read_repair_chance` (0.0–1.0): probability any given read triggers repair on disagreement. Default 0.1 (10%).
+- Historically tunable via `read_repair_chance` / `dclocal_read_repair_chance` (probability a given read triggers repair on disagreement) — these were **deprecated and removed in Cassandra 4.0**; modern Cassandra always performs blocking read repair when the consistency level requires it, and runs asynchronous repair via `nodetool repair`
 - Pros: no added read latency
 - Cons: staleness persists until a triggered repair hits the diverged node
 
@@ -254,4 +256,8 @@ If maximum availability is needed (IoT, metrics ingestion):
 
 {{< callout type="info" >}}
 In a system design interview, when choosing between strong and eventual consistency, frame it as a quorum choice: "We'll use QUORUM writes and QUORUM reads — with N=3 that's W=2, R=2, which guarantees the read set always overlaps the write set. For cross-datacenter we'd use LOCAL_QUORUM to avoid the cross-region latency penalty while keeping consistency within each DC." This shows you understand the mechanism, not just the label.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd anchor the conversation on **R + W > N** — that's the overlap guarantee, and it's the only thing that makes quorum-based reads consistent. With N=3 I default to QUORUM/QUORUM (W=2, R=2) because it tolerates one node failure and still satisfies R+W > N. For cross-DC deployments I'd use LOCAL_QUORUM to avoid 50–200ms cross-region RTT on every operation while keeping consistency within each datacenter. Two pitfalls I'd flag explicitly: TWO/TWO with N=5 *looks* like a quorum but R+W=4 < N=5, so reads can miss writes entirely; and **sloppy quorum breaks the overlap math** — writes accepted by non-designated nodes during a failure window can be invisible to subsequent QUORUM reads from the designated set, so I only enable sloppy quorum when write availability matters more than immediate read consistency.
 {{< /callout >}}

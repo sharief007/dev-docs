@@ -4,6 +4,8 @@ weight: 5
 type: docs
 ---
 
+A user is streaming video on your app. They walk out of WiFi range and their phone switches to LTE — the IP address changes. Over HTTP/2, the TCP connection is dead; the phone re-handshakes TCP and TLS from scratch, the video buffers for 1–2 seconds, and your engagement metrics dip every time someone walks down a hallway. Over HTTP/3, the connection survives the IP change because it's identified by an opaque Connection ID, not a 4-tuple — playback never stutters. That single property, plus stream-independent loss recovery, is the reason HTTP/3 exists.
+
 HTTP/3 (RFC 9114, 2022) replaces TCP with **QUIC** (RFC 9000) as the transport layer. QUIC is built on UDP and reimplements reliable transport in user space, solving the two remaining problems of HTTP/2: TCP-level HOL blocking and slow connection establishment.
 
 ## Why Not Fix TCP?
@@ -118,7 +120,7 @@ TLS is not optional in QUIC. The TLS 1.3 handshake is **integrated into the QUIC
 - In TCP: `TCP handshake → TLS handshake → data`
 - In QUIC: `single combined handshake → data`
 
-QUIC encrypts **everything** — not just the payload. Even packet numbers and connection IDs (in some cases) are encrypted, preventing middlebox interference and passive traffic analysis.
+QUIC encrypts **everything** — not just the payload. Packet numbers are always encrypted (preventing on-path traffic analysis), and most header fields are protected; the connection IDs that have to be visible for routing remain in cleartext in the long header during the initial handshake. The result still prevents middlebox interference far better than TLS-over-TCP, where the entire TCP header is exposed.
 
 ## QPACK — Header Compression for HTTP/3
 
@@ -197,3 +199,7 @@ If multiple hostnames resolve to the same IP and share a TLS certificate, a QUIC
 | Connection migration | ❌ | ❌ | ✅ |
 | Server push | ❌ | ✅ (deprecated) | ✅ (unused) |
 | Middlebox ossification risk | Low | Medium | Low (encrypted) |
+
+{{< callout type="info" >}}
+**Interview tip:** When discussing HTTP/3, lead with the *why*: "I'd reach for HTTP/3 specifically for mobile clients and lossy networks. The core win isn't 0-RTT or connection migration — it's that QUIC streams are independent at the transport layer, so a single dropped packet only affects one stream instead of stalling every in-flight request like TCP-based HTTP/2 does. Connection migration via Connection ID is the killer feature for mobile because the connection survives WiFi-to-LTE handoffs without re-handshaking. I'd advertise HTTP/3 via `Alt-Svc` with HTTP/2 fallback — UDP 443 is frequently blocked by corporate firewalls and ISPs, so HTTP/2 over TCP must always work. Two trap questions: 0-RTT data is replay-vulnerable, so the server must reject non-idempotent requests in early-data, and CDN-to-origin links should usually stay on HTTP/2 because the RTT is too low for QUIC's handshake savings to matter."
+{{< /callout >}}

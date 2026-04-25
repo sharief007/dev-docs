@@ -4,6 +4,8 @@ weight: 9
 type: docs
 ---
 
+A user places an order. Behind the scenes you need to: create the order in the Order service, charge the card via the Payment service, reserve stock in the Inventory service, and dispatch a shipment via the Shipping service — and if any step fails partway through, you need to *undo* the earlier steps so the user isn't charged for an order that never ships. In a monolith, one ACID transaction handles this. Across microservices each owning their own database, **2PC is the wrong answer** — it requires XA support everywhere, holds cross-service locks during slow operations, and re-couples the services you decoupled. The Saga pattern is what you reach for instead: a chain of local transactions, each with a compensating action, orchestrated through to success or fully rolled back through compensation.
+
 A Saga is a sequence of **local transactions** across multiple services, where each step has a **compensating transaction** that undoes its effect if a later step fails. It replaces distributed transactions (2PC) in microservice architectures where holding cross-service locks is impractical.
 
 ## Why Not [2PC](../../consensus/two-phase-commit) Across Services?
@@ -236,4 +238,8 @@ Does the transaction span multiple services?
 
 {{< callout type="warning" >}}
 **Common interview mistake:** Candidates often say "we'll use a saga to make this atomic." Sagas are **not** atomic in the traditional sense — they provide **eventual consistency** through compensation. The correct framing is: "We'll use a saga to coordinate this cross-service flow. The trade-off is temporary inconsistency during the saga execution window, which we mitigate with semantic locks and idempotent compensations."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When a workflow spans multiple services with their own databases, I reach for a Saga and explicitly *not* 2PC — distributed transactions across microservices recouple the services you intentionally decoupled. I'd default to **orchestration** over choreography because a central orchestrator gives you a single place to track saga state, retry, and trigger compensations; choreography only stays simple for 2–3 step flows before the implicit event graph becomes impossible to reason about. The two correctness rules I'd state unprompted: **compensating transactions must be idempotent** (orchestrator may retry them after crashes, so `RefundPayment(id)` called twice must produce one refund), and **they must always eventually succeed** — design with retry queues, not give-up paths. And I'd flag the tradeoff honestly: sagas give eventual consistency, not atomicity, so I'd use semantic locks (`status = PENDING_FULFILLMENT`) to hide intermediate states from concurrent readers.
 {{< /callout >}}

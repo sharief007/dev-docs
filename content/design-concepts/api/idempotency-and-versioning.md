@@ -40,30 +40,37 @@ def handle_payment(request):
     if not idempotency_key:
         return error(400, "Idempotency-Key header required")
 
-    # Check for existing result
-    cached = redis.get(f"idem:{idempotency_key}")
+    result_key = f"idem:{idempotency_key}"
+    lock_key = f"idem_lock:{idempotency_key}"
+
+    # Fast path: a previous call already completed — return its result.
+    cached = redis.get(result_key)
     if cached:
         return json.loads(cached)
 
-    # Lock to prevent concurrent duplicates
-    lock_key = f"idem_lock:{idempotency_key}"
+    # Acquire a short-lived lock to serialize concurrent duplicates.
     if not redis.set(lock_key, "1", nx=True, ex=30):
         return error(409, "Request in progress — retry later")
 
     try:
-        # Execute business logic
+        # Re-check the cache: another caller may have completed between
+        # our initial miss and our lock acquisition.
+        cached = redis.get(result_key)
+        if cached:
+            return json.loads(cached)
+
         result = process_payment(request.body)
 
-        # Cache the result with TTL
+        # Cache the response with a long TTL so future retries are idempotent.
         redis.setex(
-            f"idem:{idempotency_key}",
+            result_key,
             86400,  # 24 hour TTL
-            json.dumps({"status": 200, "body": result})
+            json.dumps({"status": 200, "body": result}),
         )
         return success(result)
-    except Exception as e:
-        redis.delete(lock_key)  # allow retry on failure
-        raise
+    finally:
+        # Always release the lock — on success, on error, and on early return.
+        redis.delete(lock_key)
 ```
 
 ### Storage for Idempotency Keys
