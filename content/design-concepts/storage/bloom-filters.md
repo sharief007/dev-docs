@@ -1,6 +1,6 @@
 ---
 title: Bloom Filters & HyperLogLog
-weight: 12
+weight: 14
 type: docs
 ---
 
@@ -239,3 +239,43 @@ PFMERGE dau:2024-01-week users:day1 users:day2 ... users:day7  # weekly unique u
 | **Supports deletion** | No (standard) | No |
 | **Merge two sketches** | Yes (bitwise OR) | Yes (register max) |
 | **Memory** | ~10 bits/element | ~12 KB fixed, any cardinality |
+
+{{< callout type="info" >}}
+**Interview tip:** When the interviewer asks about LSM-tree reads, cache penetration, or counting unique users at scale, probabilistic structures are the right answer. For Bloom filters I'd say: "Roughly 10 bits per element gives a 1% false-positive rate, no false negatives ever — perfect for telling Cassandra or RocksDB which SSTables to skip on a point lookup, or for blocking cache-penetration attacks before they hit the DB." For HyperLogLog: "12 KB to count any cardinality up to 2^64 with 0.81% error, and two HLL sketches merge by taking the per-register max — so I can compute weekly DAU as the merge of seven daily HLLs without ever touching the raw user IDs." The thing I'd flag is that standard Bloom filters can't delete — for that I'd reach for a Counting Bloom filter or a Cuckoo filter, accepting 4x or ~1.05x more memory respectively.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A Bloom filter reports 'probably in set' for a key. You query the database and the key doesn't exist. Is the Bloom filter broken?" closed="true" >}}
+**No — this is expected behavior.** A Bloom filter has a tunable **false positive rate** (typically 1%). It guarantees no false negatives ("definitely not in set" is always correct), but "probably in set" is wrong ~1% of the time. The database query is the authoritative check.
+
+The Bloom filter's value is in the 99% of cases where it says "not in set" — those skip the database entirely. The 1% false positives are a small price for avoiding the other 99% of unnecessary lookups.
+{{< /details >}}
+
+{{< details title="You use a Bloom filter to prevent cache penetration — requests for non-existent keys that bypass the cache and hit the DB every time. An attacker sends millions of random keys. Does the Bloom filter help?" closed="true" >}}
+**Partially.** For keys the system has never seen, the Bloom filter correctly returns "not in set" and rejects them without touching the DB. This blocks the attack.
+
+**But:** If the attacker crafts keys that happen to trigger false positives (1% of random keys), those still reach the DB. At 1M requests/sec with 1% FP rate, that's 10K DB queries/sec from the attack alone.
+
+**Better defense:** Combine the Bloom filter with **rate limiting** per IP/client and **cached null sentinels** (cache the "not found" result with a short TTL so repeated requests for the same non-existent key don't hit the DB). The Bloom filter is the first line of defense, not the only one.
+{{< /details >}}
+
+{{< details title="A Bloom filter uses 10 bits per element and 7 hash functions for a 1% false positive rate. You need to add deletion support. What are your options and their costs?" closed="true" >}}
+**Standard Bloom filter cannot delete** — clearing a bit might affect other elements that share it.
+
+**Option 1: Counting Bloom filter.** Replace each bit with a 4-bit counter. Increment on insert, decrement on delete. Cost: **4x memory** (40 bits/element instead of 10). Risk: counter overflow at 15 — rare but possible under heavy insertion.
+
+**Option 2: Cuckoo filter.** Uses cuckoo hashing (a technique where each element has two possible bucket positions; on collision, the existing element is "kicked" to its alternate position) to store fingerprints. Supports deletion natively. Cost: ~**1.05x memory** vs Bloom for the same FP rate. Trade-off: insertion can fail if the table is too full (typically limit to 95% occupancy).
+
+**Option 3: Rebuild the Bloom filter** periodically from the current set. No deletion during the interval, but simple and deterministic.
+{{< /details >}}
+
+{{< details title="You need to count unique visitors per day. An engineer proposes storing user IDs in a set. With 100M daily visitors, how much memory does this take vs HyperLogLog?" closed="true" >}}
+**Exact set:** 100M UUIDs (16 bytes each) = ~1.6 GB per day. Plus hash table overhead ≈ 2-3 GB total. 365 days = ~1 TB.
+
+**HyperLogLog:** ~12 KB. Fixed. Regardless of whether you have 1 or 100 billion unique elements. Error: ±0.81%.
+
+**The trade-off:** HLL gives you approximate cardinality (how many unique elements) with 0.81% error in 12 KB. You can't enumerate the elements or check membership — only count them. Two HLL sketches merge by taking per-register max, so weekly DAU = merge of 7 daily HLLs without touching raw data.
+
+For exact counts or membership checks, you need the full set. For "approximately how many unique users visited" — which is 99% of analytics use cases — HLL saves 5+ orders of magnitude of memory.
+{{< /details >}}

@@ -4,6 +4,8 @@ weight: 5
 type: docs
 ---
 
+A user is streaming video on your app. They walk out of WiFi range and their phone switches to LTE — the IP address changes. Over HTTP/2, the TCP connection is dead; the phone re-handshakes TCP and TLS from scratch, the video buffers for 1–2 seconds, and your engagement metrics dip every time someone walks down a hallway. Over HTTP/3, the connection survives the IP change because it's identified by an opaque Connection ID, not a 4-tuple — playback never stutters. That single property, plus stream-independent loss recovery, is the reason HTTP/3 exists.
+
 HTTP/3 (RFC 9114, 2022) replaces TCP with **QUIC** (RFC 9000) as the transport layer. QUIC is built on UDP and reimplements reliable transport in user space, solving the two remaining problems of HTTP/2: TCP-level HOL blocking and slow connection establishment.
 
 ## Why Not Fix TCP?
@@ -118,7 +120,7 @@ TLS is not optional in QUIC. The TLS 1.3 handshake is **integrated into the QUIC
 - In TCP: `TCP handshake → TLS handshake → data`
 - In QUIC: `single combined handshake → data`
 
-QUIC encrypts **everything** — not just the payload. Even packet numbers and connection IDs (in some cases) are encrypted, preventing middlebox interference and passive traffic analysis.
+QUIC encrypts **everything** — not just the payload. Packet numbers are always encrypted (preventing on-path traffic analysis), and most header fields are protected; the connection IDs that have to be visible for routing remain in cleartext in the long header during the initial handshake. The result still prevents middlebox interference far better than TLS-over-TCP, where the entire TCP header is exposed.
 
 ## QPACK — Header Compression for HTTP/3
 
@@ -197,3 +199,52 @@ If multiple hostnames resolve to the same IP and share a TLS certificate, a QUIC
 | Connection migration | ❌ | ❌ | ✅ |
 | Server push | ❌ | ✅ (deprecated) | ✅ (unused) |
 | Middlebox ossification risk | Low | Medium | Low (encrypted) |
+
+{{< callout type="info" >}}
+**Interview tip:** "HTTP/3 for mobile clients and lossy networks. The core win: QUIC streams are independent at the transport layer — a dropped packet only affects one stream. Connection migration via Connection ID survives WiFi-to-LTE handoffs. Advertise via `Alt-Svc` with HTTP/2 fallback — UDP 443 is often blocked. Two traps: 0-RTT data is replay-vulnerable (reject non-idempotent requests), and CDN-to-origin should stay HTTP/2 (RTT too low for QUIC's handshake savings). See the [version comparison](../http-evolution) for a side-by-side view."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="QUIC runs over UDP, which has no built-in reliability. How does QUIC provide reliable delivery without TCP?" closed="true" >}}
+QUIC reimplements reliability **in user space** on top of UDP. Each QUIC stream has its own:
+
+1. **Sequence numbers** (packet numbers) — monotonically increasing, never reused (unlike TCP which can wrap)
+2. **ACK frames** — the receiver sends ACK frames listing which packet numbers it has received
+3. **Retransmission** — lost packets are detected via ACK gaps and timers, then retransmitted
+4. **Flow control** — per-stream and per-connection credit-based flow control (similar to HTTP/2's WINDOW_UPDATE)
+
+The key difference from TCP: loss recovery is **per-stream**. A lost packet on Stream 1 only blocks Stream 1's data. Stream 3's data, even if it arrived in the same UDP datagram, is delivered immediately. TCP can't do this because it guarantees in-order delivery of the **entire byte stream**, not per-logical-stream.
+{{< /details >}}
+
+{{< details title="A user's phone switches from WiFi to cellular while streaming video over HTTP/3. The IP address changes. How does the connection survive?" closed="true" >}}
+QUIC identifies connections by a **Connection ID** (an opaque byte string), not by the IP:port 4-tuple. When the phone's IP changes (WiFi → cellular), it sends the next QUIC packet from the new IP but with the **same Connection ID**. The server looks up the connection by ID, finds the existing state, and continues.
+
+There is no re-handshake — the cryptographic keys from the original handshake are still valid because they were negotiated per-Connection-ID, not per-IP. The server may issue a new Connection ID for the new path (to prevent linkability) via a `NEW_CONNECTION_ID` frame, but the logical connection is uninterrupted.
+
+TCP connections are identified by (src IP, src port, dst IP, dst port). Any change to this 4-tuple kills the connection — requiring a full TCP + TLS handshake, which takes 2 RTTs and interrupts playback.
+{{< /details >}}
+
+{{< details title="You enable 0-RTT on your QUIC server. A payment service behind it accepts POST /charge in the 0-RTT early data. What attack does this enable?" closed="true" >}}
+**Replay attack.** An attacker who captures the 0-RTT packet can replay it to the server. Since 0-RTT data is sent before the handshake completes, the server has no way to distinguish the original request from a replay. The `/charge` endpoint processes the payment **twice**.
+
+0-RTT data lacks **forward secrecy for replay protection** — the session ticket from the previous connection is used to derive keys, and anyone who captured the initial packet can resend it.
+
+**Fix:** Servers must only accept **idempotent requests** (GET, HEAD) in 0-RTT data. Reject POST, PUT, DELETE, or any state-changing request in early data. Alternatively, implement server-side replay detection (a strike register of recently seen 0-RTT tokens), but this adds state and complexity.
+{{< /details >}}
+
+{{< details title="Your L4 load balancer forwards QUIC traffic to backend servers. After deploying a new backend, some clients experience connection resets. HTTP/2 over TCP doesn't have this problem. Why?" closed="true" >}}
+QUIC uses **Connection IDs** to route packets to the correct connection state. The L4 LB must route all packets with the same Connection ID to the same backend server. If the LB routes based on the IP:port 4-tuple (like TCP), a QUIC connection migration (client IP change) or a new backend deployment can route packets to a server that doesn't have the connection state → **connection reset**.
+
+**Why TCP doesn't have this problem:** TCP connections are identified by the 4-tuple, which doesn't change mid-connection. The LB's flow table maps the 4-tuple to a backend, and it stays consistent.
+
+**Fix for QUIC:** Use a **QUIC-aware L4 LB** that parses the Connection ID from the QUIC header and routes based on it. Alternatively, encode a backend identifier in the Connection ID itself (Cloudflare's approach) — the LB can extract the target backend from the Connection ID without maintaining any state.
+{{< /details >}}
+
+{{< details title="HTTP/3 encrypts almost everything in the QUIC packet, including packet numbers. Why is this important, and what problem does it solve that TLS-over-TCP doesn't?" closed="true" >}}
+**Middlebox ossification.** Over decades, network middleboxes (firewalls, NATs, WAN optimizers) have been built to inspect and sometimes modify TCP header fields. When TCP tries to deploy new features (like TCP Fast Open or new congestion control), middleboxes that don't recognize the new fields may drop or mangle the packets. This effectively **froze TCP evolution** — any change that modifies visible header fields breaks on some fraction of the internet.
+
+QUIC encrypts packet numbers, most header fields, and all payload. Middleboxes can see the Connection ID (for routing) and a few bits for packet handling, but nothing else. They can't inspect or modify QUIC internals, so QUIC can evolve freely without middlebox interference.
+
+TLS-over-TCP only encrypts the payload. The entire TCP header (sequence numbers, window size, flags, options) remains in plaintext — visible and modifiable by middleboxes. This is why TCP couldn't evolve and QUIC was built from scratch on UDP.
+{{< /details >}}

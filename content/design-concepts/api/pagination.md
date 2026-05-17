@@ -177,3 +177,25 @@ Result: item 1015 disappeared — client never sees it
 {{< callout type="info" >}}
 **Interview tip:** When an API needs to return a large list, say: "I'd use cursor-based pagination with keyset queries — the cursor encodes the last item's sort key and is opaque to the client. Unlike offset pagination, performance doesn't degrade for deeper pages because the database uses an index seek instead of scanning. The trade-off is no random page access, which is fine for infinite scroll UIs but not for page-number navigation." This shows you understand the database-level reason for the choice, not just the API pattern.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A client uses offset pagination: GET /orders?offset=50000&limit=20. The query is slow even with an index. Why?" closed="true" >}}
+**Offset scanning.** `OFFSET 50000` means the database finds the first 50,020 rows using the index, then **discards the first 50,000** and returns 20. The deeper the offset, the more work is wasted. At offset 1M, the DB scans 1M+ index entries just to throw them away.
+
+Cursor/keyset pagination avoids this: `WHERE id > last_seen_id ORDER BY id LIMIT 20` uses an index **seek** to jump directly to the starting point — O(log n) regardless of page depth.
+{{< /details >}}
+
+{{< details title="You use cursor-based pagination. A client bookmarks page 5 to return later. Between visits, items are inserted and deleted. The bookmark is broken. Why, and is this fixable?" closed="true" >}}
+**Cursors encode position, not page number.** The cursor says "start after item X." If items are inserted before X, the client sees them on a previous page (if they go back) but not on the current cursor's continuation — items are "missed." If X is deleted, the cursor is invalid.
+
+**This is inherent to cursor pagination** — it provides a stable traversal of a moving dataset, not a stable snapshot. Offset pagination has the same problem (inserted items shift offsets).
+
+**If you need stable snapshots:** Use timestamp-based cursors with immutable data (events, audit logs). Or take a point-in-time snapshot and paginate over it (expensive, only for exports).
+{{< /details >}}
+
+{{< details title="Your API uses keyset pagination: WHERE created_at > cursor ORDER BY created_at LIMIT 20. Two orders have the same created_at. One is skipped. Why?" closed="true" >}}
+**Non-unique sort key.** If two orders share `created_at = '2024-01-15T10:00:00'`, the cursor after the first page points to that timestamp. The next page's `WHERE created_at > cursor` skips the second order with the same timestamp.
+
+**Fix:** Use a **compound cursor** with a tiebreaker: `WHERE (created_at, id) > (cursor_ts, cursor_id) ORDER BY created_at, id`. The `id` is unique and breaks ties. This requires a composite index on `(created_at, id)`.
+{{< /details >}}

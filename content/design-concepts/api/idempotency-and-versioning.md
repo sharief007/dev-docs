@@ -40,30 +40,37 @@ def handle_payment(request):
     if not idempotency_key:
         return error(400, "Idempotency-Key header required")
 
-    # Check for existing result
-    cached = redis.get(f"idem:{idempotency_key}")
+    result_key = f"idem:{idempotency_key}"
+    lock_key = f"idem_lock:{idempotency_key}"
+
+    # Fast path: a previous call already completed — return its result.
+    cached = redis.get(result_key)
     if cached:
         return json.loads(cached)
 
-    # Lock to prevent concurrent duplicates
-    lock_key = f"idem_lock:{idempotency_key}"
+    # Acquire a short-lived lock to serialize concurrent duplicates.
     if not redis.set(lock_key, "1", nx=True, ex=30):
         return error(409, "Request in progress — retry later")
 
     try:
-        # Execute business logic
+        # Re-check the cache: another caller may have completed between
+        # our initial miss and our lock acquisition.
+        cached = redis.get(result_key)
+        if cached:
+            return json.loads(cached)
+
         result = process_payment(request.body)
 
-        # Cache the result with TTL
+        # Cache the response with a long TTL so future retries are idempotent.
         redis.setex(
-            f"idem:{idempotency_key}",
+            result_key,
             86400,  # 24 hour TTL
-            json.dumps({"status": 200, "body": result})
+            json.dumps({"status": 200, "body": result}),
         )
         return success(result)
-    except Exception as e:
-        redis.delete(lock_key)  # allow retry on failure
-        raise
+    finally:
+        # Always release the lock — on success, on error, and on early return.
+        redis.delete(lock_key)
 ```
 
 ### Storage for Idempotency Keys
@@ -167,3 +174,23 @@ Twilio: /2010-04-01/Accounts/...
 {{< callout type="info" >}}
 **Interview tip:** When designing an API, say: "All mutating endpoints require an `Idempotency-Key` header — the server stores the key and result in Redis with a 24-hour TTL. Duplicates return the cached response. For versioning, I'd use URL path versioning (`/v1/`) with a 6-month deprecation window. Non-breaking changes (new optional fields) go into the current version; breaking changes get a new version. The `Sunset` header tells clients when a version will be removed." This shows you've thought about client safety (idempotency) and API lifecycle (versioning) as separate concerns.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A client sends POST /payments with Idempotency-Key: abc123. The server processes the payment, stores the result, and returns 200. The client retries with the same key. What should the server return?" closed="true" >}}
+**The cached 200 response from the first attempt.** The server looks up `abc123` in its idempotency store, finds the stored result, and returns it verbatim — no reprocessing. The payment is not charged twice.
+
+**Edge case:** What if the first request is still in progress when the retry arrives? The server should return **409 Conflict** or **425 Too Early** to indicate the original request hasn't completed. The client retries after a brief delay.
+{{< /details >}}
+
+{{< details title="Your API adds an optional 'priority' field to the order creation response. Is this a breaking change? Does it require a new API version?" closed="true" >}}
+**No — adding an optional field to a response is a non-breaking change.** Well-behaved clients ignore unknown fields. This can go into the current version with no version bump.
+
+**Breaking changes that require a new version:** Removing a field, renaming a field, changing a field's type (string → integer), changing the URL structure, changing required fields, or changing error response formats. These can be shipped under a new version (`/v2/`) with the old version maintained during a deprecation window.
+{{< /details >}}
+
+{{< details title="A mobile app caches the Idempotency-Key locally and retries a failed payment 3 days later. The server's idempotency store (Redis with 24h TTL) has expired the key. What happens?" closed="true" >}}
+**The payment is processed again** — the server has no record of the original key and treats it as a new request. The user is charged twice.
+
+**Fixes:** (1) Match the idempotency TTL to the client's maximum retry window. If clients retry up to 7 days, set TTL to 7 days. (2) Use a durable store (database) instead of Redis for payment idempotency — the key persists regardless of TTL. (3) Use the payment processor's built-in idempotency (Stripe accepts idempotency keys and deduplicates on their side with a 24h window).
+{{< /details >}}

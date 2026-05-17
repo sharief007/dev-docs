@@ -4,9 +4,9 @@ weight: 2
 type: docs
 ---
 
-Apache Kafka is a distributed, persistent, append-only commit log designed for high-throughput event streaming. It sits at the center of most modern event-driven architectures — acting as the durable backbone between services that produce events and the many systems that consume them.
+Your ride-sharing platform pushes a million GPS pings per second from drivers' phones. The pricing engine needs them for surge recomputation, the ETA service needs them for arrival predictions, the data lake needs them for ML training, and the regulatory team needs a 7-year audit trail. They all need the same data, at different paces, with no slow consumer blocking the others.
 
-This page covers Kafka's internals at the level expected in a FAANG system design interview.
+Apache Kafka is a distributed, persistent, append-only commit log for high-throughput event streaming. It sits at the center of most event-driven architectures — the durable backbone between producers and consumers.
 
 ## Architecture Overview
 
@@ -27,7 +27,7 @@ flowchart TD
         end
     end
 
-    Prod[Producers] -->|writes go to partition leaders| P0L
+    Prod[Producers] -->|writes to leaders| P0L
     Prod --> P1L
     Prod --> P2L
 
@@ -44,169 +44,119 @@ flowchart TD
     Ctrl --- Broker 3
 ```
 
-### Core Components
-
 | Component | Role |
-|-----------|------|
-| **Broker** | A single Kafka server. Stores partition data on disk. Serves produce and fetch requests. |
-| **Topic** | A named category of events (e.g., `orders`, `user-clicks`). Logical grouping only — data lives in partitions. |
-| **Partition** | An ordered, immutable, append-only log of messages. The unit of parallelism and ordering. |
-| **Replica** | A copy of a partition on another broker. One replica is the **leader** (handles reads + writes); others are **followers** (replicate from leader). |
-| **Controller** | Manages cluster metadata: partition leadership, broker liveness, topic creation. Since Kafka 3.3, this is a Raft-based **KRaft** quorum (replacing ZooKeeper). |
+|---|---|
+| **Broker** | A single Kafka server. Stores partition data on disk, serves produce/fetch requests. |
+| **Topic** | Named category of events (e.g., `orders`). Logical grouping — data lives in partitions. |
+| **Partition** | Ordered, immutable, append-only log. The unit of parallelism and ordering. |
+| **Replica** | Copy of a partition on another broker. One is the **leader** (handles reads + writes); others are **followers** (replicate from leader, take over on failure). |
+| **Controller** | Manages cluster metadata: partition leadership, broker liveness. Since Kafka 3.3, this is a [Raft](../consensus/raft.md)-based **KRaft** quorum (replacing ZooKeeper). |
 
-**Key insight:** Producers and consumers **only interact with partition leaders**. Followers exist purely for durability — they replicate from the leader and take over if it fails.
+Producers and consumers **only talk to partition leaders**. Followers exist purely for durability.
 
-## Partitions
+## Partitions & Ordering
 
-A partition is a bounded, ordered, append-only sequence of messages. Each message within a partition gets a monotonically increasing **offset** — an immutable position number.
+Each message in a partition gets a monotonically increasing **offset** — an immutable position number.
 
 ```
 Topic: orders (3 partitions)
 
-Partition 0: [0] [1] [2] [3] [4] [5] [6] ... [1042]  ← current head
-Partition 1: [0] [1] [2] [3] [4] ... [987]
-Partition 2: [0] [1] [2] [3] ... [1105]
-                                     ↑
-                            Each offset is unique
-                            within its partition
+Partition 0: [0] [1] [2] [3] ... [1042]  ← current head
+Partition 1: [0] [1] [2] ... [987]
+Partition 2: [0] [1] [2] ... [1105]
 ```
 
-### Ordering Guarantees
-
-**Within a partition:** Strict total order. Message at offset 5 was written before offset 6, always.
-
-**Across partitions:** No ordering. Offset 5 in partition 0 has no temporal relationship to offset 5 in partition 1.
-
-This means: if you need messages for a specific entity (e.g., all events for `user:42`) to be processed in order, they must go to the **same partition**.
+**Within a partition:** Strict total order. Offset 5 was written before offset 6, always.
+**Across partitions:** No ordering guarantee. Offset 5 in P0 has no temporal relationship to offset 5 in P1.
 
 ### Partition Assignment (Producing)
 
-The producer decides which partition a message goes to:
-
 ```
 1. Message has a key → hash(key) % num_partitions → deterministic partition
-   key="user:42" → hash → partition 1
-   key="user:42" → hash → partition 1  (always the same partition)
+   key="user:42" → always goes to the same partition → ordering per user
 
-2. Message has no key → round-robin across partitions (or sticky partitioning for batching)
+2. Message has no key → round-robin (or sticky partitioning for batching)
 
-3. Custom partitioner → application logic determines partition
+3. Custom partitioner → application logic decides
 ```
 
-**Why keys matter:** All messages with the same key go to the same partition, guaranteeing ordering per key. This is how you ensure all events for a specific user, order, or session are processed in order.
+**Why keys matter:** All messages with the same key go to the same partition, guaranteeing per-key ordering. This is how you ensure all events for a specific user or order are processed in order.
 
 ### How Many Partitions?
 
 ```
 Parallelism = min(partition_count, consumers_in_group)
 
-Target throughput: 100 MB/s
-Single consumer throughput: 10 MB/s
-→ Need at least 10 partitions
-
-Rule of thumb for Kafka:
-  - Start with 6-12 partitions per topic for moderate throughput
-  - High-throughput topics: 30-100+ partitions
-  - Partition count can be increased (but not decreased) after creation
-  - More partitions = more open file handles, longer leader election, higher memory
+Target: 100 MB/s throughput, single consumer handles 10 MB/s → need ≥ 10 partitions
 ```
 
+Rule of thumb: start with 6–12 for moderate throughput; 30–100+ for high-throughput topics.
+
 {{< callout type="warning" >}}
-**Partition count cannot be decreased.** Increasing partitions changes the key-to-partition mapping (`hash(key) % N`), so existing keys may move to different partitions. This breaks ordering guarantees for in-flight data. Plan partition count carefully at topic creation time.
+**Partition count can be increased but never decreased.** Increasing changes `hash(key) % N`, so existing keys may move to different partitions — breaking ordering for in-flight data. Plan partition count carefully at creation.
 {{< /callout >}}
 
-## Replication and ISR
+## Replication & ISR
 
-Each partition has a configurable **replication factor** (typically 3). One replica is the leader; the rest are followers.
-
-### In-Sync Replicas (ISR)
-
-The ISR is the set of replicas that are "caught up" with the leader — their log end offset is within `replica.lag.time.max.ms` (default 30s) of the leader's.
+Each partition has a configurable **replication factor** (typically 3). The **ISR (In-Sync Replica set)** is the set of replicas whose log end offset is within `replica.lag.time.max.ms` (default 30s) of the leader's.
 
 ```mermaid
 sequenceDiagram
     participant P as Producer
-    participant L as Broker 1 (Leader)
-    participant F1 as Broker 2 (Follower, ISR)
-    participant F2 as Broker 3 (Follower, ISR)
+    participant L as Leader (Broker 1)
+    participant F1 as Follower (Broker 2, ISR)
+    participant F2 as Follower (Broker 3, ISR)
 
     P->>L: Produce (acks=all)
-    L->>L: Append to local log (offset 1042)
+    L->>L: Append offset 1042
 
-    par Followers fetch from leader
-        F1->>L: Fetch(offset=1042)
-        L->>F1: Data for offset 1042
-        F2->>L: Fetch(offset=1042)
-        L->>F2: Data for offset 1042
+    par Followers fetch
+        F1->>L: Fetch(1042)
+        F2->>L: Fetch(1042)
     end
 
-    F1->>F1: Append to local log ✓
-    F2->>F2: Append to local log ✓
+    F1->>F1: Append ✓
+    F2->>F2: Append ✓
 
-    Note over L: All ISR replicas have offset 1042<br/>High watermark advances to 1042
-
-    L->>P: ACK (offset 1042 committed)
+    Note over L: All ISR have 1042 → high watermark advances
+    L->>P: ACK (committed)
 ```
 
 ### High Watermark
 
-The **high watermark** is the offset up to which all ISR replicas have replicated. Consumers can only read up to the high watermark — this prevents them from reading data that might be lost if the leader fails before replication completes.
+The **high watermark** is the offset up to which all ISR replicas have replicated. Consumers only read up to the high watermark — preventing them from seeing data that could be lost if the leader fails before replication completes.
 
 ```
-Leader log:      [1040] [1041] [1042] [1043] [1044]
-Follower 1 log:  [1040] [1041] [1042] [1043]
-Follower 2 log:  [1040] [1041] [1042]
-                                  ↑
-                          High watermark = 1042
-                          (all ISR replicas have up to 1042)
-
-Consumers can read: offsets ≤ 1042
-Offsets 1043, 1044: not yet committed — invisible to consumers
+Leader:     [1040] [1041] [1042] [1043] [1044]
+Follower 1: [1040] [1041] [1042] [1043]
+Follower 2: [1040] [1041] [1042]
+                             ↑
+                     High watermark = 1042
+                     Consumers can read ≤ 1042
 ```
 
 ### Leader Failure
 
-When a partition leader fails, the controller elects a new leader from the ISR:
+Controller detects failure via heartbeat timeout → elects new leader from ISR → recovering broker truncates to high watermark and catches up.
 
-```
-Before failure:
-  Leader: Broker 1, ISR: [Broker 1, Broker 2, Broker 3]
-
-Broker 1 crashes:
-  Controller detects via heartbeat timeout
-  New leader elected from ISR: Broker 2
-  ISR updated: [Broker 2, Broker 3]
-
-Broker 1 recovers:
-  Truncates log to high watermark (discards unreplicated data)
-  Fetches from new leader to catch up
-  Rejoins ISR when caught up
-```
-
-**Unclean leader election** (`unclean.leader.election.enable=false` by default): If all ISR replicas are down, Kafka refuses to elect an out-of-sync replica as leader — the partition becomes unavailable rather than risk data loss. Setting this to `true` allows an out-of-sync replica to become leader, accepting potential data loss for availability.
+**Unclean leader election** (`unclean.leader.election.enable=false` default): if all ISR replicas are down, Kafka refuses to elect an out-of-sync replica — partition becomes **unavailable** rather than risk data loss. Setting `true` trades data loss risk for availability.
 
 ## Consumer Groups
 
-Consumer groups are Kafka's mechanism for both **fan-out** (multiple groups read independently) and **work distribution** (within a group, partitions are split among members).
+Consumer groups provide **fan-out** (multiple groups read independently) and **work distribution** (within a group, partitions split among members).
 
 ```mermaid
 flowchart TD
     subgraph "Topic: orders (4 partitions)"
-        P0[Partition 0]
-        P1[Partition 1]
-        P2[Partition 2]
-        P3[Partition 3]
+        P0[P0] --- P1[P1] --- P2[P2] --- P3[P3]
     end
 
-    subgraph "Consumer Group: analytics (3 consumers)"
-        A1[Consumer A1]
-        A2[Consumer A2]
-        A3[Consumer A3]
+    subgraph "Group: analytics (3 consumers)"
+        A1[A1] --- A2[A2] --- A3[A3]
     end
 
-    subgraph "Consumer Group: search (2 consumers)"
-        B1[Consumer B1]
-        B2[Consumer B2]
+    subgraph "Group: search (2 consumers)"
+        B1[B1] --- B2[B2]
     end
 
     P0 -.-> A1
@@ -220,218 +170,187 @@ flowchart TD
     P3 -.-> B2
 ```
 
-**Rules:**
-1. Each partition is assigned to **exactly one consumer** within a group
-2. A consumer can be assigned **multiple partitions**
-3. If consumers > partitions, some consumers sit idle
-4. Each consumer group reads **all** messages independently
+**Rules:** Each partition → exactly one consumer within a group. A consumer can own multiple partitions. If consumers > partitions, extras sit idle. Each group reads **all** messages independently.
 
 ### Rebalancing
 
-When a consumer joins, leaves, or crashes, partitions are **rebalanced** across the remaining consumers in the group.
+When a consumer joins, leaves, or crashes, partitions are redistributed. **Rebalancing is expensive** — all consumers in the group briefly stop processing.
 
-```
-Initial state: 4 partitions, 3 consumers
-  A1: [P0]    A2: [P1]    A3: [P2, P3]
-
-Consumer A2 crashes:
-  Rebalance triggered
-  A1: [P0, P1]    A3: [P2, P3]
-
-New consumer A4 joins:
-  Rebalance triggered
-  A1: [P0]    A3: [P2]    A4: [P1, P3]
-```
-
-**Rebalancing is expensive:** During a rebalance, all consumers in the group stop processing briefly. This can cause latency spikes. Strategies to minimize impact:
-
-| Strategy | How |
-|----------|-----|
-| **Static group membership** | Assign persistent `group.instance.id` to each consumer. On restart, the consumer reclaims its previous partitions without triggering a full rebalance. |
-| **Cooperative sticky rebalancing** | Only revoke and reassign the partitions that need to move (Kafka 2.4+). Other consumers continue processing during rebalance. |
-| **Over-provision partitions** | More partitions than consumers means rebalancing moves fewer partitions per event. |
+| Mitigation | How |
+|---|---|
+| **Static group membership** | Persistent `group.instance.id` — on restart, consumer reclaims its partitions without full rebalance |
+| **Cooperative sticky rebalancing** | Only revoke partitions that need to move (Kafka 2.4+). Others keep processing. |
+| **Over-provision partitions** | More partitions than consumers → rebalancing moves fewer partitions per event |
 
 ## Offset Management
 
-Each consumer group tracks its position in each partition via **offsets** stored in the internal `__consumer_offsets` topic.
-
-```mermaid
-sequenceDiagram
-    participant C as Consumer
-    participant K as Kafka Broker
-    participant CO as __consumer_offsets topic
-
-    C->>K: Poll(topic=orders, partition=0)
-    K->>C: Messages at offsets [1040, 1041, 1042]
-
-    C->>C: Process message 1040 ✓
-    C->>C: Process message 1041 ✓
-    C->>C: Process message 1042 ✓
-
-    C->>CO: Commit offset 1043 (next offset to read)
-    Note over CO: Stored: group=analytics, topic=orders,<br/>partition=0, offset=1043
-
-    Note over C: Consumer restarts
-
-    C->>CO: Where did I leave off? (group=analytics, partition=0)
-    CO->>C: offset 1043
-
-    C->>K: Poll(topic=orders, partition=0, start=1043)
-    K->>C: Messages starting at offset 1043
-```
-
-### Commit Strategies
+Each consumer group tracks its position per partition via **offsets** stored in the internal `__consumer_offsets` topic.
 
 | Strategy | How | Risk |
-|----------|-----|------|
-| **Auto-commit** (`enable.auto.commit=true`) | Kafka commits offsets periodically (every 5s by default) | Messages processed but offset not yet committed → reprocessing on restart. Messages committed but not yet processed → data loss. |
-| **Manual sync commit** (`commitSync()`) | Application commits after processing each batch | Slower (blocks until commit ACK). Safest — exactly matches processing progress. |
-| **Manual async commit** (`commitAsync()`) | Non-blocking commit, fire-and-forget | Faster, but if commit fails silently, offsets may fall behind → reprocessing. |
+|---|---|---|
+| **Auto-commit** | Kafka commits every 5s by default | Gap between processing and commit → reprocessing or data loss on crash |
+| **Manual sync** (`commitSync()`) | App commits after processing each batch | Safest, but blocks until commit ACK |
+| **Manual async** (`commitAsync()`) | Non-blocking, fire-and-forget | If commit fails silently, offsets fall behind → reprocessing |
 
-**The at-least-once pattern (most common):**
-
+**The standard at-least-once pattern:**
 ```
 while true:
-  messages = consumer.poll()
-  for msg in messages:
-    process(msg)           # must be idempotent
-  consumer.commitSync()    # commit after all messages in batch processed
+    messages = consumer.poll()
+    for msg in messages:
+        process(msg)           # must be idempotent
+    consumer.commitSync()      # commit AFTER processing
 ```
 
-If the consumer crashes between `process()` and `commitSync()`, the uncommitted messages are re-delivered on restart — hence "at-least-once."
+If the consumer crashes between `process()` and `commitSync()`, uncommitted messages are re-delivered — hence "at-least-once."
 
 ### Offset Reset Policy
 
-When a consumer group has no committed offset (new group, or offsets expired), `auto.offset.reset` determines where to start:
+When a consumer group has no committed offset (new group, or offsets expired):
 
-| Policy | Behavior | Use Case |
-|--------|----------|----------|
-| `earliest` | Start from the beginning of the partition | New service that needs all historical events |
-| `latest` | Start from the current head (skip history) | Service that only cares about new events |
-| `none` | Throw an exception | Fail-safe — force explicit offset management |
+| `auto.offset.reset` | Behavior |
+|---|---|
+| `earliest` | Start from the beginning — new service needs full history |
+| `latest` | Start from current head — only care about new events |
+| `none` | Throw exception — fail-safe, force explicit management |
 
 ## Delivery Guarantees
 
-### At-Most-Once
+| Guarantee | How | When |
+|---|---|---|
+| **At-most-once** | Commit offset *before* processing. Crash = message lost. | Low-value metrics where gaps are OK |
+| **At-least-once** | Commit offset *after* processing. Crash = message reprocessed. Consumer must be idempotent. | **Default for most systems** |
+| **Exactly-once** | Idempotent producer + transactions + `read_committed` consumers. Atomic offset commit + output write. | Kafka-to-Kafka pipelines only |
 
-```
-messages = consumer.poll()
-consumer.commitSync()        # commit BEFORE processing
-for msg in messages:
-  process(msg)               # if crash here, messages are lost (already committed)
-```
+### Exactly-Once: How It Works
 
-Messages may be lost but are never duplicated. Appropriate for low-value metrics where gaps are acceptable.
-
-### At-Least-Once (Default)
-
-```
-messages = consumer.poll()
-for msg in messages:
-  process(msg)               # process first
-consumer.commitSync()        # commit AFTER processing
-
-# If crash between process and commit → message reprocessed on restart
-```
-
-Messages are never lost but may be duplicated. The consumer **must be idempotent** to handle redelivery.
-
-### Exactly-Once (Kafka Transactions)
-
-Kafka's exactly-once semantics combine three features:
-
-```mermaid
-sequenceDiagram
-    participant P as Producer
-    participant TC as Transaction Coordinator
-    participant B0 as Broker (input partition)
-    participant B1 as Broker (output partition)
-    participant CO as __consumer_offsets
-
-    P->>TC: initTransactions(transactional.id="order-processor")
-
-    P->>B0: Poll (consume input events)
-
-    P->>TC: beginTransaction()
-
-    P->>B1: Produce to output topic (within txn)
-    P->>CO: Commit input offset (within same txn)
-
-    P->>TC: commitTransaction()
-
-    par Transaction coordinator writes COMMIT markers
-        TC->>B1: COMMIT marker on output partition
-        TC->>CO: COMMIT marker on __consumer_offsets
-    end
-
-    Note over B0,CO: Output write + offset commit are atomic<br/>Either both happen or neither does
-```
-
-**Three components working together:**
+Three components combine:
 
 | Component | What it does |
-|-----------|-------------|
-| **Idempotent producer** (`enable.idempotence=true`) | Each message gets a sequence number per (ProducerID, partition). Broker deduplicates retried messages. Prevents duplicate writes from producer retries. |
-| **Transactions** (`transactional.id`) | Wraps produce + offset commit in a single atomic transaction. Either both succeed or both are rolled back. |
-| **Consumer isolation** (`isolation.level=read_committed`) | Consumer only reads messages from committed transactions. Uncommitted/aborted messages are invisible. |
+|---|---|
+| **Idempotent producer** (`enable.idempotence=true`) | Each message gets a sequence number per (ProducerID, partition). Broker deduplicates retried messages. |
+| **Transactions** (`transactional.id`) | Wraps produce + offset commit in a single atomic transaction. Both succeed or both roll back. |
+| **Consumer isolation** (`isolation.level=read_committed`) | Consumer only sees messages from committed transactions. Uncommitted/aborted messages are invisible. |
 
-**Scope limitation:** Kafka's exactly-once only covers **Kafka-to-Kafka** pipelines (consume from input topic → process → produce to output topic). If the processing step writes to an external database, that write is not part of the Kafka transaction. For external systems, combine with the outbox pattern or design the consumer to be idempotent.
+{{< callout type="warning" >}}
+**Scope limitation:** Kafka's exactly-once only covers **Kafka-to-Kafka** pipelines (consume → process → produce). If processing writes to an external database, that write is outside the Kafka transaction. For external systems, use the [outbox pattern](../distributed/outbox-pattern.md) or make the consumer [idempotent](../distributed/idempotency.md).
+{{< /callout >}}
 
-## Producer Internals
-
-### Batching and Compression
-
-Producers don't send messages one at a time. They accumulate messages into **batches** per partition and send them together.
-
-```
-Producer buffer (per partition):
-
-Partition 0 batch: [msg1, msg2, msg3] → compress → send as one request
-Partition 1 batch: [msg4]             → compress → send as one request
-Partition 2 batch: [msg5, msg6]       → compress → send as one request
-```
+{{< details title="Producer internals: batching, compression, and acks" closed="true" >}}
+Producers accumulate messages into **batches** per partition before sending:
 
 | Config | Default | Effect |
-|--------|---------|--------|
-| `batch.size` | 16KB | Maximum batch size in bytes. Larger = better throughput, higher latency. |
-| `linger.ms` | 0 | Wait time to fill a batch. `linger.ms=5` waits up to 5ms to accumulate more messages before sending. |
-| `compression.type` | `none` | `gzip`, `snappy`, `lz4`, `zstd`. Compression happens at the batch level — more messages per batch = better compression ratio. |
+|---|---|---|
+| `batch.size` | 16KB | Max batch size. Larger = better throughput, higher latency. |
+| `linger.ms` | 0 | Wait time to fill a batch. `5–20ms` trades tiny latency for 5–10x throughput. |
+| `compression.type` | `none` | `snappy`, `lz4`, `zstd`. Compression at batch level — more messages = better ratio. |
 
-**Throughput optimization:** Set `linger.ms=5-20` and `batch.size=64KB-1MB`. The producer waits a few milliseconds to accumulate a larger batch, compresses it, and sends one network request instead of many small ones. This trades a few ms of latency for 5–10x throughput improvement.
+**Ack modes:**
 
-### Acknowledgement Modes
+| `acks` | Behavior | Durability |
+|---|---|---|
+| `0` | Fire and forget | Data loss possible |
+| `1` | Leader ACK only | Loss if leader crashes before follower replication |
+| `all` | All ISR ACK | No loss while ≥1 ISR survives |
 
-| `acks` | Behavior | Durability | Latency |
-|--------|----------|-----------|---------|
-| `0` | Fire and forget. Don't wait for any ACK. | Data loss possible — broker may never receive the message. | Lowest |
-| `1` | Wait for leader ACK only. | Data loss if leader crashes before followers replicate. | Low |
-| `all` (`-1`) | Wait for all ISR replicas to ACK. | No data loss as long as at least one ISR replica survives. | Highest |
+**Production recommendation:** `acks=all` + `min.insync.replicas=2` + `replication.factor=3`. Write is only ACK'd when leader + ≥1 follower have the data.
+{{< /details >}}
 
-**Production recommendation:** `acks=all` + `min.insync.replicas=2` (with replication factor 3). This means a write is only ACK'd when the leader + at least one follower have the data. If fewer than 2 replicas are in-sync, the producer gets an error rather than accepting data with insufficient durability.
-
-## Storage: Why Kafka Is Fast
-
-Kafka achieves millions of messages per second because of how it stores and serves data:
-
+{{< details title="Storage internals: why Kafka is fast" closed="true" >}}
 | Technique | How |
-|-----------|-----|
-| **Append-only writes** | Sequential disk I/O only. No random seeks. Sequential writes on modern SSDs: 500+ MB/s. |
-| **Page cache** | Kafka delegates caching to the OS page cache. Recently written data is served from memory without Kafka managing a cache. |
-| **Zero-copy** (`sendfile` syscall) | Data goes directly from page cache to network socket — never copied into Kafka's JVM heap. Eliminates two memory copies per fetch. |
-| **Batching** | Messages are grouped, compressed, and sent as a single network request. Amortizes per-message overhead. |
-| **Segment files** | Each partition is split into segment files (default 1GB). Old segments are deleted or compacted without affecting current writes. |
+|---|---|
+| **Append-only writes** | Sequential disk I/O only. No random seeks. 500+ MB/s on SSDs. |
+| **Page cache** | OS page cache serves recent data from memory — Kafka doesn't manage its own cache. |
+| **Zero-copy** (`sendfile` syscall) | Data goes from page cache directly to network socket, never enters JVM heap. Eliminates 2 memory copies per fetch. |
+| **Batching** | Messages grouped, compressed, sent as one network request. Amortizes per-message overhead. |
+| **Segment files** | Partition split into 1GB segments. Old segments deleted/compacted without affecting writes. |
 
 ```
-Partition 0 directory on disk:
-  00000000000000000000.log     ← segment 1 (offsets 0-999)
-  00000000000000001000.log     ← segment 2 (offsets 1000-1999)
-  00000000000000002000.log     ← active segment (appending here)
-  00000000000000000000.index   ← sparse offset → file position index
-  00000000000000000000.timeindex  ← timestamp → offset index
+Partition 0 on disk:
+  00000000000000000000.log       ← segment (offsets 0-999)
+  00000000000000001000.log       ← segment (offsets 1000-1999)
+  00000000000000002000.log       ← active segment
+  00000000000000000000.index     ← sparse offset → byte position
+  00000000000000000000.timeindex ← timestamp → offset
 ```
 
-The `.index` file maps offsets to byte positions in the `.log` file. It's sparse (not every offset) — Kafka binary-searches the index, then scans forward in the log. This allows O(1) lookups by offset despite the append-only log structure.
+The `.index` file is sparse — Kafka binary-searches it, then scans forward in the `.log`. This gives O(1) offset lookups despite the append-only structure.
+{{< /details >}}
 
 {{< callout type="info" >}}
-**Interview framing:** "I'd use Kafka as the event backbone — producers publish OrderCreated events with `key=orderId` so all events for the same order go to the same partition (ordering guarantee). Three consumer groups read independently: analytics for the data warehouse, search for Elasticsearch indexing, and notifications for email. We'd run with `acks=all`, `min.insync.replicas=2`, and `replication.factor=3` for durability. Consumers commit offsets manually after processing and are designed to be idempotent — that gives us at-least-once delivery with effective exactly-once semantics at the application level."
+**Interview tip:** "I'd use Kafka as the event backbone. Producers publish `OrderCreated` events with `key=orderId` so all events for the same order land in the same partition (ordering guarantee). Three consumer groups read independently: analytics, search indexing, and notifications. I'd run `acks=all` + `min.insync.replicas=2` + `replication.factor=3` for durability. Consumers commit offsets manually after processing and are idempotent — that gives at-least-once delivery with effective exactly-once at the application level. Parallelism = `min(partitions, consumers)`, so I'd size partitions for peak throughput plus headroom."
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="If Kafka guarantees ordering within a partition, why can't you just use one partition for strict global ordering across all events?" closed="true" >}}
+One partition = one consumer per group. You lose **all** parallelism. Throughput is capped at what a single consumer can handle.
+
+In practice, you design your partition key so ordering matters *within a key* (per-user, per-order), not globally. If you truly need global ordering (rare), consider whether you can relax the requirement to "causal ordering" and use techniques like [logical clocks](../distributed/logical-clocks.md) instead.
+{{< /details >}}
+
+{{< details title="You set acks=all and replication.factor=3. A network partition isolates Broker 1 (the leader) from Brokers 2 and 3. What happens to producers? What happens to consumers?" closed="true" >}}
+**Producers:** Broker 1 is still alive but can't replicate to Brokers 2 and 3 — ISR shrinks to just [Broker 1]. If `min.insync.replicas=2`, writes fail with `NotEnoughReplicasException` because only 1 replica is in-sync. The producer gets errors and must retry or buffer.
+
+**Meanwhile:** The controller (on the KRaft quorum, which Brokers 2 and 3 can still reach) detects Broker 1 is unreachable and elects a new leader from ISR members it can see. But if Broker 1 was the only ISR member reachable to itself, it's a split-brain scenario.
+
+**Consumers:** Consumer reads are also affected — they can only read up to the high watermark, which can't advance without ISR replication.
+
+**Key insight:** `acks=all` + `min.insync.replicas=2` is a **CP** configuration (in CAP terms) — it chooses consistency (no data loss) over availability (partition becomes unavailable when quorum can't be met).
+{{< /details >}}
+
+{{< details title="A consumer processes a message, writes the result to PostgreSQL, and then commits the Kafka offset. The process crashes after the DB write but before the offset commit. What happens, and how do you make this safe?" closed="true" >}}
+The message is redelivered (at-least-once). The DB write happens **again**, potentially creating a duplicate row.
+
+**Fixes:**
+1. **Idempotent consumer:** Use a unique message ID (or `topic+partition+offset`) as a deduplication key in Postgres. Insert with `ON CONFLICT DO NOTHING` or check before writing.
+2. **Outbox pattern:** Write the result + the offset into the *same* Postgres transaction. A separate process reads committed results and publishes downstream. The offset in Postgres becomes the source of truth, not `__consumer_offsets`.
+3. **Kafka transactions don't help here** because the Postgres write is outside Kafka's transactional boundary. Exactly-once only applies to Kafka-to-Kafka pipelines.
+{{< /details >}}
+
+{{< details title="Your topic has 12 partitions and your consumer group has 12 consumers. You need to increase throughput. Should you add more consumers or more partitions? What are the consequences of each?" closed="true" >}}
+**Adding more consumers (>12):** Useless. With 12 partitions, only 12 consumers can be active. Extra consumers sit idle — they're just standby for failover.
+
+**Adding more partitions (e.g., 24):** Increases parallelism (now 24 consumers can be active). But:
+- `hash(key) % N` changes — existing keys remap to different partitions. In-flight data loses ordering guarantees during the transition.
+- More partitions = more file handles, longer leader elections, higher controller memory.
+- **Partition count cannot be decreased.** This is a one-way door.
+
+**Better alternatives before adding partitions:**
+- Optimize consumer processing (batch DB writes, async I/O)
+- Use `linger.ms` and `batch.size` on the producer to reduce per-message overhead
+- Check if consumers are I/O-bound rather than Kafka-bound
+{{< /details >}}
+
+{{< details title="You're using Kafka for an event-sourced system. After 2 years, a topic has 500 million messages. A new microservice joins and sets auto.offset.reset=earliest. What happens and how do you handle it?" closed="true" >}}
+The new consumer starts reading from offset 0 and must process **all 500 million messages** before it catches up to real-time. This could take hours or days depending on processing speed.
+
+**Strategies:**
+1. **Compacted topics:** If the topic uses `cleanup.policy=compact`, Kafka retains only the latest value per key. The new consumer reads a smaller dataset (one message per key, not full history).
+2. **Snapshot + stream:** Materialize the current state into a snapshot (e.g., a database dump or compacted topic), have the new service bootstrap from the snapshot, then start consuming from a recent offset.
+3. **Parallel bootstrap:** Temporarily scale the new consumer group to many instances to chew through the backlog faster, then scale down.
+4. **Retention policy:** If the topic has `retention.ms` or `retention.bytes` configured, old messages are already deleted. The consumer only processes what's retained.
+
+**The real question:** Should an event-sourced topic retain 2 years of raw events? Usually yes for audit, but the consumer doesn't need to replay all of them — separate the "audit log" retention from the "bootstrap" mechanism.
+{{< /details >}}
+
+{{< details title="Kafka's exactly-once semantics use idempotent producers with sequence numbers. If a producer crashes and restarts, it gets a new ProducerID. How does Kafka handle this without breaking exactly-once?" closed="true" >}}
+The **`transactional.id`** bridges this gap. When a producer starts with a configured `transactional.id`, it calls `initTransactions()`. Kafka's transaction coordinator maps the `transactional.id` to an internal **ProducerID + epoch**. If the producer crashes and restarts:
+
+1. The new producer instance calls `initTransactions()` with the same `transactional.id`
+2. The coordinator increments the epoch (fencing the old producer)
+3. Any incomplete transactions from the old epoch are aborted
+4. The new producer gets a fresh ProducerID + new epoch but the `transactional.id` provides continuity
+
+**Without `transactional.id`:** A restarted producer gets a brand new ProducerID, and the broker can't correlate it with the old one — sequence number deduplication only works within a single ProducerID's lifetime. This is why the idempotent producer alone gives at-least-once (not exactly-once) across restarts. Transactions + `transactional.id` are required for true exactly-once.
+{{< /details >}}
+
+{{< details title="Consumer A reads a message at offset 100 and processes it in 500ms. Consumer B in a different group reads the same message and processes it in 5ms. Does Consumer B's processing delay Consumer A?" closed="true" >}}
+**No.** Consumer groups are completely independent. Each group maintains its own offset per partition in `__consumer_offsets`. Consumer A and Consumer B read from the same partition leader, but:
+
+- They have separate offset tracking
+- They poll at their own pace
+- A slow consumer in one group cannot back-pressure a consumer in another group
+- They can even be at completely different offsets (A at offset 100, B at offset 50,000)
+
+This is Kafka's key advantage over traditional message queues (where a message is consumed by one consumer and deleted). The persistent log allows multiple consumer groups to read independently at different speeds — which is exactly why it works for the GPS scenario in the opening: pricing, ETA, data lake, and audit all read the same data independently.
+{{< /details >}}

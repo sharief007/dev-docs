@@ -1,6 +1,6 @@
 ---
 title: Wide-Column Stores (Cassandra)
-weight: 7
+weight: 8
 type: docs
 ---
 
@@ -241,3 +241,37 @@ Secondary indexes in Cassandra (`CREATE INDEX`) scatter queries across all nodes
 | Append-only logs and activity feeds | Complex joins across entities |
 | Multi-datacenter active-active replication | Small datasets (operational overhead not justified) |
 | Linear horizontal scale with no single point of failure | Frequent deletes (tombstone accumulation) |
+
+{{< callout type="info" >}}
+**Interview tip:** When the question is "how would you store a billion messages a day?", I'd reach for Cassandra and immediately explain the schema is query-driven: "I'd design one table per query pattern — `messages_by_user` partitioned on `user_id`, `messages_by_conversation` partitioned on `conv_id` — and accept that I'm storing each message twice. Denormalization isn't a workaround in Cassandra, it's the design." I'd bound partition size with a time bucket like `(user_id, year_month)` to avoid unbounded partitions, run `LOCAL_QUORUM` reads and writes for strong consistency within a DC at one-replica-failure tolerance, and explicitly call out the hot-partition problem as the most common production failure mode — fixing it with random suffixing or sharded counters when needed. I'd avoid Cassandra secondary indexes; they scatter queries across every node and become a performance trap.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A Cassandra table is partitioned by user_id. One user has 50 million messages. Reads for this user time out. What's wrong and how do you fix it?" closed="true" >}}
+**Unbounded partition.** All 50M messages live in a single partition (one node). Reading requires loading all rows into memory — Cassandra partitions should ideally stay under 100MB / 100K rows.
+
+**Fix:** Add a **time bucket** to the partition key: `PRIMARY KEY ((user_id, year_month), created_at)`. Each partition holds at most one month. A query for recent messages hits one small partition; full history requires scatter-gather across month buckets and client-side merge.
+{{< /details >}}
+
+{{< details title="You write with CL=ONE and read with CL=ONE (RF=3). Can a read return stale data?" closed="true" >}}
+**Always possible.** R + W = 2, which is ≤ N (3) — the quorum rule isn't satisfied. The write may go to Node A, the read to Node B, and B hasn't replicated yet.
+
+Even after replication, LWW (Last Write Wins — Cassandra resolves conflicts by timestamp) means a clock-skewed node could overwrite a newer value with an older one.
+
+**For strong consistency within a DC:** Use `LOCAL_QUORUM` for both reads and writes. With RF=3, that requires 2/3 replicas — guaranteed overlap between read and write sets.
+{{< /details >}}
+
+{{< details title="You model a 'likes' counter as a regular column and increment it with SET likes = likes + 1. Under concurrent writes, increments are lost. Why?" closed="true" >}}
+Cassandra has no read-modify-write atomicity. The client reads `likes=100`, computes 101, writes 101. Two concurrent clients both read 100 and both write 101 — one increment lost.
+
+**Fix:** Use a **sharded counter** pattern. Write increments to N random partition shards (`likes:post_123:shard_0` through `shard_9`). Read by summing all shards. This distributes write contention and eliminates the lost-update problem. Cassandra's built-in counter columns exist but have eventual consistency issues under contention.
+{{< /details >}}
+
+{{< details title="A Cassandra cluster has RF=3 with NetworkTopologyStrategy across 3 DCs (RF=3 per DC). You write with LOCAL_QUORUM. The entire US DC goes down. Is data lost?" closed="true" >}}
+**No data is lost.** With RF=3 per DC, each DC has 3 independent replicas. The US DC is down but EU and APAC each have all the data.
+
+However, `LOCAL_QUORUM` only counts replicas in the **local** DC. Clients in the US DC can't write (no local replicas to form quorum) and must be rerouted to another DC. Clients in EU/APAC continue operating normally.
+
+**If RF=3 total** (1 per DC), losing the US DC means 1 of 3 replicas is lost. Data survives on the other 2, but LOCAL_QUORUM in the US fails — no local replicas at all.
+{{< /details >}}

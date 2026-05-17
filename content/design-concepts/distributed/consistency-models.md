@@ -4,6 +4,8 @@ weight: 3
 type: docs
 ---
 
+A user updates their profile photo and immediately reloads the page — they see the old photo. A customer's payment is debited but their order status still shows "pending" five seconds later. A reply appears on a thread before the original question becomes visible. Each of these is a violation of a *different* consistency guarantee. **Picking a consistency model is picking which of these surprises your users will never see** — and which ones you'll trade away to keep latency low. The right answer is rarely "the strongest one"; it's a per-operation decision driven by what the data is for.
+
 A consistency model defines the contract between a distributed system and its clients: which reads and writes are guaranteed to reflect which other reads and writes. The models form a spectrum from strongest (most expensive) to weakest (most performant).
 
 ```
@@ -155,7 +157,7 @@ Client 1 writes x=1 → sees x=1 on next read ✓
 Client 2 (independent session) may still see x=0 for a short window ← acceptable
 ```
 
-**Implementation:** Track the write's LSN (log sequence number) per session. Route subsequent reads to replicas that have applied at least that LSN. See [Read Replicas & Replication Lag](../replication/read-replicas) for implementation patterns.
+**Implementation:** Track the write's LSN (log sequence number) per session. Route subsequent reads to replicas that have applied at least that LSN. See [Read Replicas & Replication Lag](../../replication/read-replicas) for implementation patterns.
 
 ### Monotonic Reads
 
@@ -221,4 +223,8 @@ Search index:           Eventual consistency (EL) — seconds of lag is fine
 
 {{< callout type="info" >}}
 In a system design interview, the strongest signal is knowing which operations require linearizability and which tolerate eventual consistency. State it explicitly: "The balance read before a debit must be linearizable — I'll route it to the primary. The feed read can be eventually consistent — I'll read from the nearest replica." This shows you treat consistency as a per-operation decision with cost implications, not a binary system property.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd be precise about the term: linearizability is a **single-object** guarantee — every read sees the most recent write across replicas, in real-time order. It's not the same as serializability, which is a **multi-object** isolation guarantee about transaction interleaving; you can have one without the other, and conflating them is the most common interview red flag here. In practice I'd reach for linearizability only on operations where staleness causes correctness failures (balances, inventory, locks, idempotency keys) and accept causal or eventual consistency everywhere else. Session guarantees — read-your-writes and monotonic reads — are usually the right middle ground; they're cheap to implement with LSN-based routing and they prevent the "I just updated my photo, why is the old one back?" failure that users actually notice.
 {{< /callout >}}

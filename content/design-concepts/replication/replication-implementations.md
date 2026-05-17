@@ -117,7 +117,7 @@ SHOW VARIABLES LIKE 'binlog_format';  -- should return ROW
 |-----------|---------------|
 | **Version independence** | Leader and follower can run different DB versions — the log format is stable across releases |
 | **Cross-engine replication** | PostgreSQL → MySQL is possible via logical decoding |
-| **Change data capture (CDC)** | External systems (Kafka, data warehouses) consume the same log stream — this is the foundation of the [Outbox Pattern](../distributed/outbox-pattern) |
+| **Change data capture (CDC)** | External systems (Kafka, data warehouses) consume the same log stream — this is the foundation of the [Outbox Pattern](../../distributed/outbox-pattern) |
 | **Selective replication** | Replicate a subset of tables or columns |
 | **Human-readable** | Row-level changes are easier to debug than byte-level diffs |
 
@@ -169,3 +169,19 @@ CREATE TRIGGER orders_audit
 {{< callout type="info" >}}
 **Interview tip:** When discussing database replication, say: "I'd use logical replication — it decouples the replication format from the storage engine, supports cross-version upgrades, and doubles as a CDC stream. For a hot standby where byte-identical state and minimal lag matter (like a failover target), WAL shipping is better because it skips the logical decoding overhead." This shows you understand the tradeoff, not just the mechanism.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You upgrade PostgreSQL from v15 to v16. Physical (WAL) replication stops working between the old primary and new-version replica. Why?" closed="true" >}}
+**WAL format is version-specific.** Physical replication ships raw WAL bytes (page-level changes), which depend on the internal storage format. Different major versions have different page layouts, WAL record formats, and internal data structures. A v16 replica can't interpret v15 WAL records.
+
+**Logical replication works cross-version** because it ships logical changes (INSERT row X, UPDATE row Y) decoded from the WAL, independent of the internal storage format. This is why logical replication is the standard tool for zero-downtime major version upgrades: set up logical replication from v15 to v16, let it catch up, then failover.
+{{< /details >}}
+
+{{< details title="You use logical replication to feed Elasticsearch from PostgreSQL. A large UPDATE touching 1 million rows runs on the primary. The replica (and ES) lag spikes to 30 minutes. Why?" closed="true" >}}
+**Logical decoding overhead.** Each of the 1 million row updates must be: (1) decoded from the WAL into a logical change event, (2) serialized to the replication protocol, (3) sent to the subscriber, and (4) applied one at a time on the subscriber.
+
+Physical replication would ship the WAL bytes directly with minimal processing. Logical decoding adds CPU overhead per row and serialization cost. The subscriber also applies changes sequentially by default (single-threaded apply), creating a bottleneck.
+
+**Fixes:** Batch large updates into smaller transactions. Use parallel apply workers (PostgreSQL 16+ supports parallel logical replication apply). Or for the ES use case, use CDC (Debezium) which is optimized for high-throughput change streaming.
+{{< /details >}}

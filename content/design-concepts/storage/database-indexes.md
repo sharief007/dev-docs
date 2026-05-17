@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+Your `orders` table grows from 100K to 50M rows. The dashboard query that filtered by `customer_id` in 80ms now takes 22 seconds, and on Black Friday it times out entirely. Adding one B-tree index on `customer_id` brings it back to single-digit milliseconds — but every additional index slows down every INSERT and UPDATE, and the wrong choice (or the wrong column order in a composite) leaves the planner doing a Seq Scan anyway.
+
 An index is a separate data structure maintained by the database that lets it find rows without scanning the entire table. Every index you add speeds up reads and slows down writes — the art is knowing which tradeoff to make.
 
 {{< callout type="info" >}}
@@ -180,3 +182,43 @@ Key things to spot:
 | `Bitmap Heap Scan` | Row pointers collected from index scan(s) sorted by physical block location; heap pages read sequentially — avoids random I/O per row; also produced when multiple indexes are OR'd or AND'd together |
 | `rows=` estimate vs actual | Large gap → stale statistics; run `ANALYZE` |
 | `Buffers: hit=X read=Y` | `hit` = from cache, `read` = from disk — high `read` indicates cache pressure |
+
+{{< callout type="info" >}}
+**Interview tip:** When an interviewer asks "how would you make this query faster?", I'd say: "First I'd check `EXPLAIN ANALYZE` to see if the planner is actually using an index — a lot of perceived 'index problems' are really stale statistics or composite indexes that violate the leftmost-prefix rule. For composite indexes I put equality columns first and range columns last, because a range predicate stops the index from being useful for any column after it. And I'd push back on adding more indexes reflexively — every index multiplies write amplification, so on a write-heavy table I'd rather have three carefully chosen composite or covering indexes than eight single-column ones."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You have a composite index on (status, created_at). The query is WHERE created_at > '2024-01-01' AND status = 'active'. Does the index help? What if the query is WHERE created_at > '2024-01-01'?" closed="true" >}}
+**First query: Yes, fully.** The optimizer reorders the predicates to match the index — `status = 'active'` (equality) uses the first column, then `created_at > '2024-01-01'` (range) uses the second. Column order in the WHERE clause doesn't matter; index column order does.
+
+**Second query: No.** The index is `(status, created_at)`. Without a predicate on `status` (the leftmost column), the index can't be used. The planner falls back to a sequential scan or a different index. This is the **leftmost-prefix rule** — a composite index is only usable starting from the leftmost column.
+{{< /details >}}
+
+{{< details title="A table has 10 million rows. You add an index on a boolean column 'is_active' where 99% of rows are true. Will queries filtering WHERE is_active = false use the index?" closed="true" >}}
+**Yes — and this is one of the few cases a low-cardinality index is useful.** The planner estimates selectivity: `is_active = false` matches only 1% of rows (100K). An index scan fetching 100K row pointers + heap lookups is much cheaper than scanning 10M rows.
+
+**But** `WHERE is_active = true` (99% of rows) will NOT use the index — the planner correctly chooses a sequential scan because fetching 9.9M row pointers via random I/O is slower than reading the table sequentially. Selectivity, not cardinality, determines whether the index is used.
+
+A **partial index** is even better here: `CREATE INDEX idx_inactive ON orders (id) WHERE is_active = false` — indexes only the 1% of rows you actually query, using 99% less space.
+{{< /details >}}
+
+{{< details title="You create a covering index on (user_id, email, name) to avoid heap fetches. EXPLAIN shows 'Index Only Scan'. After a bulk update of 500K rows, the same query now shows 'Index Scan' (not Index Only). What happened?" closed="true" >}}
+PostgreSQL's Index Only Scan requires the **visibility map** to confirm that all rows on a heap page are visible to all transactions (no dead tuples). After a bulk update, the updated rows create dead tuples. The visibility map marks those pages as "not all-visible," forcing PostgreSQL to check the heap for those pages — degrading to a regular Index Scan.
+
+**Fix:** Run `VACUUM` on the table. VACUUM removes dead tuples and updates the visibility map, allowing Index Only Scan to work again. Autovacuum will eventually do this, but after a large bulk update, a manual `VACUUM ANALYZE` is faster.
+{{< /details >}}
+
+{{< details title="An engineer proposes adding an index on every column 'just in case.' A table has 8 columns and receives 50K inserts/second. Why is this dangerous?" closed="true" >}}
+**Write amplification.** Every INSERT must update all 8 indexes. Each index update involves finding the correct B-tree leaf page, potentially splitting it, and writing WAL entries. At 50K inserts/sec with 8 indexes, that's 400K index operations/sec — each involving random I/O and lock contention on leaf pages.
+
+The symptoms: insert latency increases, WAL volume grows (more replication lag on replicas), checkpoint frequency increases, and autovacuum falls behind because there are more dead index entries to clean.
+
+**Rule:** Index only what your queries need. Three carefully chosen composite indexes that serve your actual query patterns will outperform eight single-column indexes in both read and write performance.
+{{< /details >}}
+
+{{< details title="Your query uses ORDER BY created_at DESC LIMIT 10 on a table with a B-tree index on created_at. Is the index used? What about ORDER BY created_at DESC, priority ASC?" closed="true" >}}
+**First query: Yes.** B-tree indexes are inherently ordered. The planner can traverse the index backward (descending) and stop after 10 entries — no sort step needed. This is O(log n + 10), extremely fast.
+
+**Second query: Depends on the index.** A single-column index on `created_at` can't satisfy a two-column sort. The planner may use the index to avoid a full scan but still needs a sort step for the secondary `priority ASC` ordering. A composite index on `(created_at DESC, priority ASC)` — with explicit sort directions — would eliminate the sort entirely. PostgreSQL supports per-column sort direction in index definitions since v11.
+{{< /details >}}

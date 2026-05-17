@@ -1,6 +1,6 @@
 ---
 title: Full-Text Search
-weight: 16
+weight: 18
 type: docs
 ---
 
@@ -298,3 +298,48 @@ Query-time synonyms are generally preferred for flexibility.
 {{< callout type="info" >}}
 In a system design interview, Elasticsearch is the right answer when the question involves full-text search, autocomplete, relevance ranking, or log analytics. It is a **derived data store** — populated from a primary database (PostgreSQL, MySQL) via CDC or dual writes, not the authoritative record of truth. Never let the interviewer assume Elasticsearch replaces your primary database.
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When the question involves full-text search, autocomplete, or "find products like X", I'd reach for Elasticsearch and explain: "It's built on Lucene's inverted index — terms map to sorted posting lists, intersected at query time, with BM25 scoring that handles term-frequency saturation and document-length normalization better than TF-IDF." I'd flag two sharp edges: shard count is fixed at index creation, so I'd size 10–50 GB per shard from day one and use the `_split` API later if needed; and Elasticsearch is near-real-time, not real-time — there's a 1-second refresh lag by default, which I'd raise or lower depending on the workload. Most importantly, Elasticsearch is a derived data store, never the source of truth — I'd populate it from PostgreSQL via CDC (Debezium → Kafka → ES sink) so the primary stays authoritative and ES handles search.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A search for 'running shoes' returns results about 'shoe running tracks' ranked higher than actual running shoes. What's wrong with the relevance scoring?" closed="true" >}}
+**BM25 scoring without field boosting.** BM25 (the default relevance algorithm) scores based on term frequency, inverse document frequency, and field length. If "running" and "shoes" appear in the `description` field of "shoe running tracks" more frequently or in a shorter field, it scores higher.
+
+**Fix:** Apply **field boosting** — weight the `title` field higher than `description`. A match in the title is more relevant than a match in the body. Additionally, use **phrase matching** (`"running shoes"` as an exact phrase) with a boost, so documents containing the exact phrase rank higher than documents with the words scattered independently.
+{{< /details >}}
+
+{{< details title="You create an Elasticsearch index with 5 primary shards. Data grows to 500GB. Queries are slow. You want to increase to 20 shards. Can you?" closed="true" >}}
+**Not directly.** Elasticsearch's primary shard count is **fixed at index creation**. You can't change it after the fact because documents are routed to shards via `hash(doc_id) % num_shards` — changing the shard count would invalidate every document's routing.
+
+**Options:**
+1. **Reindex** into a new index with 20 shards using the `_reindex` API. Requires downtime or an alias swap.
+2. **Split API** (`_split`): doubles or triples shard count by splitting existing shards. Requires the original shard count to be a factor of the target.
+3. **Rollover indices:** Use time-based indices (e.g., `logs-2024-01`) with ILM (Index Lifecycle Management — Elasticsearch's built-in policy engine for managing index rotation, retention, and tier migration). New indices get the right shard count; old ones stay as-is.
+
+**Prevention:** Size shards at 10-50 GB from day one. For 500GB expected, start with 10-20 shards.
+{{< /details >}}
+
+{{< details title="You index 1 million documents into Elasticsearch. Immediately after the bulk index call returns, you search for one of the documents. It's not found. Why?" closed="true" >}}
+**Near-real-time (NRT) refresh interval.** Elasticsearch doesn't make documents searchable immediately after indexing. New documents are written to an in-memory buffer and a translog (Elasticsearch's write-ahead log for crash recovery). They become searchable only after a **refresh** operation, which creates a new Lucene segment from the buffer. The default refresh interval is **1 second**.
+
+**Fixes:**
+- `POST /index/_refresh` — force a manual refresh after bulk indexing (adds latency)
+- `?refresh=wait_for` — on the index request, wait for the next scheduled refresh before returning
+- Lower `refresh_interval` to `500ms` (increases I/O and reduces throughput)
+- Accept the 1-second lag — for most use cases, NRT is sufficient
+{{< /details >}}
+
+{{< details title="Elasticsearch is running as the primary database for your e-commerce product catalog. An engineer says 'it has full CRUD and is fast enough.' What will go wrong?" closed="true" >}}
+Elasticsearch is a **search engine, not a database**. Critical limitations:
+
+1. **No ACID transactions:** An update to a document + update to inventory is not atomic. Partial failures leave inconsistent state.
+2. **NRT visibility:** A newly created product may not be searchable for up to 1 second — unacceptable for immediate confirmation.
+3. **Update = delete + reindex:** Every update rewrites the entire document in a new Lucene segment. High update rates cause segment explosion and merge pressure.
+4. **No referential integrity:** No foreign keys, no constraints, no cascading deletes.
+5. **Durability gaps:** The translog provides crash recovery, but it's not equivalent to a database WAL with full ACID guarantees.
+
+**Correct architecture:** PostgreSQL as the source of truth for CRUD. Elasticsearch as a derived search index, populated via CDC (Debezium reads PostgreSQL's WAL and publishes changes to Kafka; an ES connector consumes and indexes them).
+{{< /details >}}

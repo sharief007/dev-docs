@@ -1,6 +1,6 @@
 ---
 title: Caching Patterns
-weight: 13
+weight: 15
 type: docs
 ---
 
@@ -239,24 +239,33 @@ sequenceDiagram
 
 Cost: a brief wait for non-first requests. Risk: if the lock holder crashes, others wait until timeout.
 
-**Mitigation 2 — Probabilistic Early Recomputation (PER):**
+**Mitigation 2 — Probabilistic Early Recomputation (XFetch):**
 
-Before a key expires, recompute it with increasing probability as the TTL approaches zero. No locking required.
+Before a key expires, recompute it with increasing probability as the TTL approaches zero. No locking required. The canonical formula (Vattani–Chierichetti–Lowenstein, 2015) is:
 
 ```
-# On every cache read:
-remaining_ttl = cache.TTL(key)
-recompute_probability = exp(-remaining_ttl / β)  # β controls aggressiveness
+# On every cache read, alongside the cached value, the writer also stored:
+#   delta = time the last recompute took (measured)
+#   expiry = absolute time when this entry expires
+# Choose to recompute early when:
+#
+#     now - delta * beta * ln(random()) >= expiry
+#
+# where random() is uniform in (0, 1] and beta > 0 (typically 1.0).
+# Note ln(random()) is negative, so the left-hand side is greater than `now`;
+# as `now` approaches `expiry` the inequality fires with rising probability,
+# and slow-to-recompute keys (large delta) refresh sooner.
 
-if random() < recompute_probability:
+if now() - delta * beta * math.log(random()) >= expiry:
     value = db.fetch(key)               # recompute early
-    cache.SET(key, value, full_TTL)     # reset TTL
+    new_delta = measure(...)            # time the recompute
+    cache.SET(key, (value, new_delta), full_TTL)
     return value
 else:
     return cached_value                 # serve current value
 ```
 
-With β tuned to ~2–5× the recompute cost, entries are refreshed before expiry with high probability — the cache never actually expires for hot keys.
+With `beta` tuned around 1.0, hot, expensive-to-recompute keys are refreshed before expiry with high probability — the cache never actually expires for them, while cheap or rarely-read keys aren't refreshed unnecessarily.
 
 **Mitigation 3 — Background Refresh:**
 
@@ -359,3 +368,53 @@ Request:
 ```
 
 **L1 consistency challenge:** Each application instance has its own L1 cache. A write on one instance invalidates L1 on that instance, but other instances' L1 caches remain stale until TTL expires. This is acceptable for data that tolerates a short staleness window (product prices, user profile data). Not acceptable for inventory counts or session data that must be immediately consistent.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about caching, I'd default to cache-aside with explicit invalidation — "the application reads from cache, falls back to DB on miss, and on writes I update the DB then DEL the cache key, never write to both." Updating the cache on write is unsafe because the two writes aren't atomic. I'd then walk through the three failure modes interviewers expect: stampede (a hot key expires and 500 requests hit the DB at once — fix with single-flight locks or probabilistic early recomputation), penetration (requests for keys that don't exist always miss — fix with cached-null sentinels or a Bloom filter), and avalanche (bulk-loaded keys expire simultaneously — fix with TTL jitter). For multi-region or multi-service systems I'd use CDC-driven invalidation rather than dual writes, and I'd add a 1-second L1 in-process cache as a hot-key defense.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A hot key expires in your Redis cache. 500 concurrent requests arrive simultaneously and all miss the cache. They all query the database, which collapses. What's this called and how do you prevent it?" closed="true" >}}
+**Cache stampede** (also called thundering herd). All 500 requests see the cache miss and independently query the DB for the same data.
+
+**Fixes:**
+1. **Single-flight / mutex lock:** The first request acquires a short-lived lock (Redis SETNX). Other requests wait or get a stale value. Only one DB query executes; the result populates the cache for everyone.
+2. **Probabilistic early recomputation (XFetch):** Each request checks if the key is "close to expiry" and probabilistically decides to refresh it before TTL expires. The probability increases as TTL approaches 0, so exactly one request refreshes early.
+3. **Never-expire + background refresh:** The cache key has no TTL. A background job refreshes it periodically. Readers always get a cache hit (possibly slightly stale).
+{{< /details >}}
+
+{{< details title="You use cache-aside and on write you UPDATE the DB then SET the cache. A race condition causes the cache to permanently hold stale data. How?" closed="true" >}}
+**Write-write race:** Thread A updates DB (value=1), then Thread B updates DB (value=2), then Thread B SETs cache (value=2), then Thread A SETs cache (value=1). The DB has value=2 but the cache has value=1 — **permanently stale** until the cache key expires.
+
+**Fix:** On write, **DELETE the cache key** instead of setting it. The next read will miss and populate from the DB (which has the correct value). DELETE is safe because it doesn't carry a value that can be stale — it just forces a re-read.
+
+The deeper issue: writing to two systems (DB + cache) without a transaction means ordering is not guaranteed. DELETE-on-write is the simplest safe pattern.
+{{< /details >}}
+
+{{< details title="Your cache has a 1-hour TTL. Every hour on the hour, all cached keys expire simultaneously and the DB gets hammered. What's this called and how do you fix it?" closed="true" >}}
+**Cache avalanche.** Happens when many keys share the same TTL and were populated at roughly the same time (e.g., after a deploy or cache warm-up).
+
+**Fix: TTL jitter.** Instead of `TTL = 3600`, use `TTL = 3600 + random(0, 300)`. Keys expire over a 5-minute window instead of all at once. The DB handles a smooth trickle of misses instead of a sudden spike.
+
+For bulk cache warming (after a deploy), add jitter during population too — stagger the initial TTLs so they don't all expire together 1 hour later.
+{{< /details >}}
+
+{{< details title="An attacker sends millions of requests for keys that don't exist in either cache or database. Every request misses the cache and hits the DB. How do you defend against this?" closed="true" >}}
+**Cache penetration attack.** The cache can't help because the keys genuinely don't exist — there's nothing to cache.
+
+**Defenses:**
+1. **Cached null sentinels:** On DB miss, cache the key with a null value and short TTL (30-60s). Subsequent requests for the same key get a cache hit (null) without hitting the DB.
+2. **Bloom filter:** Maintain a Bloom filter of all valid keys. Check it before the cache/DB lookup. If the Bloom filter says "not in set," reject immediately. False positives (1%) still reach the DB, but 99% of invalid keys are blocked.
+3. **Rate limiting:** Per-IP or per-client rate limits at the API gateway layer.
+
+Use all three together for defense in depth.
+{{< /details >}}
+
+{{< details title="You use write-through caching (write to cache and DB synchronously). Write latency doubles. Your colleague suggests write-back (write to cache only, async flush to DB). What's the risk?" closed="true" >}}
+**Data loss.** Write-back (also called write-behind) acknowledges the write after updating only the cache. If the cache node crashes before flushing to the DB, those writes are lost permanently.
+
+**When write-back is acceptable:** The data is reconstructable (e.g., computed caches, session data that can be re-derived), or you're willing to accept the loss window (e.g., metrics, counters where losing the last 5 seconds is OK).
+
+**When it's not:** Financial transactions, order state, user data — anything where lost writes cause business damage. For these, use **cache-aside with DELETE-on-write** (lowest write latency without data loss risk) or accept the latency of write-through.
+{{< /details >}}

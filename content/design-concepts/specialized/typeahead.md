@@ -197,3 +197,23 @@ flowchart TB
 {{< callout type="info" >}}
 **Interview tip:** The key insight interviewers look for: "I'd store the top-k completions at each trie node so lookups are O(prefix length), not O(subtree size). The trie is built offline from aggregated search logs and deployed to serving nodes. For trending queries, a real-time stream detects frequency spikes and injects them into the serving layer. Personalization blends global popularity with per-user history at query time." This covers data structure choice, offline pipeline, real-time adaptation, and personalization — the four dimensions of autocomplete.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A user types 'ap' and expects 'apple' as the top suggestion. Your trie has 10 million completions under 'ap'. How do you return top-5 in under 10ms without scanning the entire subtree?" closed="true" >}}
+**Pre-computed top-k at each node.** At build time, store the top-k completions (by frequency/score) at every trie node. When the user types "ap," return the pre-stored top-5 from the "ap" node — O(prefix length) lookup, no subtree traversal.
+
+The trade-off: memory. Each node stores k pointers/strings. For a trie with 50M nodes and k=10, that's significant. Mitigation: only store top-k at nodes above a certain depth, or compress single-child chains into a Patricia trie (radix tree).
+{{< /details >}}
+
+{{< details title="A breaking news event causes 'earthquake' to trend. Your autocomplete trie was built offline 6 hours ago and doesn't include it. How do you surface trending queries in near-real-time?" closed="true" >}}
+**Streaming layer alongside the batch trie.** Ingest search queries into a Kafka topic. A stream processor (Flink/Kafka Streams) maintains a sliding-window frequency count. Queries exceeding a spike threshold are injected into a small **hot-terms overlay** (Redis sorted set or in-memory map) that the serving layer checks alongside the batch trie.
+
+At query time: merge results from the batch trie (global popularity) and the hot-terms overlay (trending), with a blending weight that favors recency for spikes.
+{{< /details >}}
+
+{{< details title="Two users type the same prefix 'ho'. User A recently searched for 'hotels in paris'. User B searched for 'hockey scores'. How do you personalize without maintaining per-user tries?" closed="true" >}}
+**Blended scoring at query time.** The global trie returns the top-k candidates for "ho." Then apply a **personalization boost**: score = `α × global_popularity + (1-α) × user_history_match`. User A's history boosts "hotels"; User B's boosts "hockey."
+
+User history is stored in a lightweight per-user feature (Redis hash of recent queries/clicks). The trie is shared globally — no per-user copies. Personalization is a **re-ranking** step, not a separate data structure.
+{{< /details >}}

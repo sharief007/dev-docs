@@ -4,6 +4,8 @@ weight: 8
 type: docs
 ---
 
+A user reports that their session keeps logging out on Safari but works fine on Chrome. You inspect the response and find `Set-Cookie: session=abc; SameSite=None` — no `Secure` flag. Safari silently drops it. The whole problem was a single missing header attribute. HTTP headers are how clients, proxies, CDNs, and servers negotiate behavior — and tiny header bugs cascade into outages, broken auth, cache poisoning, and CORS failures.
+
 Headers are key-value pairs sent in both requests and responses. Names are **case-insensitive**. Values are strings. Multiple values can be comma-separated or sent as multiple header lines.
 
 ```
@@ -273,3 +275,58 @@ The `X-` prefix convention was **deprecated by RFC 6648 in 2012**. New custom he
 | `X-Correlation-Id` | Similar to `X-Request-Id`. Common in microservice architectures. |
 | `X-Real-IP` | Original client IP as set by Nginx. Simpler alternative to `X-Forwarded-For`. |
 | `X-Api-Version` | API version indicator. Some APIs use this instead of URL versioning. |
+
+{{< callout type="info" >}}
+**Interview tip:** Anchor on high-leverage headers: "Caching: `Cache-Control: public, max-age=31536000, immutable` on content-hashed assets, `private, no-store` for user-specific data — `no-cache` means revalidate, not don't cache. Security: HSTS with `preload`, strict CSP, `nosniff`. Client IP: never trust leftmost `X-Forwarded-For` — read the IP from your first trusted proxy. CORS: `Allow-Origin: *` and `Allow-Credentials: true` are mutually exclusive. Cookies: always `HttpOnly`, `Secure`, `SameSite=Lax`."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Your API sets Cache-Control: no-cache on all responses. A developer complains that 'caching is disabled' and wants you to switch to no-store. Are they right? What's the actual difference?" closed="true" >}}
+**They're wrong about what `no-cache` does, but may be right about the desired behavior.**
+
+- `no-cache` = **store it, but revalidate with the server every time before using it.** The browser sends a conditional request (`If-None-Match` with ETag), and the server returns `304 Not Modified` (no body) if nothing changed. The response IS cached — it's just always validated.
+- `no-store` = **don't store anything at all.** No caching, no conditional requests, full response body every time.
+
+If the goal is to prevent sensitive data from being stored on disk (e.g., credit card data, personal health info), `no-store` is correct. If the goal is "always fresh but avoid transferring unchanged data," `no-cache` is more efficient because `304` responses have no body.
+{{< /details >}}
+
+{{< details title="A browser sends a CORS preflight (OPTIONS) to your API. The server returns Access-Control-Allow-Origin: * and Access-Control-Allow-Credentials: true. The actual request fails silently. Why?" closed="true" >}}
+These two headers are **mutually exclusive**. The spec requires that when `Allow-Credentials: true`, the `Allow-Origin` must be a specific origin (e.g., `https://app.example.com`), not `*`. Browsers silently block the response when both are set.
+
+**Why:** `Allow-Origin: *` with credentials would let **any site** send authenticated requests to your API and read the response — a massive security hole (effectively disabling the Same-Origin Policy).
+
+**Fix:** Set `Access-Control-Allow-Origin` to the specific requesting origin (read it from the `Origin` request header, validate it against an allowlist, then echo it back).
+{{< /details >}}
+
+{{< details title="Your Set-Cookie header is: Set-Cookie: session=abc; SameSite=None. It works in Chrome but is silently dropped in Safari. What's missing?" closed="true" >}}
+`SameSite=None` **requires the `Secure` attribute**. Without `Secure`, modern browsers (Safari first, then Chrome and Firefox) silently reject the cookie. The correct header is:
+
+```
+Set-Cookie: session=abc; SameSite=None; Secure; HttpOnly; Path=/
+```
+
+`SameSite=None` means "send this cookie on cross-site requests" — the browser requires `Secure` (HTTPS only) as a safety gate, because sending cookies cross-site over HTTP would be trivially interceptable.
+{{< /details >}}
+
+{{< details title="You set Strict-Transport-Security: max-age=31536000; includeSubDomains; preload on your production domain. A developer sets up a staging environment on staging.example.com over HTTP. Users can't access it. Why?" closed="true" >}}
+`includeSubDomains` applies HSTS to **all subdomains**, including `staging.example.com`. Browsers that visited the production site now refuse to connect to any subdomain over HTTP — they upgrade all requests to HTTPS. Since staging doesn't have a TLS certificate, the connection fails.
+
+**`preload` makes this permanent:** The domain is submitted to browser preload lists, which are hardcoded into Chrome, Firefox, Safari, and Edge. Even users who've never visited your site enforce HSTS. Removing `preload` from the header doesn't remove you from the list — you must submit a removal request to each browser vendor, which takes weeks to months.
+
+**Fix:** Don't use `includeSubDomains` if you have non-HTTPS subdomains. Or get TLS certs for all subdomains (Let's Encrypt wildcard certs make this easy).
+{{< /details >}}
+
+{{< details title="An attacker discovers your API returns user data with Vary: Cookie. They craft a URL that a victim clicks, and the CDN caches the victim's personalized response. How does this attack work?" closed="true" >}}
+This is a **web cache poisoning / cache deception** attack. The attack flow:
+
+1. Attacker crafts a URL: `https://api.example.com/account?cb=random123`
+2. Victim clicks the link (via phishing, social engineering)
+3. The CDN receives the request with the victim's `Cookie` header
+4. The CDN caches the personalized response keyed on URL + Cookie value
+5. If the CDN also caches based on URL alone (misconfigured), or if `Vary: Cookie` is not properly implemented, the attacker can request the same URL and receive the victim's cached response
+
+**The real issue:** `Vary: Cookie` creates a separate cache entry per unique cookie value. If the cache key implementation is flawed (e.g., CDN ignores `Vary` for certain response codes, or the cache key doesn't include the full cookie), this breaks.
+
+**Fix:** User-specific responses should use `Cache-Control: private, no-store` — never cache them at shared caches (CDN/proxy). `Vary: Cookie` is almost never correct for CDN caching because cookies are per-user by definition.
+{{< /details >}}

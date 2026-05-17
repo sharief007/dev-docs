@@ -87,18 +87,36 @@ Instead of separate thread pools, use a **semaphore** (concurrent call counter) 
 ```python
 import asyncio
 
+
+class BulkheadFullException(Exception):
+    pass
+
+
 class SemaphoreBulkhead:
-    def __init__(self, max_concurrent):
+    """Limit concurrent calls per dependency; fail fast when full."""
+
+    def __init__(self, max_concurrent, max_wait_seconds=0.0):
+        self._max = max_concurrent
+        self._max_wait_seconds = max_wait_seconds
         self._semaphore = asyncio.Semaphore(max_concurrent)
 
     async def execute(self, func, *args, **kwargs):
-        acquired = self._semaphore.locked()
-        if self._semaphore._value == 0:
-            raise BulkheadFullException(
-                f"Bulkhead full: {self._semaphore._bound} concurrent calls active"
+        # Try to acquire a slot. With max_wait_seconds=0 this is fail-fast;
+        # raising a non-zero value lets callers queue briefly under burst load.
+        try:
+            await asyncio.wait_for(
+                self._semaphore.acquire(),
+                timeout=self._max_wait_seconds,
             )
-        async with self._semaphore:
+        except asyncio.TimeoutError:
+            raise BulkheadFullException(
+                f"Bulkhead full: {self._max} concurrent calls active"
+            )
+        try:
             return await func(*args, **kwargs)
+        finally:
+            self._semaphore.release()
+
 
 payment_bulkhead = SemaphoreBulkhead(max_concurrent=10)
 db_bulkhead = SemaphoreBulkhead(max_concurrent=20)
@@ -154,3 +172,23 @@ If the circuit breaker is outside the bulkhead, an open circuit returns a fallba
 {{< callout type="info" >}}
 **Interview tip:** When discussing service resilience, say: "I'd use a bulkhead per downstream dependency to prevent a slow payment service from starving the database path. The payment bulkhead allows 10 concurrent calls — request 11 gets rejected immediately with a 503 instead of queueing. Inside the bulkhead, a circuit breaker monitors error rates and stops all calls if the payment service is consistently failing. This way, a partial outage in one dependency doesn't cascade to the entire system." This shows you understand both isolation (bulkhead) and fail-fast (circuit breaker) as complementary patterns.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Your app has one 200-thread pool shared across all endpoints. Recommendation service becomes slow (5s response). Users can't check out. Why?" closed="true" >}}
+**Thread pool exhaustion.** Each recommendation call holds a thread for 5 seconds. At moderate traffic, all 200 threads block waiting for recommendations. No threads left for checkout, profile, or any other endpoint. A slow non-critical dependency takes down the entire application — exactly what bulkheads prevent.
+{{< /details >}}
+
+{{< details title="Semaphore bulkhead with max 10 concurrent calls to payment. Request 11 arrives. Queue or reject?" closed="true" >}}
+**Reject immediately** (503 or fallback). For synchronous user-facing requests, queueing adds latency with no success guarantee — the payment service is already at capacity. For async background tasks, a bounded queue (50 slots) is acceptable. **Never** use unbounded queues — they hide back-pressure, consume memory, and eventually cause OOM.
+{{< /details >}}
+
+{{< details title="You have bulkhead + circuit breaker + timeout per dependency. What's the correct ordering?" closed="true" >}}
+**Request → Bulkhead → Circuit Breaker → Timeout → Downstream call.**
+
+1. **Bulkhead** limits concurrency — if full, reject immediately (no resources consumed).
+2. **Circuit breaker** checks state — if open, return fallback (no network call).
+3. **Timeout** caps actual call duration — abort if downstream is slow.
+
+Wrong order (timeout outside bulkhead): a slow downstream holds a bulkhead slot for the full timeout, effectively reducing capacity to zero under sustained slowness.
+{{< /details >}}

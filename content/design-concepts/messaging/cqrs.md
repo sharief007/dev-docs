@@ -4,6 +4,8 @@ weight: 4
 type: docs
 ---
 
+Your order service has two very different jobs colliding in one PostgreSQL schema. Writes need ACID transactions, strict validation, and normalized tables to keep invariants intact. Reads — the customer dashboard, the search page, the analytics view — each want the data shaped a different way, denormalized and pre-aggregated, scaling at 100x the volume. Trying to make one schema serve both eventually means slow queries, lock contention, and a model that's a compromise between two workloads. CQRS is the pattern that admits these are separate problems.
+
 CQRS is an architectural pattern that splits a system into two distinct models: a **write model** (handles commands — state mutations) and a **read model** (handles queries — data retrieval). Instead of a single database schema serving both reads and writes, each side gets its own model, optimized for its specific workload.
 
 ## The Problem CQRS Solves
@@ -390,3 +392,27 @@ CQRS adds architectural complexity. The operational cost is real: for each read 
 {{< callout type="info" >}}
 **Interview framing:** "For this system's order service, I'd use CQRS because we have very different read and write patterns: writes need ACID transactions with complex validation, but reads need full-text search across millions of orders and a real-time dashboard. The write side stores orders in normalized PostgreSQL. On commit, an outbox event goes to Kafka. Separate projectors build an Elasticsearch index for search and a Redis cache for the dashboard — each optimized for its query pattern, each scaling independently. The trade-off is eventual consistency between the write and read models, typically under 100ms, which is acceptable here since users see the confirmation immediately from the command response. If we ever need a new view — say, an analytics pipeline — we add a projector and replay the event stream. Zero changes to the write side."
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd lead with "CQRS is only justified when reads and writes have fundamentally different shapes or scaling profiles" — otherwise the operational cost of running two models, a projection pipeline, and lag monitoring isn't worth it. The write side stays normalized and ACID; the read side is a denormalized projection built per query pattern (Redis for dashboard, Elasticsearch for search), and the link between them is an event stream fed by the transactional outbox so we never dual-write. The trade-off I'd own up to is eventual consistency — typically tens of milliseconds — and I'd handle it with read-your-writes off the command response. I'd also note CQRS and event sourcing are independent; most teams should start with CQRS over a regular DB and only add event sourcing when audit and replay genuinely require it.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Your CQRS system: write in PostgreSQL, read in Elasticsearch. User creates an order, immediately searches — order not found. Why?" closed="true" >}}
+**Projection lag.** Write commits to PG → event published to Kafka → consumer updates ES. This pipeline has 50-500ms latency. The search hits ES before the projection processes the event.
+
+**Fixes:** (1) Return the created order in the command response (read-your-writes from the write path). (2) Optimistic UI — frontend adds the order locally while backend processes. (3) For critical paths, update the read model synchronously in the same request.
+{{< /details >}}
+
+{{< details title="An engineer proposes CQRS for a simple CRUD app with 100 QPS. Is this justified?" closed="true" >}}
+**Almost certainly not.** CQRS adds: a second data store, a projection pipeline, eventual consistency, lag monitoring, and double the operational complexity. At 100 QPS, a single PostgreSQL handles both reads and writes trivially.
+
+**CQRS is justified when:** Read/write models need different storage (normalized PG for writes, denormalized Redis for dashboards, ES for search), read scale vastly exceeds write scale, or read query patterns are fundamentally different from write patterns.
+{{< /details >}}
+
+{{< details title="The projection consumer crashes and restarts. It reprocesses some events. Some orders appear twice in the read model. What went wrong?" closed="true" >}}
+**Non-idempotent projection.** The consumer processed events and updated the read model but crashed before committing the Kafka offset. On restart, it reprocesses and inserts duplicates.
+
+**Fix:** Make projections idempotent. Use event offset as deduplication key: ES → use `topic:partition:offset` as `_id` (upsert). PG → `INSERT ... ON CONFLICT DO NOTHING`. Redis → `SETNX` with event ID. Idempotent consumers are a requirement for any at-least-once system.
+{{< /details >}}

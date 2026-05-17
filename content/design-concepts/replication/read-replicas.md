@@ -1,8 +1,10 @@
 ---
 title: Read Replicas & Replication Lag
-weight: 10
+weight: 3
 type: docs
 ---
+
+A user uploads a new profile photo, sees the success toast, refreshes the page — and the old photo is back. They submit a comment, scroll up, and don't see it. Two users both check the inventory count, both see "1 in stock," both buy it, and now you've oversold. **Each of these is a read-replica lag bug** — the write succeeded on the primary, the read hit a replica that hadn't replicated it yet, and the user sees a state that contradicts what just happened. Read replicas are the standard scaling lever for read-heavy workloads, but they only scale safely if you're explicit about which reads can tolerate seconds of staleness and which must come from the primary.
 
 A read replica is a copy of the primary database that serves read traffic. The primary handles all writes; replicas receive those writes asynchronously (usually) and apply them to their local state. The gap between a write landing on the primary and becoming visible on a replica is **replication lag**.
 
@@ -242,3 +244,36 @@ Automated failover tools (Orchestrator for MySQL, Patroni for PostgreSQL, AWS RD
 {{< callout type="info" >}}
 In a system design interview, state upfront which reads can tolerate replication lag (feeds, counts, search indexes) and which cannot (inventory checks, balance reads, idempotency lookups). Route the latter to the primary explicitly. This distinction separates candidates who understand distributed systems from those who treat "add read replicas" as a free scaling win.
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd be explicit that read replicas are **not** a free scaling win — every replica reintroduces a consistency decision per query. My default routing rule: any read whose result drives a write decision (inventory check before purchase, balance check before debit, idempotency-key lookup) goes to the primary; stale-OK reads (feeds, profiles, search results, counts) go to replicas. For read-your-writes I'd use LSN-based causal tokens — write returns the LSN, the next read includes it, and the replica only serves the read once it has applied that LSN; PostgreSQL supports this natively with `pg_current_wal_lsn()`. For durability I'd configure semi-synchronous replication so the leader waits for at least one replica ACK before confirming the write to the client — that gives zero data loss on failover as long as the confirmed replica is the one promoted.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A user updates their profile, then immediately refreshes the page. The page shows the old profile. The read hit a replica with replication lag. How do you fix this without always reading from the primary?" closed="true" >}}
+**Read-your-writes consistency** via LSN-based causal tokens:
+
+1. The write response includes the primary's current WAL LSN (Log Sequence Number)
+2. The client passes this LSN on subsequent reads
+3. The read-routing layer checks if the replica has applied that LSN (`pg_last_wal_replay_lsn() >= requested LSN`)
+4. If yes → serve from replica. If no → either wait briefly or route to primary.
+
+This gives read-your-writes consistency for the user who wrote, while other users still read from replicas. PostgreSQL supports this natively. The alternative — routing all post-write reads to the primary for N seconds — is simpler but wastes primary capacity.
+{{< /details >}}
+
+{{< details title="Your read replica handles 50K QPS. You add a second replica. QPS capacity doubles, but replication lag on both replicas increases from 100ms to 500ms. Why?" closed="true" >}}
+**WAL sender contention.** The primary has one WAL sender process per replica. Adding a replica doubles the WAL shipping work on the primary — more CPU for WAL encoding, more network I/O, more disk reads of WAL segments. If the primary was already near I/O limits, the extra replica competes for the same WAL bandwidth, slowing delivery to both.
+
+Additionally, each replica applies WAL independently — a replica under heavy read load may deprioritize WAL application, increasing lag.
+
+**Fixes:** Use **cascading replication** (replica 2 replicates from replica 1, not the primary). This offloads the primary. Or use logical replication with a CDC tool (Debezium) that reads the WAL once and fans out to multiple consumers.
+{{< /details >}}
+
+{{< details title="An inventory check reads from a replica: 'stock = 5'. The primary actually has stock = 0 (a write hasn't replicated yet). The application sells 5 items that don't exist. How do you prevent this?" closed="true" >}}
+This is a **stale-read-drives-wrong-write** bug — the most dangerous consequence of replication lag.
+
+**Rule:** Any read whose result drives a write decision must go to the **primary**. Inventory checks, balance checks, idempotency-key lookups, rate-limit counters — all primary reads.
+
+Stale-tolerant reads (feeds, profiles, search results, dashboards) can safely use replicas. The routing decision is per-query, not per-service.
+{{< /details >}}

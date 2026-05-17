@@ -4,7 +4,9 @@ weight: 4
 type: docs
 ---
 
-HTTP/2 (RFC 7540, 2015) keeps the same semantics as HTTP/1.1 — methods, status codes, headers — but replaces the text-based wire format with a **binary framing layer**. The primary goals: eliminate HOL blocking at the application layer, reduce header overhead, and allow multiple requests to share a single TCP connection.
+You're loading a product page that pulls 40 sub-resources from the same origin. Over HTTP/1.1, the browser opens 6 parallel TCP connections and serializes the rest behind them; the page renders in 2.1 seconds. Flip the server to HTTP/2 and the same request set finishes in 700ms over a single connection — same bytes on the wire, no code changes, no extra hardware. The difference is the binary framing layer.
+
+HTTP/2 (originally RFC 7540 in 2015, now superseded by RFC 9113 in 2022) keeps the same semantics as HTTP/1.1 — methods, status codes, headers — but replaces the text-based wire format with a **binary framing layer**. The primary goals: eliminate HOL blocking at the application layer, reduce header overhead, and allow multiple requests to share a single TCP connection.
 
 ## Binary Framing Layer
 
@@ -187,3 +189,41 @@ Each stream and the connection itself has a **receive window** — the maximum a
 | Header compression | ❌ (plaintext, repeated) | ✅ (HPACK) |
 | Server push | ❌ | ✅ (deprecated in practice) |
 | TLS required | No | No (but enforced by all browsers) |
+
+{{< callout type="info" >}}
+**Interview tip:** "HTTP/2's wins: binary framing eliminates app-level HOL blocking, HPACK compresses repeated headers by 85–95%, and one TCP connection replaces the 6-connection-per-origin hack. The catch: TCP-level HOL blocking is actually worse — a single dropped packet stalls every stream. That's why I'd reach for [HTTP/3](../http-3) on lossy networks. Skip server push — use `103 Early Hints` instead."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="HTTP/2 uses a single TCP connection per origin. In a benchmark, HTTP/2 is slower than HTTP/1.1 on a 2% packet loss network. How is this possible?" closed="true" >}}
+**TCP-level HOL blocking.** HTTP/2 multiplexes all streams over one TCP connection. With 2% packet loss, roughly 1 in 50 TCP segments is lost. Each loss stalls **every** in-flight stream until retransmission completes (~1 RTT).
+
+HTTP/1.1 opens 6 parallel connections. A lost packet on one connection stalls only that connection — the other 5 continue. On lossy networks, 6 independent connections provide better aggregate throughput than one multiplexed connection.
+
+**This is the fundamental reason HTTP/3 exists** — QUIC streams are independent at the transport layer, so loss on one stream doesn't affect others.
+{{< /details >}}
+
+{{< details title="HPACK maintains a dynamic table per connection. A client rotates between 3 backend servers behind a load balancer. Why does this degrade header compression efficiency?" closed="true" >}}
+The HPACK dynamic table is built up over the **lifetime of a single connection**. After many requests, frequently used headers (like `Authorization: Bearer <token>`) are referenced by index (1 byte) instead of sent literally (hundreds of bytes).
+
+If the load balancer routes the client to 3 different backends, there are 3 separate HTTP/2 connections, each with its own dynamic table. Each table starts empty and takes several requests to warm up. The client pays full literal header cost on every connection switch.
+
+**Mitigation:** Use **sticky sessions** or **connection pooling** at the load balancer so the client reuses the same backend connection. Or accept the trade-off — HPACK's static table (61 predefined entries) still provides significant compression even without a warm dynamic table.
+{{< /details >}}
+
+{{< details title="HTTP/2 has a max concurrent streams limit (default 100). What happens when a client tries to open stream 101?" closed="true" >}}
+The server sends a **`RST_STREAM`** with error code `REFUSED_STREAM` for the excess stream. The client must wait for an existing stream to complete before opening a new one. The client-side HTTP/2 implementation typically queues the request internally until a stream becomes available.
+
+This means under heavy load, HTTP/2 can still experience **queuing delays** — not HOL blocking, but throughput limitation. If 100 streams are in flight and all are slow, the 101st request waits.
+
+**Mitigation:** The limit is negotiable via `SETTINGS_MAX_CONCURRENT_STREAMS`. Servers can raise it (e.g., 256), but higher limits increase memory usage per connection. For extremely high concurrency, the client may open **multiple HTTP/2 connections** to the same origin — uncommon but allowed.
+{{< /details >}}
+
+{{< details title="Your team enables HTTP/2 server push to proactively send CSS and JS with the HTML response. Users report no performance improvement. Chrome DevTools shows PUSH_PROMISE followed by RST_STREAM. Why?" closed="true" >}}
+The client **already has the resources in its browser cache**. When the server sends `PUSH_PROMISE`, the client checks its cache. If the resource is already cached, it sends `RST_STREAM` to cancel the push — but the server has already started sending data. The bandwidth for the pushed bytes is **wasted**.
+
+Server push cannot know the client's cache state. This is the fundamental flaw — the server guesses what the client needs, but the client may already have it from a previous page load.
+
+**Why Chrome deprecated server push (2022):** In real-world measurements, push rarely improved performance and often wasted bandwidth. The replacement is `103 Early Hints` with `Link: rel=preload` — the server sends hints, and the **client** decides whether to fetch based on its cache.
+{{< /details >}}

@@ -1,6 +1,6 @@
 ---
 title: Cache Eviction
-weight: 14
+weight: 16
 type: docs
 ---
 
@@ -237,3 +237,40 @@ Eviction:
 | OS kernel page replacement | **CLOCK** | Minimal overhead, good approximation of LRU |
 | Session store (all sessions equally important) | **volatile-ttl** | Evict soonest-to-expire sessions first; access pattern irrelevant |
 | Mixed persistent + ephemeral keys (Redis) | **volatile-lru** or **volatile-lfu** | Evict only keys with TTL; preserve no-TTL keys |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about cache eviction, I'd say: "LRU is the default and it works for most workloads — O(1) get/put with a doubly-linked list plus a hash map. But it falls apart on two patterns: scans (a sequential scan of cold data evicts the entire hot working set) and skewed access (recency loses to frequency for the long tail)." For skewed workloads I'd reach for W-TinyLFU — the policy in Caffeine and Redis 4.0+ LFU mode — because it uses a Count-Min Sketch with periodic decay to handle frequency aging, and a small admission window protects hot entries from scan pollution. For mixed Redis workloads with both ephemeral and persistent keys I'd use `volatile-lfu` to evict only TTL'd keys. The detail I'd flag is that pure LFU has no aging — yesterday's hot key blocks today's trending key forever — which is exactly why W-TinyLFU's decay was invented.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You use LRU eviction. A nightly batch job scans every product in the catalog (1M products). The next morning, all cache hits drop to 0%. What happened?" closed="true" >}}
+**Scan pollution.** The batch job accessed 1M cold keys sequentially. LRU treats each access as "recently used," evicting the hot working set (the 10K products users actually access) to make room for 1M cold keys that will never be accessed again.
+
+**Fixes:**
+1. **W-TinyLFU / ARC:** Both have scan resistance — they protect frequently accessed keys from being evicted by a sequential scan of cold data.
+2. **Separate cache:** Run the batch job against the DB directly, bypassing the cache entirely.
+3. **LRU with admission filter:** Only admit keys into the cache if they've been accessed more than once (TinyLFU's approach).
+{{< /details >}}
+
+{{< details title="Pure LFU tracks access count. A key was accessed 100,000 times last week but hasn't been accessed today. Under LFU, it will never be evicted. Why is this a problem?" closed="true" >}}
+**No frequency aging.** Pure LFU has no mechanism to decay old access counts. A key that was hot last week retains its high count forever, blocking today's trending keys from entering the cache — even if they're now more popular.
+
+**Fix: W-TinyLFU's periodic decay.** Every N accesses, all counters are halved (right-shifted). A key that was accessed 100K times last week but 0 times this week decays to near-zero. Today's trending key with 500 recent accesses overtakes it. This is implemented via a Count-Min Sketch (a probabilistic data structure that estimates element frequency using multiple hash functions and a 2D array of counters) with periodic halving.
+{{< /details >}}
+
+{{< details title="Redis is configured with maxmemory-policy: volatile-lru. You store both session keys (with TTL) and feature flags (no TTL). Under memory pressure, which keys are evicted?" closed="true" >}}
+**Only session keys (with TTL) are evicted.** `volatile-lru` applies LRU eviction only to keys that have an expiry set. Feature flags (no TTL) are never candidates for eviction — they persist regardless of memory pressure.
+
+**Danger:** If all volatile keys are evicted and memory is still full, Redis returns `OOM` errors on new writes. The no-TTL keys can't be evicted under this policy.
+
+**Fix:** If you want Redis to evict any key when needed, use `allkeys-lru` or `allkeys-lfu`. If you want to protect specific keys, use `volatile-*` policies and ensure there are always enough volatile keys to absorb memory pressure.
+{{< /details >}}
+
+{{< details title="You implement LRU with a hash map + doubly-linked list for O(1) operations. At 10M cached entries, memory overhead is significant. Why, and what's a more memory-efficient alternative?" closed="true" >}}
+**Per-entry overhead.** Each entry in the doubly-linked list has two pointers (prev, next) = 16 bytes on 64-bit systems. The hash map has a pointer per bucket + pointer to the list node + key hash = ~40-60 bytes overhead per entry. At 10M entries, that's 400-600 MB of overhead before storing any actual data.
+
+**Alternative: CLOCK approximation.** CLOCK uses a circular buffer with a single reference bit per entry. On access, set the bit. On eviction, scan the clock hand — skip entries with the bit set (clear it), evict the first entry with bit=0. Overhead: 1 bit per entry + no linked list pointers. The OS uses CLOCK for page replacement for exactly this reason.
+
+**In practice:** Redis's approximated LRU samples 5-10 random keys and evicts the least recently used among them — no linked list at all. This trades precision for near-zero overhead.
+{{< /details >}}

@@ -1,6 +1,6 @@
 ---
 title: Object Storage (S3)
-weight: 9
+weight: 10
 type: docs
 ---
 
@@ -252,3 +252,31 @@ SELECT * FROM S3Object WHERE status = 'error' LIMIT 1000
 {{< callout type="info" >}}
 The key design principle: **size objects for your read unit**. If you always read a day's worth of logs together, store them as one object per day — not one object per log line. The per-request API cost and latency make many tiny objects expensive; fewer large objects with byte-range fetches is almost always more efficient.
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When the design involves user uploads, media, or a data lake, I'd say: "I'd put it in S3 with presigned PUT URLs so client uploads bypass our app servers entirely — direct browser-to-S3 with no bandwidth through us." For large files I'd use multipart upload (5 MB minimum part size, 10K part limit) so a failed part doesn't restart the whole transfer. I'd push back on using S3 as a database — its latency is tens of ms versus microseconds for block storage, and there's no in-place update — but I'd use it as the durable backing for data lakes (Parquet with byte-range fetches), backups, and ML training sets. For cost I'd use lifecycle policies to transition cold data to Glacier and call out that strong read-after-write consistency is the post-2020 default, so we don't need to design around eventual consistency anymore — except for cross-region replication.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A client uploads a 5GB file to S3 using a single PUT request. The upload fails at 4.8GB due to a network glitch. The entire upload must restart. How do you prevent this?" closed="true" >}}
+**Multipart upload.** Split the file into parts (minimum 5 MB, up to 10,000 parts). Upload each part independently — if one fails, retry only that part. After all parts succeed, call CompleteMultipartUpload to assemble them. Parts can also upload **in parallel** for faster throughput.
+
+For browser-to-S3 uploads, generate a **pre-signed PUT URL** so the client uploads directly to S3, bypassing your application servers entirely.
+{{< /details >}}
+
+{{< details title="Your data lake stores 10 billion small objects (100 bytes each) in S3. Listing and querying is extremely slow and expensive. What's wrong?" closed="true" >}}
+**Per-object overhead dominates.** Each S3 API call has per-request cost and ~50-100ms latency. 10 billion tiny objects means 10M LIST calls just to enumerate (1000 objects/page), and sequential GET is impossibly slow.
+
+**Fix:** Batch small records into larger objects — one per day/hour in **Parquet** format. Use byte-range fetches to read specific sections. Query engines (Athena, Spark) read Parquet column statistics to skip irrelevant row groups without scanning.
+{{< /details >}}
+
+{{< details title="S3 provides strong read-after-write consistency (since Dec 2020). Does this mean you can use S3 as a database?" closed="true" >}}
+**No.** Strong consistency means a GET after PUT returns the latest data. But S3 still lacks: atomic read-modify-write, in-place updates (must rewrite entire objects), low latency (50-200ms vs microseconds), transactions, and query indexes. S3 is durable, cheap, infinitely scalable storage — ideal for data lakes and backups, not transactional workloads.
+{{< /details >}}
+
+{{< details title="You use S3 lifecycle policies to move objects to Glacier after 90 days. A user requests an archived object. What happens?" closed="true" >}}
+**Glacier is not instant-access storage.** Retrieval takes minutes to hours: Expedited (1-5 min), Standard (3-5 hours), Bulk (5-12 hours). The request either fails or blocks.
+
+Your application must handle this asynchronously: accept the request, initiate a restore, notify the user when available. **Alternatives:** S3 Intelligent-Tiering (automatic tier movement, no retrieval delays) or Glacier Instant Retrieval (millisecond access for archival data accessed ~quarterly).
+{{< /details >}}

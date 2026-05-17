@@ -4,7 +4,7 @@ weight: 3
 type: docs
 ---
 
-[GeoHash](../specialized/geohash) divides the world into a fixed grid — every cell at a given precision is the same size, whether it covers Manhattan with 10,000 restaurants or the Sahara Desert with none. This wastes precision on empty regions and provides too little resolution in dense ones. A QuadTree solves this by **adapting its resolution to data density**: dense areas are subdivided into smaller cells, sparse areas remain as large cells.
+[GeoHash](../geohash) divides the world into a fixed grid — every cell at a given precision is the same size, whether it covers Manhattan with 10,000 restaurants or the Sahara Desert with none. This wastes precision on empty regions and provides too little resolution in dense ones. A QuadTree solves this by **adapting its resolution to data density**: dense areas are subdivided into smaller cells, sparse areas remain as large cells.
 
 ## How a QuadTree Works
 
@@ -161,7 +161,7 @@ Game world stored in QuadTree. To check if a bullet hits any enemy, query the bu
 
 ## QuadTree vs GeoHash
 
-| Property | QuadTree | [GeoHash](../specialized/geohash) |
+| Property | QuadTree | [GeoHash](../geohash) |
 |----------|----------|---------| 
 | **Cell size** | Adaptive — dense areas have small cells, sparse areas have large cells | Fixed — all cells at precision 6 are the same angular size |
 | **Storage** | In-memory tree structure (pointers between nodes) | String column in any database with a B-tree index |
@@ -210,3 +210,19 @@ flowchart LR
 {{< callout type="info" >}}
 **Interview tip:** "For nearby search, I'd use a QuadTree because data density varies — Manhattan has thousands of points per square kilometer while rural areas have almost none. The QuadTree adapts by subdividing dense areas into small cells and keeping sparse areas as large cells. A radius query prunes entire subtrees that don't intersect the search circle, so it's O(log N + k) where k is the number of results. The tree is built offline and loaded into memory on each server; updates flow in via CDC. For simpler requirements where data is more uniformly distributed, GeoHash with a B-tree index in the database is sufficient."
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A QuadTree leaf node has 500 points and your threshold is 100. It subdivides into 4 children. But 480 of the 500 points are in one quadrant (a city center). That child immediately needs to subdivide again. Is this a problem?" closed="true" >}}
+**Expected behavior, not a problem.** QuadTree adapts to data density by design — dense areas subdivide deeply, sparse areas stay as large cells. A city center may subdivide 10 levels deep while rural areas stay at level 2. This is the core advantage over GeoHash's fixed-size cells.
+
+**When it becomes a problem:** Extremely skewed data (all points at the same coordinate) causes infinite recursion. Set a **maximum depth limit** (e.g., 20 levels) and allow leaf nodes to exceed the point threshold at max depth.
+{{< /details >}}
+
+{{< details title="Your QuadTree is built offline and loaded into memory. A new restaurant opens. How do you update the tree without rebuilding it?" closed="true" >}}
+**Option 1: Incremental insert.** Traverse the tree to find the correct leaf. If the leaf exceeds the threshold, split it. This is O(depth) per insert — fast for single updates.
+
+**Option 2: CDC-based batch rebuild.** Accumulate changes in a queue, periodically rebuild the tree (every 5-15 minutes), and atomically swap the old tree for the new one (blue-green). Readers see a consistent snapshot; the brief staleness is acceptable for location data.
+
+For most "nearby search" systems, option 2 is preferred because the tree is also used for ranking and scoring — a full rebuild ensures all optimizations (top-k per node, bounding box pruning) are up to date.
+{{< /details >}}

@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+Your application uses auto-increment primary keys and inserts a few thousand rows per second. Throughput looks fine — until you add a second index on `created_at`, then a third on `(user_id, status)`, and suddenly the database is spending most of its I/O budget rewriting B+ tree pages and the rightmost leaf becomes a write hotspot. Understanding how a B+ tree actually lays out pages, splits, and amplifies writes is what separates "we added an index and it got slow" from a real diagnosis.
+
 A B+ tree is the index structure underneath PostgreSQL, MySQL (InnoDB), Oracle, and SQL Server. [Database Indexes](../database-indexes) covers what queries a B-tree supports and when to use one. This file goes one level deeper: how the structure actually works on disk, why it is fast, and what happens when you write.
 
 ## B-Tree vs B+ Tree
@@ -168,3 +170,40 @@ A table with 8 indexes amplifies this across 8 B+ trees — every INSERT must up
 | **Used by** | PostgreSQL, MySQL (InnoDB), Oracle, SQL Server | Cassandra, RocksDB, LevelDB, HBase, InfluxDB |
 
 The rule of thumb: **B+ tree for read-heavy OLTP, LSM tree for write-heavy time-series or log workloads.** Most OLTP databases are read-dominated (10:1 to 100:1 read/write ratio), which is why B+ trees dominate relational databases.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked "why is PostgreSQL so fast for point lookups even on a billion-row table?", I'd say: "Because the index is a B+ tree with a fan-out of 200–500 keys per page, so even a billion rows is reachable in 3 to 4 levels — and the upper levels stay pinned in the buffer pool, so a typical lookup is one disk I/O at the leaf level." For write-heavy workloads I'd flag the cost: every secondary index multiplies write amplification, page splits dirty multiple pages, and monotonically increasing keys create a right-edge hotspot on the rightmost leaf. That's the moment to consider an LSM-backed engine or to deliberately scatter inserts with a less ordered key.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A B+ tree index on a billion-row table has a fan-out of 400. How many levels does the tree have, and how many disk I/Os does a point lookup require?" closed="true" >}}
+**Levels:** Each level multiplies capacity by the fan-out. Level 1 (root) = 400 children. Level 2 = 400² = 160K. Level 3 = 400³ = 64M. Level 4 = 400⁴ = 25.6B. So **4 levels** are enough for a billion rows.
+
+**Disk I/Os:** One I/O per level traversed = 4 I/Os in the worst case. But the root and often level 2 are pinned in the buffer pool (they're accessed on every lookup). In practice: **1-2 disk I/Os** for the leaf level + heap fetch. This is why B+ trees are fast even at massive scale — logarithmic depth with a very high base.
+{{< /details >}}
+
+{{< details title="You insert rows with an auto-incrementing primary key (1, 2, 3, ...). The B+ tree's rightmost leaf page splits repeatedly. Why is this a problem under concurrent inserts?" closed="true" >}}
+**Right-edge hotspot.** All inserts go to the same rightmost leaf page because keys are monotonically increasing. Under concurrency, all insert threads contend for the lock on that one page, serializing what should be parallel work.
+
+Page splits are also concentrated: the rightmost page fills, splits, and the new rightmost page immediately starts filling. This creates latch contention and write amplification on a single page.
+
+**Fixes:**
+1. Use a **UUID or ULID** (Universally Unique Lexicographically Sortable Identifier — 128-bit, timestamp-prefixed but with enough randomness to scatter) as the primary key to distribute inserts across the tree. Trade-off: random I/O on inserts and larger key size.
+2. Use **hash partitioning** to spread inserts across multiple B+ trees.
+3. If ordering is needed, accept the hotspot and tune the page size and buffer pool for the workload.
+{{< /details >}}
+
+{{< details title="You have a B+ tree index on (last_name, first_name). The query is WHERE first_name = 'Alice'. Does the index help?" closed="true" >}}
+**No.** The B+ tree is sorted by `last_name` first, then `first_name` within each last_name group. Without a predicate on `last_name` (the leftmost column), the index can't narrow the search — it would have to scan every leaf page. This is the **leftmost-prefix rule**.
+
+The index helps for: `WHERE last_name = 'Smith'`, `WHERE last_name = 'Smith' AND first_name = 'Alice'`, and `WHERE last_name LIKE 'Sm%'` — all start from the leftmost column.
+{{< /details >}}
+
+{{< details title="A B+ tree stores all data in leaf nodes with leaves linked in a doubly-linked list. An LSM tree stores data in sorted immutable SSTables. Why does this make range scans faster on a B+ tree?" closed="true" >}}
+**B+ tree:** Once you find the starting leaf via tree traversal (O(log n)), you follow the linked list sequentially — each next leaf is one sequential page read. The data is in a single sorted structure.
+
+**LSM tree:** Data for the same key range may be spread across **multiple SSTables** at different levels. A range scan must read from all relevant SSTables and **merge** them (like merge-sort). This is O(k × range_size) where k is the number of SSTables, vs O(range_size) for a B+ tree.
+
+LSM trees mitigate this with compaction (reducing the number of SSTables) and Bloom filters (skipping SSTables that don't contain the target key), but the fundamental merge cost remains.
+{{< /details >}}

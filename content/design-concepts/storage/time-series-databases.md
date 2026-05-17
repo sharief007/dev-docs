@@ -1,6 +1,6 @@
 ---
 title: Time-Series Databases
-weight: 10
+weight: 11
 type: docs
 ---
 
@@ -360,3 +360,33 @@ ClickHouse is a columnar OLAP database, not a purpose-built TSDB — but it is w
 {{< callout type="warning" >}}
 The most expensive mistake in time-series systems is storing request-level or user-level data in a TSDB using high-cardinality tags. Use a TSDB for **aggregate** metrics (rate of requests, p99 latency per service). Use distributed tracing (Jaeger, Tempo) for per-request data and use logs (Elasticsearch, Loki) for per-event data. These are three distinct systems solving three distinct problems.
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When the workload is metrics, IoT, or any append-mostly time-ordered data, I'd reach for a purpose-built TSDB and explain why PostgreSQL with a timestamp index falls over: "Random B-tree updates on every write, no temporal compression, and DELETE-based retention generates dead tuples that need VACUUM." A TSDB chunks data into time windows that compress 10–100x using delta-of-delta on timestamps and Gorilla XOR on floats, expires data in O(1) by dropping whole chunks, and pre-aggregates rollups so a year-long query hits 1-day buckets, not 31 million 1-second points. The biggest gotcha I'd flag is high cardinality: tagging by `request_id` or `user_id` explodes the series count and OOMs Prometheus reliably. TSDBs are for aggregate metrics; per-request data belongs in tracing, per-event data in logs.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A team stores per-request metrics in Prometheus with labels {method, path, status_code, user_id}. After a week, Prometheus OOMs. What happened?" closed="true" >}}
+**High-cardinality label explosion.** `user_id` creates a separate time series for every unique combination — 10 endpoints × 5 status codes × 1M users = 50M series. Each series consumes memory for its head block.
+
+Prometheus is designed for **aggregate metrics**, not per-entity tracking. Per-request data → distributed tracing (Jaeger). Per-user analytics → data warehouse.
+
+**Fix:** Remove `user_id` from metric labels. Emit per-user metrics to a high-cardinality system (ClickHouse, M3).
+{{< /details >}}
+
+{{< details title="You're comparing TimescaleDB vs InfluxDB for IoT metrics. When would you pick each?" closed="true" >}}
+**TimescaleDB** when: you already run PostgreSQL, need SQL joins between metrics and relational data, write rate is moderate (<500K inserts/sec), or need ACID on time-series data.
+
+**InfluxDB** when: write throughput is the primary constraint (millions of points/sec), queries are tag-based aggregations without joins, or you want built-in downsampling/retention without manual setup.
+
+**Trade-off:** TimescaleDB = full PostgreSQL ecosystem (indexes, joins, extensions) at lower peak write throughput. InfluxDB = higher write throughput and purpose-built compression at the cost of no relational capabilities.
+{{< /details >}}
+
+{{< details title="Your TSDB stores 1-second resolution metrics. A dashboard queries 365 days. The query takes 60 seconds. How do you make it sub-second?" closed="true" >}}
+**Downsampling / rollups.** 365 days × 86,400 seconds/day = ~31.5M points per series — no TSDB scans that in sub-second time.
+
+Pre-aggregate: 1-second raw → 7 days retention. 1-minute rollups → 30 days. 1-hour → 1 year. 1-day → forever. A 365-day query hits 365 one-day points. Sub-second.
+
+Most TSDBs support this natively: InfluxDB (continuous queries), TimescaleDB (continuous aggregates), Prometheus (recording rules). **Retention and resolution are linked** — you don't need 1-second granularity for a year-long trend.
+{{< /details >}}

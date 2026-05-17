@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+A fiber cut between us-east-1a and us-east-1b just isolated half your database cluster from the other half. Both halves are alive; both can serve traffic; neither can talk to the other. Right now your inventory service is being asked: "Is this product in stock?" — and both sides have to answer something. Do you return potentially stale stock counts (and risk overselling) or refuse the request entirely (and lose the sale)? **There is no third option** — and that is the heart of the CAP theorem. It forces every distributed system to declare, in advance, what it does when the network breaks.
+
 The CAP theorem states that a distributed system can satisfy at most two of three properties simultaneously: **Consistency**, **Availability**, and **Partition Tolerance**. During a network partition, you must choose between consistency and availability — you cannot have both.
 
 ## The Three Properties
@@ -213,3 +215,7 @@ The binary CP/AP framing is a simplification. Real systems are more nuanced:
 | **Fencing tokens** | Accept writes on both sides of partition; use monotonic tokens to discard stale writers after reconnection |
 
 The [PACELC](../pacelc) model extends CAP to describe the latency vs. consistency tradeoff that exists even in the **absence** of partitions — which is the more common operating condition.
+
+{{< callout type="info" >}}
+**Interview tip:** I always lead with: "P is not optional — networks partition, so the real question is CP or AP per data type." Then I separate concerns: inventory, balances, and idempotency keys are CP (refuse the request rather than oversell or double-charge); feeds, view counts, and search indexes are AP (stale is fine, downtime isn't). I'm careful never to conflate CAP's C — which is **linearizability**, a single-object cross-replica freshness guarantee — with ACID's C, which is invariant preservation within a single node. And I follow up with [PACELC](../pacelc) because partitions are rare; the real cost most days is the latency-vs-consistency tradeoff on every read.
+{{< /callout >}}

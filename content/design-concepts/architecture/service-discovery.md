@@ -134,7 +134,7 @@ flowchart TB
 |---------------|-------------|
 | **Routing** | Maps external URL (`/api/orders`) to internal service (`order-service:8080/orders`) |
 | **Authentication** | Validates JWT/OAuth tokens before requests reach services — services trust the gateway's identity headers |
-| **Rate limiting** | Enforces per-client or per-endpoint rate limits (see [Rate Limiting](../rate-limiting/algorithms)) |
+| **Rate limiting** | Enforces per-client or per-endpoint rate limits (see [Rate Limiting](../../rate-limiting/algorithms)) |
 | **SSL termination** | Handles TLS at the edge — internal traffic can be plaintext (within a trusted network) or mTLS |
 | **Protocol translation** | Client speaks REST/JSON; internal services use gRPC/Protobuf. Gateway translates. |
 | **Request aggregation** | Mobile app needs data from 3 services in one screen. Gateway makes 3 internal calls and returns one response. |
@@ -215,3 +215,31 @@ They are **complementary**, not alternatives. A typical production setup has an 
 {{< callout type="info" >}}
 **Interview tip:** When designing a microservices system, say: "External traffic enters through an API gateway that handles auth, rate limiting, and TLS termination. Internally, services discover each other through Kubernetes DNS — `payment-service.default.svc.cluster.local` resolves to a ClusterIP backed by healthy pods. For service-to-service concerns like retries, circuit breaking, and mTLS, I'd use a service mesh sidecar (Envoy) rather than implementing those in every service's application code." This shows you understand the separation between edge routing and internal communication.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Service A calls Service B via a hardcoded URL (http://service-b:8080). Service B scales from 2 to 10 instances. Service A still hits only the original 2. What's missing?" closed="true" >}}
+**Service discovery and load balancing.** A hardcoded URL resolves to a fixed IP. New instances register in the service registry (Kubernetes endpoints, Consul) but the caller doesn't re-resolve.
+
+**Fix:** Use DNS-based discovery (Kubernetes ClusterIP resolves to healthy pod IPs via kube-proxy) or a service mesh sidecar (Envoy) that dynamically updates its endpoint list. The key: the caller resolves the service name **on every request** (or connection), not once at startup.
+{{< /details >}}
+
+{{< details title="Your API gateway handles authentication, rate limiting, and routing for external traffic. An engineer proposes also routing all internal service-to-service traffic through it. Why is this usually wrong?" closed="true" >}}
+**The API gateway is for north-south traffic (client → system), not east-west (service → service).** Routing internal calls through it creates:
+
+1. **Single point of failure** — every internal call depends on the gateway's availability
+2. **Latency overhead** — every internal hop adds gateway processing time
+3. **Scaling bottleneck** — internal traffic volume is often 10-100x external traffic
+
+**For east-west concerns** (retries, circuit breaking, mTLS, observability), use a **service mesh** (Istio, Linkerd) with sidecar proxies. Each pod gets its own Envoy proxy handling these concerns locally — no central bottleneck.
+{{< /details >}}
+
+{{< details title="You deploy a new version of a service. The service registry still has old instances registered. Some requests go to old instances, some to new. How do you handle this during rollouts?" closed="true" >}}
+**This is expected during rolling deploys** — old and new instances coexist. The registry reflects the current state: old pods deregistering, new pods registering.
+
+**Requirements for safe rollouts:**
+1. **Health-check-based registration:** New instances only register after passing readiness checks. Old instances deregister before shutdown (graceful drain).
+2. **Backward-compatible changes:** New and old versions must handle the same API contract during the transition. Breaking changes need API versioning.
+3. **Connection draining:** Old instances stop accepting new connections, finish in-flight requests, then deregister and terminate.
+4. **Service mesh canary:** Route 5% of traffic to the new version via weighted routing, monitor error rates, then gradually increase.
+{{< /details >}}

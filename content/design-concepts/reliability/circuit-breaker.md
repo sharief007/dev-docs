@@ -46,8 +46,7 @@ Threshold: 50% → TRIP → circuit opens
 
 ```python
 class CircuitBreaker:
-    def __init__(self, failure_threshold=0.5, min_calls=20,
-                 window_seconds=60, reset_timeout=30):
+    def __init__(self, failure_threshold=0.5, min_calls=20, reset_timeout=30):
         self.state = "CLOSED"
         self.failure_count = 0
         self.success_count = 0
@@ -57,9 +56,13 @@ class CircuitBreaker:
         self.reset_timeout = reset_timeout
 
     def call(self, func, *args, **kwargs):
+        # OPEN: short-circuit unless reset timeout has elapsed.
         if self.state == "OPEN":
-            if time.time() - self.last_failure_time > self.reset_timeout:
+            if time.time() - self.last_failure_time >= self.reset_timeout:
+                # Transition OPEN -> HALF_OPEN; reset counters so a single
+                # probe failure or success cleanly decides the next state.
                 self.state = "HALF_OPEN"
+                self._reset_counters()
             else:
                 return self.fallback()
 
@@ -67,12 +70,13 @@ class CircuitBreaker:
             result = func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:
+        except Exception:
             self._on_failure()
             return self.fallback()
 
     def _on_success(self):
         if self.state == "HALF_OPEN":
+            # Probe succeeded -> close the circuit and start fresh.
             self.state = "CLOSED"
             self._reset_counters()
         self.success_count += 1
@@ -80,14 +84,20 @@ class CircuitBreaker:
     def _on_failure(self):
         self.failure_count += 1
         self.last_failure_time = time.time()
-        total = self.failure_count + self.success_count
 
-        if total >= self.min_calls:
-            if self.failure_count / total >= self.failure_threshold:
-                self.state = "OPEN"
-
+        # In HALF_OPEN, a single probe failure immediately re-opens.
         if self.state == "HALF_OPEN":
             self.state = "OPEN"
+            return
+
+        # In CLOSED, only trip once we've seen enough calls to be confident.
+        total = self.failure_count + self.success_count
+        if total >= self.min_calls and self.failure_count / total >= self.failure_threshold:
+            self.state = "OPEN"
+
+    def _reset_counters(self):
+        self.failure_count = 0
+        self.success_count = 0
 ```
 
 ## Reset Timeout and Exponential Backoff
@@ -192,3 +202,21 @@ Request → Retry (2 attempts, exponential backoff)
 {{< callout type="info" >}}
 **Interview tip:** When discussing service resilience, say: "Each downstream call goes through a circuit breaker. If the payment service error rate exceeds 50% in a 60-second window, the circuit opens and we return a cached response for 30 seconds, then probe with a single request. I'd use per-dependency breakers — a failure in the recommendation service shouldn't block checkout." This shows you understand cascading failures and isolation, not just the state machine.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Circuit trips after 5 consecutive failures on a 1-second blip. Users see errors for 30 seconds. How do you improve this?" closed="true" >}}
+**Use a sliding window error rate instead of consecutive failures.** 5-consecutive is too sensitive — a brief burst trips the circuit even when the service is 99.9% healthy.
+
+Better: trip when error rate exceeds 50% in a 60-second rolling window with minimum 20 requests. 5 failures in 1000 requests = 0.5% — circuit stays closed. Also use exponential backoff on repeated trips (30s → 60s → 120s) and reset after a successful half-open probe.
+{{< /details >}}
+
+{{< details title="A single global circuit breaker for payments. US provider is down, EU provider is fine. All payments blocked. How do you fix this?" closed="true" >}}
+**Per-route circuit breakers.** A single global breaker treats all traffic as one stream. US failures trip it, blocking EU traffic that would succeed.
+
+Fix: separate circuit breaker per payment provider/region. US-provider breaker trips independently; EU-provider stays closed. This is the **bulkhead principle** applied to circuit breakers — isolate failure domains.
+{{< /details >}}
+
+{{< details title="Circuit is half-open. One probe request succeeds. Circuit closes. 5 seconds later, downstream fails again. How do you make half-open more robust?" closed="true" >}}
+**Gradual traffic ramp-up.** Instead of one probe, allow 10% of traffic through in half-open. If success rate exceeds the threshold over N requests, close. If not, re-open. This prevents the false-positive where one lucky request closes the circuit only to immediately reopen (thrashing).
+{{< /details >}}

@@ -368,3 +368,33 @@ Never auto-replay DLQ messages without a fix in place. Auto-replay without a fix
 {{< callout type="info" >}}
 **Interview framing:** "Every consumer in this system is designed to be idempotent — retries are safe. On failure, we use exponential backoff with full jitter to avoid synchronized retry storms. After 3 retries, the message goes to a dead letter queue. The DLQ is monitored — any message landing there triggers a PagerDuty alert because it means either a bug or a data issue that needs human investigation. After we fix the root cause, we replay DLQ messages back to the main queue. For Kafka consumers, we implement this in the consumer code since Kafka has no built-in DLQ; for SQS, we configure `maxReceiveCount` and a DLQ target. We also classify errors: transient errors (timeouts, 503s) get retried with backoff, but non-retryable errors (400, schema violations) skip retries and go straight to the DLQ."
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** The three things I'd insist on are exponential backoff with full jitter, idempotent consumers, and treating any DLQ depth above zero as a paging-grade alert. Synchronized retries without jitter turn a downstream blip into a thundering herd, and without idempotency every retry risks double-charging or double-sending. I'd separate transient errors (timeouts, 503s — retry with backoff) from permanent errors (4xx, schema violations — straight to DLQ, no retry budget wasted), and I'd never auto-replay DLQ messages without a deployed fix because that's an infinite loop waiting to happen. On Kafka I'd call out that there's no built-in DLQ — the consumer has to publish failed messages to a DLQ topic itself.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Your retry uses fixed 1-second intervals. A service goes down for 30 seconds. 10,000 retries hit it simultaneously on recovery. How do you prevent this?" closed="true" >}}
+**Retry storm.** All messages retry at the same interval, synchronizing into a burst.
+
+**Fix: Exponential backoff with full jitter.** Retry after `random(0, min(cap, base * 2^attempt))`. This desynchronizes retries across all messages, spreading load over time. Without jitter, exponential backoff alone still causes synchronized waves at exponential boundaries.
+{{< /details >}}
+
+{{< details title="A message consistently throws NullPointerException. After 5 retries (30 seconds), it goes to DLQ. During those 5 retries it blocked the queue. How do you handle poison messages faster?" closed="true" >}}
+**Classify errors immediately:**
+- **4xx / deserialization / validation errors:** Permanent. DLQ on first failure — no retry.
+- **5xx / timeout / connection refused:** Transient. Retry with backoff.
+- **Unexpected exceptions (NPE):** 2-3 retries max with short backoff, then DLQ.
+
+Additionally, use a **circuit breaker** on the downstream call. If it's failing consistently, all messages skip to DLQ instead of blocking the queue one-by-one.
+{{< /details >}}
+
+{{< details title="Your DLQ has 50,000 messages from yesterday's bug. The fix is deployed. An engineer proposes auto-replaying all DLQ messages. What could go wrong?" closed="true" >}}
+1. **Fix doesn't cover all cases** — some messages fail again, creating an infinite DLQ → replay → DLQ loop.
+2. **Ordering violations** — the main queue has newer messages for the same entities; replaying old DLQ messages may overwrite newer state.
+3. **Duplicate side effects** — some messages were partially processed before failing (email sent, DB write failed). Replay sends the email again.
+4. **Volume spike** — 50K messages at once overwhelms the downstream.
+
+**Safe replay:** Deploy fix → replay 100 messages → verify → rate-limited batch replay → monitor for new failures. Never auto-replay without manual verification.
+{{< /details >}}

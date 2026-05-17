@@ -176,3 +176,19 @@ In practice, both are used together:
 {{< callout type="info" >}}
 **Interview tip:** When discussing system overload, say: "At the API gateway, I'd use load shedding with priority classification — health checks and analytics are shed first, checkout traffic is protected. Inside the system, the Kafka consumer uses back-pressure implicitly — it polls at its own pace, and consumer lag is monitored. If lag exceeds 5 minutes, we scale the consumer group horizontally. The key principle is: reject early at the boundary, propagate back-pressure through internal pipelines." This shows you understand the distinction between controllable and uncontrollable traffic sources.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Kafka consumer lag grows to 10 million messages. The consumer is processing but can't keep up. What are your options?" closed="true" >}}
+Kafka has built-in back-pressure — the consumer polls at its own pace. But lag means it's falling behind.
+
+**Options:** (1) Scale the consumer group (add instances, up to partition count). (2) Optimize processing (batch DB writes, async I/O). (3) Increase poll batch size (`max.poll.records`). (4) For non-critical consumers, skip old messages and jump to latest offset. **Don't** increase partition count mid-stream — re-hashes keys and breaks ordering.
+{{< /details >}}
+
+{{< details title="API gateway receives 100K RPS. Backend handles 50K. Without load shedding, latency climbs to 30 seconds. How do you decide which 50K to accept?" closed="true" >}}
+**Priority-based shedding.** Classify by criticality: checkout/payment (P0, never shed) → product pages (P1, shed under severe overload) → recommendations/analytics (P2, shed first). Reject P2 with 503 + `Retry-After` when QPS exceeds capacity. A 503 in 1ms is better than a timeout in 30s.
+{{< /details >}}
+
+{{< details title="A reactive pipeline uses back-pressure to slow the producer. But the producer is an external API receiving user requests — it can't slow down. What do you do?" closed="true" >}}
+**You can't back-pressure uncontrollable sources.** Use bounded buffering + load shedding: accept into a bounded queue, shed excess when the queue is full (503, drop, or sample). The buffer size = your latency tolerance. For user-facing APIs, a small buffer (or none — shed immediately at capacity) is usually better.
+{{< /details >}}

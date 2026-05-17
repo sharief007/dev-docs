@@ -4,14 +4,15 @@ weight: 2
 type: docs
 ---
 
-A proxy sits between two parties in a connection. The direction it faces determines the name, capabilities, and use cases.
+You're running 12 microservices behind a single domain. Clients only know about `api.example.com`, but `/users/*` needs to land on the User service, `/orders/*` on the Order service, TLS needs to be terminated centrally, JWTs validated before any backend sees the request, and you want to canary the Payment service to 5% of traffic. All of that lives in one place: the reverse proxy.
+
+A proxy sits between two parties in a connection. The direction it faces determines its capabilities.
 
 | | Forward Proxy | Reverse Proxy |
 |---|---|---|
 | **Sits in front of** | Clients | Servers |
 | **Represents** | Clients to the internet | Servers to clients |
 | **Client knows about it?** | Yes (explicitly configured) | No (transparent) |
-| **Server knows about it?** | No | Yes |
 | **Primary purpose** | Privacy, filtering, egress control | Load balancing, TLS termination, caching |
 
 ## Forward Proxy
@@ -22,51 +23,21 @@ sequenceDiagram
     participant F as Forward Proxy
     participant S as Origin Server
 
-    C->>F: TCP conn + CONNECT api.example.com:443
-    F->>S: Opens new TCP conn to api.example.com:443
-    Note over F: Two separate TCP connections
+    C->>F: CONNECT api.example.com:443
+    F->>S: Opens TCP conn to target
     C-->>F: Encrypted TLS data (tunneled)
-    F-->>S: Forwards encrypted bytes
-    Note over F: For HTTPS, proxy tunnels TLS — it does NOT decrypt
-    Note over S: Sees proxy IP, not client IP
+    F-->>S: Forwards raw bytes
+    Note over F: Cannot decrypt HTTPS — only sees hostname from SNI
 ```
 
-A forward proxy acts on behalf of clients. The client explicitly configures their browser or application to route traffic through the proxy server.
+A forward proxy acts on behalf of clients. The client explicitly configures its browser or app to route traffic through it. For HTTPS, it establishes a TCP tunnel via `CONNECT` — the proxy forwards raw bytes without decrypting, so it can only filter by **hostname/IP**, not by URL path or headers.
 
-### HTTPS Tunneling
-
-For HTTPS traffic, the client sends a `CONNECT` request to establish a TCP tunnel:
-
-```http
-CONNECT api.example.com:443 HTTP/1.1
-Host: api.example.com:443
-```
-
-The proxy establishes a connection to the target server and forwards raw bytes back and forth. **The proxy cannot decrypt TLS traffic** — it only sees the target hostname from the SNI extension in the ClientHello.
-
-This limitation means forward proxies can only filter by:
-- Target hostname/IP (from CONNECT or SNI)
-- Connection patterns and timing
-- Traffic volume
-
-They cannot inspect HTTP headers, request paths, or response content for HTTPS traffic.
-
-### Use Cases
-
-| Use Case | How | Example |
-|----------|-----|---------|
-| **Corporate egress control** | All outbound traffic routes through proxy; policy engine allows/blocks domains | Block social media during work hours; allow only business-critical SaaS |
-| **Content filtering** | DNS-based or SNI-based blocking of categories | Parental controls, corporate compliance (block adult content, gambling) |
-| **Anonymity/Privacy** | Client IP hidden from destination servers | VPN services, Tor network, privacy-focused browsing |
-| **Bandwidth optimization** | Cache frequently requested content, compress responses | Office proxy caches OS updates, reduces internet bandwidth usage |
-| **Geographic circumvention** | Proxy located in different country/region | Access geo-blocked content, bypass regional restrictions |
-
-### Common Forward Proxy Tools
-
-- **Squid**: Open-source caching proxy with authentication and access control
-- **Nginx**: Can be configured as forward proxy with `proxy_pass` and resolver directives
-- **Corporate solutions**: Zscaler, Bluecoat ProxySG, Forcepoint
-- **Consumer VPNs**: NordVPN, ExpressVPN (simplified forward proxy model)
+| Use Case | Example |
+|---|---|
+| **Corporate egress control** | Block social media; allow only approved SaaS domains |
+| **Anonymity** | VPN services, Tor — hide client IP from destination |
+| **Bandwidth optimization** | Cache OS updates at the office proxy |
+| **Geo-circumvention** | Proxy in another country to bypass regional restrictions |
 
 ## Reverse Proxy
 
@@ -74,145 +45,83 @@ They cannot inspect HTTP headers, request paths, or response content for HTTPS t
 sequenceDiagram
     participant C as Client
     participant R as Reverse Proxy
-    participant B1 as Backend 1
-    participant B2 as Backend 2
+    participant B as Backend
 
-    C->>R: TCP conn A — HTTPS POST /api/orders
-    Note over R: Terminate TLS, read full request
-    Note over R: Select backend (least connections → B1)
-    R->>B1: TCP conn B — HTTP POST /api/orders
-    Note over R: conn A and conn B are independent
-    B1->>R: 201 Created (response body buffered)
-    R->>C: 201 Created (written on conn A)
-    Note over C: Never knows B1 or B2 exist
+    C->>R: HTTPS POST /api/orders (conn A)
+    Note over R: Terminate TLS, parse HTTP, select backend
+    R->>B: HTTP POST /api/orders (conn B)
+    B->>R: 201 Created
+    R->>C: 201 Created
+    Note over C: Never knows backends exist
 ```
 
-A reverse proxy acts on behalf of servers. Clients believe they're talking directly to the origin server, but they're actually hitting the proxy.
-
-### The Terminate-and-Reoriginate Model
-
-Unlike Layer 4 load balancers that forward packets, a reverse proxy:
-
-1. **Terminates the client connection** — reads the full HTTP request
-2. **Makes routing decisions** based on URL path, headers, cookies, or request body
-3. **Opens a new connection to the selected backend**
-4. **Forwards the request** and buffers the response
-5. **Returns the response** to the client on the original connection
-
-This model enables powerful capabilities but adds latency (typically 1-5ms overhead).
+A reverse proxy acts on behalf of servers. Clients believe they're talking to the origin, but they're hitting the proxy. It **terminates the client connection**, makes a routing decision, and **opens a new connection** to the backend (the terminate-and-reoriginate model).
 
 ### Core Capabilities
 
-{{< tabs items="TLS Termination,Load Balancing,Request Buffering,Connection Pooling" >}}
+{{< tabs items="TLS Termination,Request Buffering,Connection Pooling" >}}
   {{< tab >}}
-  The reverse proxy terminates TLS and forwards plaintext HTTP to backends:
-
   ```
   Client ──[TLS 1.3]──► Proxy ──[HTTP]──► Backend (internal network)
   ```
 
-  **Benefits:**
-  - Centralized certificate management — one cert per domain, not per backend
-  - Offloads CPU-intensive TLS operations from application servers
-  - Enables HTTP inspection for routing and security
-
-  **SNI-based routing:** A single proxy can terminate TLS for multiple domains on the same IP by reading the `server_name` extension in the TLS ClientHello.
-
-  **OCSP Stapling:** Proxy fetches and caches certificate revocation status, stapling it to the handshake to eliminate the browser's round trip to the CA.
+  - Centralized cert management — one cert per domain, not per backend
+  - Offloads CPU-intensive TLS from application servers
+  - **SNI-based routing:** One proxy terminates TLS for multiple domains on the same IP by reading `server_name` in the TLS ClientHello
+  - **OCSP Stapling:** Proxy caches certificate revocation status, eliminating the browser's round trip to the CA
   {{< /tab >}}
 
   {{< tab >}}
-  Distributes incoming requests across multiple backend servers:
+  Proxy buffers the **full request body** before connecting to the backend:
 
-  ```
-  Client requests        Backend pool
-  ──────────────────    ──────────────
-  GET /api/users   ──►  Server A (least connections)
-  POST /api/orders ──►  Server B (round robin)
-  GET /health      ──►  Server C (weighted)
-  ```
-
-  **Algorithms:** Round robin, least connections, weighted, IP hash, consistent hashing
-  **Health checks:** Active probes (`GET /health`) or passive failure detection
-  **Session affinity:** Cookie-based or IP-based sticky sessions when needed
-  {{< /tab >}}
-
-  {{< tab >}}
-  Proxy buffers the **full request body** from the client before connecting to the backend:
-
-  - **Slow client protection:** A client uploading a 10MB file at 1KB/s doesn't hold a backend connection for 3 hours
-  - **Slowloris defense:** Attackers sending headers very slowly never reach the backend
-  - **Backend efficiency:** Backend connections are held only for the time to process complete requests
-
-  **Trade-off:** Large uploads require memory proportional to body size — configure `client_max_body_size` limits.
+  - **Slow-client protection:** A client uploading 10MB at 1KB/s doesn't hold a backend connection for hours
+  - **Slowloris defense:** Attackers sending headers very slowly never reach the backend (Slowloris is a DoS attack that holds connections open by sending partial HTTP requests extremely slowly)
+  - **Trade-off:** Large uploads require memory proportional to body size — configure `client_max_body_size`
   {{< /tab >}}
 
   {{< tab >}}
   Maintains persistent TCP connections to backends, reused across client requests:
 
   ```
-  Client connections (short-lived)    Backend pool (persistent)
-  ──────────────────────────────     ───────────────────────────
-  Client 1 (closes after response) ┐
-  Client 2 (closes after response) ├─► Pool: [conn1, conn2, conn3] ──► Backend
-  Client 3 (closes after response) ┘         (never closed, reused)
+  Short-lived client conns ──┐
+                              ├──► Pool [conn1, conn2, conn3] ──► Backend
+  Short-lived client conns ──┘    (persistent, reused)
   ```
 
-  **Benefit:** Eliminates TCP + TLS handshake overhead on every request (100-300ms saved)
-  **Configuration:** Pool size per backend, connection lifetime limits, keepalive settings
+  Eliminates TCP + TLS handshake overhead per request (100–300ms saved). Configure pool size, connection lifetime, and keepalive settings.
   {{< /tab >}}
 {{< /tabs >}}
 
-### Header Management and Client IP Preservation
+### Client IP Preservation
 
-Since the reverse proxy opens a new connection, the backend sees the **proxy's IP**, not the client's.
+The backend sees the **proxy's IP**, not the client's. Standard headers recover the real IP:
 
-**Standard headers for client IP recovery:**
 ```http
-X-Forwarded-For: 203.0.113.5, 10.0.0.1, 10.0.0.2
+X-Forwarded-For: 203.0.113.5, 10.0.0.1
 X-Real-IP: 203.0.113.5
 X-Forwarded-Proto: https
-X-Forwarded-Host: api.example.com
 ```
 
 {{< callout type="warning" >}}
-**Security note:** Never trust the leftmost IP in `X-Forwarded-For` for authentication or rate limiting. A malicious client can send `X-Forwarded-For: 1.2.3.4` and the proxy will append to it. Always read the IP added by your **first trusted proxy** or configure the proxy to overwrite the header entirely.
+**Never trust the leftmost IP in `X-Forwarded-For`** for auth or rate limiting. A malicious client can send `X-Forwarded-For: 1.2.3.4` and the proxy appends to it. Always read the IP added by your **first trusted proxy**, or configure the proxy to overwrite the header entirely.
 {{< /callout >}}
-
-**Forwarded header (RFC 7239):** More structured alternative:
-```http
-Forwarded: for=203.0.113.5;proto=https;host=api.example.com
-```
-
-### Circuit Breaking and Fault Tolerance
-
-Reverse proxies can implement circuit breakers to prevent cascading failures:
-
-**Circuit breaker states:**
-- **Closed** (normal): Requests flow through to backends
-- **Open** (tripped): Proxy returns immediate errors without contacting backends
-- **Half-open** (testing): Proxy sends probe requests to test backend recovery
-
-**Triggers:** N consecutive failures, error rate above threshold, response times above limit
 
 ### Use Cases
 
-| Use Case | Implementation | Benefit |
-|----------|---------------|---------|
-| **Microservices aggregation** | Route `/api/users/*` → User Service, `/api/orders/*` → Order Service | Single API endpoint for clients; service boundaries hidden |
-| **Blue/green deployments** | Route 100% traffic to blue, then gradually shift to green | Zero-downtime deployments |
-| **Canary releases** | Route 5% traffic to new version, 95% to stable | Risk mitigation for new features |
-| **Rate limiting** | Per-client request quotas at the proxy layer | Protect backends from overload |
-| **Authentication gateway** | Validate JWT/API keys before forwarding requests | Centralized auth logic; backends trust proxy |
-| **Response transformation** | Strip internal headers, add CORS headers, reshape JSON | API contract management |
+| Use Case | How |
+|---|---|
+| **Microservices routing** | Route `/users/*` → User Service, `/orders/*` → Order Service |
+| **Canary / blue-green deploys** | Route 5% traffic to new version via weighted upstreams |
+| **Rate limiting** | Per-client quotas at the proxy layer |
+| **Auth gateway** | Validate JWT/API keys before forwarding — backends trust the proxy |
+| **Response transformation** | Strip internal headers, add CORS, reshape JSON |
 
-### Production Tools
-
-**Nginx Configuration Example:**
+{{< details title="Nginx & HAProxy reverse proxy config (reference)" closed="true" >}}
+**Nginx:**
 ```nginx
 upstream backend_pool {
     least_conn;
-    keepalive 32;          # connection pool size
+    keepalive 32;
     server 10.0.0.1:8080 weight=3;
     server 10.0.0.2:8080 weight=1;
     server 10.0.0.3:8080 backup;
@@ -221,124 +130,112 @@ upstream backend_pool {
 server {
     listen 443 ssl http2;
     server_name api.example.com;
-
-    ssl_certificate     /etc/ssl/api.crt;
+    ssl_certificate /etc/ssl/api.crt;
     ssl_certificate_key /etc/ssl/api.key;
-    ssl_stapling on;
-
-    # Request buffering for slow clients
-    client_max_body_size 10m;
-    proxy_request_buffering on;
 
     location /api/v1/ {
-        proxy_pass         http://backend_pool;
-        proxy_http_version 1.1;
-        proxy_set_header   Connection "";
-        proxy_set_header   Host $host;
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-        
-        # Timeouts
-        proxy_connect_timeout 5s;
-        proxy_send_timeout    60s;
-        proxy_read_timeout    60s;
-        
-        # Health checks
-        proxy_next_upstream error timeout http_500 http_502 http_503;
-    }
-
-    # Static content bypass
-    location /static/ {
-        root /var/www/assets;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        proxy_pass http://backend_pool;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_next_upstream error timeout http_502 http_503;
     }
 }
 ```
 
-**HAProxy Configuration Example:**
+**HAProxy:**
 ```
 frontend https_frontend
     bind *:443 ssl crt /etc/ssl/api.pem
-    http-request set-header X-Forwarded-Proto https
     default_backend app_servers
 
 backend app_servers
     balance leastconn
     option httpchk GET /health
-    cookie SERVERID insert indirect nocache
-    server app1 10.0.0.1:8080 check cookie app1
-    server app2 10.0.0.2:8080 check cookie app2
-    server app3 10.0.0.3:8080 check cookie app3 backup
+    server app1 10.0.0.1:8080 check
+    server app2 10.0.0.2:8080 check
+    server app3 10.0.0.3:8080 check backup
 ```
+{{< /details >}}
 
-## API Gateway: Reverse Proxy++
+## API Gateway = Reverse Proxy + Application Intelligence
 
-An API Gateway is a reverse proxy enhanced with application-layer intelligence:
+An API gateway adds auth, rate limiting, analytics, and service discovery on top of reverse proxy capabilities.
 
 | Capability | Reverse Proxy | API Gateway |
-|------------|---------------|-------------|
-| Load balancing | ✅ | ✅ |
-| TLS termination | ✅ | ✅ |
-| Request routing | ✅ (URL-based) | ✅ (URL, headers, JWT claims) |
-| **Authentication** | Basic (HTTP auth) | ✅ (JWT, API keys, OAuth 2.0) |
-| **Authorization** | ❌ | ✅ (RBAC, per-endpoint policies) |
-| **Rate limiting** | Basic (per-IP) | ✅ (per-user, per-API key, quotas) |
-| **Request transformation** | Header manipulation | ✅ (JSON reshaping, protocol translation) |
-| **Analytics** | Access logs | ✅ (API metrics, usage tracking) |
-| **Service discovery** | Static backend config | ✅ (Consul, Kubernetes, Eureka) |
+|---|---|---|
+| Load balancing, TLS, routing | ✅ | ✅ |
+| **Auth** (JWT, OAuth, API keys) | Basic | ✅ Full |
+| **Per-user rate limiting** | Per-IP only | ✅ Per-user/key/quota |
+| **Request transformation** | Header manipulation | ✅ JSON reshaping, protocol translation |
+| **Service discovery** | Static config | ✅ Dynamic (Consul, K8s, Eureka) |
+| **Analytics** | Access logs | ✅ API metrics, usage tracking |
 
-### API Gateway Use Cases
+**Request aggregation (BFF pattern):** Mobile app calls `GET /dashboard` → gateway fans out to User, Order, and Payment services → merges into one response. Reduces round trips on metered connections.
 
-**Request aggregation (Backend for Frontend pattern):**
-```
-Mobile client request: GET /api/dashboard
-  ├─ Gateway calls User Service: GET /users/123
-  ├─ Gateway calls Order Service: GET /users/123/orders
-  ├─ Gateway calls Payment Service: GET /users/123/wallet
-  └─ Gateway merges responses → single JSON response to client
-```
-
-**Protocol translation:**
-```
-Client: REST/JSON over HTTPS
-  └─ Gateway transforms to: gRPC over HTTP/2 to internal services
-```
-
-**Common API Gateway Solutions:**
-- **Kong**: Open-source, Lua-based plugins, high performance
-- **AWS API Gateway**: Managed service, tight AWS integration
-- **Apigee**: Enterprise-grade, extensive policy management
-- **Traefik**: Modern, Docker/Kubernetes native
-- **Envoy**: Service mesh component, gRPC-first
+**Protocol translation:** Client sends REST/JSON → gateway converts to gRPC/Protobuf for internal services.
 
 ## System Design Placement
 
-In a well-architected system, you'll often see layered proxies:
-
 ```
-DNS Resolution
-    ↓
-L4 Load Balancer (AWS NLB / HAProxy mode tcp)
-    ↓  ← High availability for the proxy layer itself
-    ↓  ← Preserves client IP via PROXY protocol
-    ↓
-L7 Reverse Proxy / API Gateway (Nginx / Kong / Envoy)
-    ↓  ← TLS termination, HTTP routing, authentication
-    ↓  ← Connection pooling to backends
-    ↓
-Backend Services / Microservices
+Internet → L4 LB (NLB/HAProxy TCP) → L7 Reverse Proxy / API Gateway → Backends
+              │                              │
+              ├─ HA for the proxy layer      ├─ TLS termination
+              ├─ Preserves client IP         ├─ HTTP routing, auth
+              └─ Handles non-HTTP traffic    └─ Connection pooling, rate limiting
 ```
 
-**Why this layering?**
-- **L4 layer** provides HA for the L7 proxies and handles non-HTTP protocols
-- **L7 layer** provides application intelligence and HTTP-specific features
-- **Backend layer** focuses purely on business logic
+{{< callout type="info" >}}
+**Interview tip:** "I'd put an L4 LB at the front for HA and to preserve client IP via PROXY protocol. Behind it, an L7 reverse proxy (Nginx or Envoy) does TLS termination, path-based routing, connection pooling, and request buffering against slow clients and Slowloris. That's also where I'd land canary deploys via weighted upstreams. When I need per-user auth, rate limiting, or request transformation, I'd promote it to an API gateway like Kong or Envoy. Two pitfalls: never trust the leftmost `X-Forwarded-For` — read the IP from your first trusted proxy. And the L7 layer adds 1–5ms from terminate-and-reoriginate, so for ultra-low-latency or non-HTTP traffic, stay at L4 with DSR."
+{{< /callout >}}
 
-When designing systems:
-- **Include a reverse proxy** when you have multiple backends, need TLS termination, or want centralized routing logic
-- **Upgrade to API gateway** when you need authentication, rate limiting, or request transformation
-- **Add L4 in front** when you need HA for the proxy itself or handle non-HTTP traffic
+## Test Your Understanding
 
-The reverse proxy is typically the **first component clients reach** after DNS resolution in any distributed system architecture.
+{{< details title="A reverse proxy terminates TLS, so traffic between the proxy and backends is plaintext HTTP. Under what conditions is this acceptable, and when must you re-encrypt?" closed="true" >}}
+**Acceptable when:** Proxy and backends are in the same trusted network (same VPC, same rack), the network is not shared with untrusted workloads, and compliance requirements don't mandate end-to-end encryption.
+
+**Must re-encrypt when:**
+- PCI-DSS, HIPAA, or similar compliance mandates encryption in transit end-to-end
+- The backend network is multi-tenant or shared
+- Zero-trust architecture is in place (assume the network is hostile)
+
+In practice, service meshes (Istio, Linkerd) solve this with sidecar-to-sidecar **mTLS** (mutual TLS, where both client and server present certificates to authenticate each other) — the application never handles TLS itself.
+{{< /details >}}
+
+{{< details title="Your reverse proxy uses X-Forwarded-For to pass client IPs to backends. An attacker sends a request with a spoofed X-Forwarded-For: 10.0.0.1 header. How does this break your rate limiter, and how do you fix it?" closed="true" >}}
+The proxy **appends** the real client IP to the existing `X-Forwarded-For`, resulting in `X-Forwarded-For: 10.0.0.1, <real-ip>`. If the backend naively reads the leftmost IP, the attacker appears to be `10.0.0.1` — bypassing per-IP rate limits or impersonating an internal address.
+
+**Fix:** Configure the proxy to **count hops from the right**. If you have exactly one trusted proxy, the rightmost IP is the real client. Or use `X-Real-IP` which the proxy sets to the direct connection IP (not appendable). Some frameworks (Express `trust proxy`, Django `NUM_PROXIES`) support this natively.
+{{< /details >}}
+
+{{< details title="You're choosing between using Nginx as a reverse proxy vs deploying a full API gateway (Kong, AWS API Gateway). What's the decision boundary?" closed="true" >}}
+**Stay with a reverse proxy** when you only need: TLS termination, path-based routing, static load balancing, connection pooling, and basic per-IP rate limiting. Nginx/Envoy handle these with minimal overhead.
+
+**Promote to an API gateway** when you need:
+- **Per-user authentication and authorization** (JWT validation, OAuth token introspection, RBAC per endpoint)
+- **Per-user/API-key rate limiting** with quotas and tiered plans
+- **Dynamic service discovery** (backends register/deregister without config reload)
+- **Request transformation** (protocol translation, JSON reshaping, request aggregation)
+- **API analytics** (per-endpoint metrics, usage tracking, billing)
+
+The cost of a gateway: added latency (5–20ms for auth + transformation), another system to operate, and potential single point of failure if not HA'd properly.
+{{< /details >}}
+
+{{< details title="A client uploads a 500MB file through your reverse proxy with request buffering enabled. What happens to the proxy's memory, and how do you handle this?" closed="true" >}}
+With buffering enabled, the proxy attempts to buffer the **entire 500MB request body** in memory before forwarding to the backend. This can OOM the proxy or exhaust buffer capacity, especially under concurrent large uploads.
+
+**Mitigations:**
+1. **`client_max_body_size`** — reject uploads over a threshold (e.g., 50MB) with `413 Content Too Large`
+2. **Disable buffering for upload endpoints** — `proxy_request_buffering off` in Nginx passes data to the backend as a stream (but loses slow-client protection for that route)
+3. **Dedicated upload path** — route large uploads to a separate endpoint that handles them directly (e.g., pre-signed S3 URLs), bypassing the proxy entirely
+4. **Disk buffering** — some proxies can buffer to disk instead of memory, trading I/O latency for memory safety
+{{< /details >}}
+
+{{< details title="You run an API gateway that validates JWTs before forwarding requests. The JWT issuer's signing key rotates. What happens to in-flight requests, and how do you design for this?" closed="true" >}}
+When the signing key rotates, the gateway can't validate tokens signed with the old key if it only knows the new key. In-flight requests with old tokens get **401 Unauthorized** — a brief authentication outage.
+
+**Design for key rotation:**
+1. **JWKS (JSON Web Key Set) endpoint:** The gateway fetches keys from `/.well-known/jwks.json`. The issuer publishes **both old and new keys** during the rotation window. The gateway tries all keys in the set until one validates.
+2. **Cache with TTL:** Gateway caches the JWKS with a short TTL (5–10 min). On validation failure, it re-fetches the JWKS before returning 401 — this catches key rotations between cache refreshes.
+3. **`kid` (Key ID) header:** Each JWT's header includes a `kid` that identifies which key signed it. The gateway looks up the specific key by `kid` from the JWKS, avoiding trial-and-error.
+4. **Overlap period:** The issuer keeps the old key in the JWKS for at least as long as the longest-lived token (e.g., if access tokens expire in 15 min, keep the old key for 15 min after rotation).
+{{< /details >}}

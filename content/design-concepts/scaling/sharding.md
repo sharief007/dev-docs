@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+Your social platform's `posts` table just crossed 8 TB and the primary is doing 80,000 writes per second at peak. The buffer pool can no longer hold the working set, replica lag is creeping into seconds, and the next hardware tier costs five times more for 30% more capacity. You've already added read replicas, caching, and connection pooling. There's one option left, and it's the one nobody picks lightly: shard the database.
+
 Sharding is horizontal partitioning — splitting a single database into multiple independent databases (shards), each owning a subset of the data. It is the last resort for scaling writes past what a single primary can handle, and it introduces operational complexity that cannot be undone without a full migration.
 
 ## Why Sharding Exists
@@ -270,7 +272,7 @@ Resharding — changing the number of shards — is one of the most disruptive o
 
 ### Consistent Hashing for Minimal Movement
 
-Using consistent hashing instead of `hash % N` means adding one shard moves only ~1/N of keys (see [Consistent Hashing](../consistent-hashing)). This is the standard approach for distributed caches and NoSQL systems (Cassandra token ring, Redis Cluster slot migration).
+Using consistent hashing instead of `hash % N` means adding one shard moves only ~1/N of keys (see [Consistent Hashing](../../storage/consistent-hashing)). This is the standard approach for distributed caches and NoSQL systems (Cassandra token ring, Redis Cluster slot migration).
 
 ### Double-Write Migration (Zero-Downtime for Relational DBs)
 
@@ -308,3 +310,32 @@ Purpose-built tools manage live shard splits without application changes:
 | **Application code** | Route queries to the correct DB based on shard key | Shopify (per-tenant DB), GitHub (MySQL sharding) | Full control; significant application complexity |
 | **Middleware proxy** | Transparent sharding proxy between app and DB | Vitess (MySQL), ProxySQL, Citus coordinator | App sees one DB; proxy adds latency hop |
 | **Database-native** | Database handles sharding internally | Cassandra, MongoDB, CockroachDB, DynamoDB | Simplest operationally; less control over placement |
+
+{{< callout type="info" >}}
+**Interview tip:** I'd start by saying sharding is a last resort — replicas, caching, and vertical scaling first — because once you shard, cross-shard joins, foreign keys, and multi-shard transactions become permanent application concerns. For shard-key choice I'd use hash sharding by default for even distribution and to avoid monotonic-key hotspots, switching to range sharding only when range queries dominate and I can pre-split to manage hotspots. I'd reach for consistent hashing so adding a shard moves only ~1/N of keys instead of remapping nearly everything, and I'd design the schema to co-locate data that must be written together (shard by `tenant_id` or `user_id`) so the common path stays single-shard. For the queries that genuinely need a global view, I'd serve them from a denormalized secondary store like Elasticsearch rather than scatter-gather across every shard.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You shard a user table by user_id. A query asks: 'find all users who signed up in the last 24 hours.' How does this query execute?" closed="true" >}}
+**Scatter-gather.** The query has no predicate on the shard key (user_id), so it must hit **every shard**, each filtering by `signup_date`. Results are merged client-side. With 100 shards, that's 100 queries. This is the fundamental cost of sharding — queries that don't filter by the shard key become expensive.
+
+**Fixes:** (1) Denormalize — maintain a secondary store (Elasticsearch, dedicated `recent_signups` table) indexed by date. (2) Use a compound shard key like `(signup_month, user_id)` if signup-date queries are common — but this changes the distribution of user-specific queries. (3) Accept scatter-gather for low-frequency analytical queries.
+{{< /details >}}
+
+{{< details title="You shard by hash(user_id) across 8 shards. Two users need to be in the same transaction (transferring money). They hash to different shards. What do you do?" closed="true" >}}
+**Cross-shard transactions are the hardest problem in sharding.** Options:
+
+1. **Avoid it by design:** Co-locate related data on the same shard. For money transfers, use a ledger model where each transfer is a single-shard append to an immutable log, and balances are derived views.
+2. **Saga pattern:** Debit shard A, credit shard B as separate local transactions with compensating actions on failure.
+3. **2PC within the database:** If using Vitess, CockroachDB, or Spanner, they handle cross-shard transactions internally.
+4. **Application-level coordination:** Use the outbox pattern — write both operations to an outbox, process them asynchronously with idempotent consumers.
+
+**The key insight:** Sharding pushes transaction boundaries into the application. Design the shard key to minimize cross-shard transactions.
+{{< /details >}}
+
+{{< details title="Your shard key is created_at (range sharding). All writes go to the latest time range. One shard is overwhelmed. Why?" closed="true" >}}
+**Write hotspot on the latest shard.** Range sharding by a monotonically increasing key (timestamp, auto-increment ID) concentrates all new writes in the last range. Other shards handle only reads of historical data.
+
+**Fixes:** (1) Hash sharding — distributes writes evenly but loses range query efficiency. (2) Compound key `(user_id, created_at)` — distributes across users while preserving time ordering within each user. (3) Pre-split time ranges and rotate the "active" shard periodically. (4) Use consistent hashing with a non-temporal key.
+{{< /details >}}

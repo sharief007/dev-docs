@@ -4,6 +4,8 @@ weight: 1
 type: docs
 ---
 
+A user complains your video call has a 400ms lag spike every time their WiFi drops a packet. You inspect the protocol — it's running over TCP, which retransmits the lost packet and stalls every byte behind it until recovery. Switch the call to UDP and the lost frame is just gone; the next frame plays immediately. Two seconds later a different user reports their database query came back with corrupted bytes — turns out that one was incorrectly running over UDP. The choice between TCP and UDP is the most foundational protocol decision in any system, and HTTP/3, QUIC, video streaming, and gaming exist precisely because the answer isn't always TCP.
+
 TCP and UDP are the two transport-layer protocols that almost everything on the internet runs on. They sit above IP and below application protocols like HTTP, DNS, and WebSocket.
 
 | | TCP | UDP |
@@ -139,7 +141,7 @@ sequenceDiagram
     Note over C: TIME_WAIT starts (2 × MSL)
 ```
 
-The active closer enters **TIME_WAIT** for `2 × MSL` (Maximum Segment Lifetime — 30–60 seconds on Linux, making TIME_WAIT last 60–120 seconds).
+The active closer enters **TIME_WAIT** for `2 × MSL` (Maximum Segment Lifetime). Linux pins this to a fixed 60 seconds via the `TCP_TIMEWAIT_LEN` constant rather than computing it from MSL; BSD-derived stacks typically use 60–120 seconds.
 
 **Why TIME_WAIT exists:**
 1. Ensures the final ACK reaches the server (if lost, server retransmits FIN; client must be alive to re-ACK)
@@ -230,3 +232,58 @@ See [HTTP/3 and QUIC](../http-3) for the full treatment.
 | UDP | VoIP | Real-time; old audio frames are worthless; retransmit would arrive too late |
 | UDP | QUIC (HTTP/3) | Reliability reimplemented in user space with independent streams |
 | UDP | DHCP, NTP, SNMP | Simple request/response; broadcast support needed |
+
+{{< callout type="info" >}}
+**Interview tip:** When asked TCP vs UDP, frame the choice on what you can tolerate losing: "I'd default to TCP for anything where every byte must arrive in order — HTTP, databases, file transfer. The cost is the 1-RTT handshake (2 RTT with TLS 1.3) and TCP-level HOL blocking. I'd use UDP when freshness beats completeness — VoIP, live video, multiplayer games — because retransmitting a 50ms-old audio frame is worse than dropping it. At scale I'd watch for TIME_WAIT exhaustion eating local ports — fix with connection pooling and `tcp_tw_reuse`, never the broken `tcp_tw_recycle`. And HTTP/3 chose UDP so QUIC could reimplement reliability per-stream in user space, sidestepping kernel TCP entirely."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="HTTP/2 multiplexes many streams over a single TCP connection. A single packet is lost. How many streams are affected, and why is this worse than HTTP/1.1?" closed="true" >}}
+**All streams are affected.** TCP guarantees in-order delivery, so a lost packet blocks the entire receive buffer until retransmission completes. Every HTTP/2 stream sharing that connection stalls — even streams whose data arrived fine.
+
+HTTP/1.1 uses 6 parallel TCP connections, so a lost packet on one connection blocks only ~1/6 of requests. HTTP/2's single-connection design makes TCP-level HOL blocking **worse**, not better. This is the core reason HTTP/3 uses QUIC — each QUIC stream has independent loss recovery.
+{{< /details >}}
+
+{{< details title="A high-RPS service creates 100K short-lived TCP connections per second. After a few minutes, new connections start failing. What's happening and what are three ways to fix it?" closed="true" >}}
+**TIME_WAIT exhaustion.** Each closed connection enters TIME_WAIT for 60 seconds (Linux). At 100K connections/sec, that's 6 million sockets in TIME_WAIT, each holding a local port. The default port range (~28K ports) is exhausted in under a second.
+
+**Fixes:**
+1. **Connection pooling** — reuse TCP connections instead of closing them. Eliminates most TIME_WAIT accumulation. This is the correct architectural fix.
+2. **`net.ipv4.tcp_tw_reuse=1`** — allows reusing TIME_WAIT sockets for new outbound connections (requires TCP timestamps enabled).
+3. **Expand port range** — `net.ipv4.ip_local_port_range = 1024 65535` increases from ~28K to ~64K available ports. A band-aid, not a fix.
+
+Note: `tcp_tw_recycle` was removed in Linux 4.12 because it broke connections from clients behind NAT (non-monotonic timestamps from shared IPs).
+{{< /details >}}
+
+{{< details title="You're designing a multiplayer game server. You choose UDP for game state updates. A player reports that their character sometimes teleports backward. What's happening?" closed="true" >}}
+**Out-of-order delivery.** UDP provides no ordering guarantees. If packet 5 (position: x=100) arrives after packet 6 (position: x=110), the client applies them in arrival order — the character jumps to x=110, then snaps back to x=100.
+
+**Fix:** Include a **sequence number** in each UDP packet. The client discards any packet with a sequence number ≤ the last applied one. This gives you "latest-wins" semantics without TCP's retransmission overhead. For state that must be reliable (inventory changes, score updates), use a separate TCP connection or implement selective ACK/retransmit in the application protocol.
+{{< /details >}}
+
+{{< details title="TCP's congestion control uses slow start. A new connection starts with cwnd=10 MSS (~14KB). Why does this hurt HTTP/2 more than HTTP/1.1 in the first few hundred milliseconds?" closed="true" >}}
+HTTP/2 uses **one TCP connection** per origin. That single connection starts with a 14KB congestion window. All multiplexed streams share this tiny initial bandwidth — if a page needs 200KB of resources, slow start takes several RTTs to ramp up.
+
+HTTP/1.1 opens **6 parallel connections**, each with its own slow start. 6 × 14KB = 84KB of initial burst capacity — 6x more data can flow in the first RTT. Each connection ramps up independently.
+
+**Mitigations:** Increase the initial cwnd (Linux: `ip route change ... initcwnd 20`), use TCP Fast Open (TFO) to send data in the SYN packet, or enable connection prewarming for critical paths.
+{{< /details >}}
+
+{{< details title="SYN cookies defend against SYN floods by encoding connection state in the ISN. What information is lost when using SYN cookies, and what's the practical impact?" closed="true" >}}
+SYN cookies encode connection parameters (MSS, timestamp, window scale) into the ISN, so the server allocates **no memory** until the ACK arrives. But the ISN has limited bits, so some options can't be preserved:
+
+1. **TCP window scaling** — may be lost or limited. Without it, the receive window is capped at 64KB — severely limiting throughput on high-bandwidth or high-latency links.
+2. **Selective ACK (SACK)** — may not be negotiated. Without SACK, the sender must retransmit all data from a lost packet onward, not just the missing segments.
+3. **TCP timestamps** — may be omitted. Timestamps are used for RTT estimation and PAWS (Protection Against Wrapped Sequence numbers).
+
+**Practical impact:** Under normal traffic (no attack), SYN cookies are not used and full TCP options are negotiated. During a SYN flood, connections established via SYN cookies may have degraded performance (no window scaling, no SACK) — but they at least succeed rather than being dropped. It's a graceful degradation, not a full defense.
+{{< /details >}}
+
+{{< details title="A service runs behind a NAT gateway. After 5 minutes of inactivity, clients report 'connection reset' errors. TCP keepalive is set to the default 2 hours. What's happening?" closed="true" >}}
+The **NAT gateway** drops idle connection mappings after its timeout (typically 30s–5 minutes, depending on the cloud provider or hardware). The client and server still hold their TCP sockets, but the NAT has forgotten the mapping.
+
+When either side sends data, the NAT has no entry for the 5-tuple → it returns a **RST** (reset), killing the connection. TCP keepalive at 2 hours is far too infrequent to prevent this.
+
+**Fix:** Lower TCP keepalive to less than the NAT timeout (e.g., `tcp_keepalive_time=60, tcp_keepalive_intvl=10, tcp_keepalive_probes=3`). Or better: use **application-level heartbeats** (e.g., gRPC keepalive pings, WebSocket ping/pong frames) which work across proxies that strip TCP options. AWS NAT Gateway timeout is 350 seconds for TCP — set keepalive below that.
+{{< /details >}}

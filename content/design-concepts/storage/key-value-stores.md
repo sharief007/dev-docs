@@ -1,6 +1,6 @@
 ---
 title: Key-Value Stores (Redis)
-weight: 6
+weight: 7
 type: docs
 ---
 
@@ -8,7 +8,7 @@ Redis is an in-memory data structure store. It is not just a cache — it is a s
 
 ## Why Redis is Fast
 
-Redis processes commands on a **single thread** in an event loop. This eliminates lock contention entirely — no mutex overhead, no deadlocks, no context switching between threads per request. Network I/O is handled via `epoll` / `kqueue` (non-blocking I/O multiplexing), so a single thread serves thousands of clients simultaneously.
+Redis executes every command on a **single thread** in an event loop. This eliminates lock contention entirely — no mutex overhead, no deadlocks, no context switching between threads per request. Network I/O is handled via `epoll` / `kqueue` (non-blocking I/O multiplexing), so a single thread serves thousands of clients simultaneously. (Redis 6+ optionally uses a small pool of helper threads for socket reads/writes and protocol parsing — `io-threads` — but command execution itself remains single-threaded, which is what guarantees the per-key serial-order semantics.)
 
 ```
 Client A ──┐
@@ -337,3 +337,46 @@ maxmemory-policy allkeys-lfu
 **LRU vs LFU:** LRU evicts the key not accessed for the longest time — a key accessed heavily for a week but quiet for 10 minutes could be evicted. LFU tracks access frequency over time and is more resistant to bursty patterns. Prefer `allkeys-lfu` for caches with skewed access distributions.
 
 **Redis memory overhead:** Every key has ~50–80 bytes of overhead (pointer, encoding metadata, expiry). A million small keys adds ~50–80 MB of overhead before storing any values. Monitor `INFO memory` → `mem_fragmentation_ratio`; values above 1.5 indicate memory fragmentation that `MEMORY PURGE` or a restart can reclaim.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked about Redis, I'd lead with "it's a single-threaded event-loop server, which is why every single-command operation is atomic without locks — that's why `INCR`, `SETNX`, and Lua scripts are safe primitives for distributed locking, rate limiting, and counters." I'd pick the right data structure rather than treating Redis as a JSON blob store: sorted sets for leaderboards and sliding-window rate limiters, streams (not pub/sub) when consumers must survive restarts, hashes for object fields. For HA I'd use Sentinel for automatic failover on a single primary, Redis Cluster with hash slots for horizontal scale — and I'd flag the hot-key problem (`CRC16(key) % 16384` lands one viral key on one shard) as a separate problem that needs an L1 cache or key sharding above Redis.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Redis is single-threaded. How can it handle 100K+ operations/second? Shouldn't a single thread be the bottleneck?" closed="true" >}}
+Redis uses an **event loop** (epoll/kqueue) that multiplexes thousands of client connections on a single thread without blocking. Each operation executes in microseconds because all data is in memory, data structures are optimized for in-memory access, and there's no thread context switching or lock contention.
+
+The single thread bottlenecks only when: (a) individual commands are slow (e.g., `KEYS *` scanning millions of keys), (b) large Lua scripts block the event loop, or (c) the workload is CPU-bound (rare for KV ops). Redis 6+ uses I/O threads for network read/write, but command execution remains single-threaded — preserving atomicity guarantees.
+{{< /details >}}
+
+{{< details title="You use Redis pub/sub for real-time notifications. The consumer crashes and restarts 30 seconds later. What happened to messages published during the downtime?" closed="true" >}}
+**They're gone.** Redis pub/sub is fire-and-forget — messages are delivered to currently connected subscribers and immediately discarded. No persistence, no replay, no acknowledgment.
+
+**Fix:** Use **Redis Streams** instead. Streams are a persistent, append-only log (similar to Kafka). Consumers use consumer groups with offset tracking — after a crash, the consumer resumes from its last acknowledged position. Streams provide at-least-once delivery; pub/sub provides at-most-once.
+{{< /details >}}
+
+{{< details title="Your Redis instance uses 8GB of RAM with maxmemory=8GB and allkeys-lru eviction. During a traffic spike, response times jump from 0.1ms to 50ms. What's happening?" closed="true" >}}
+**Eviction pressure.** When Redis hits maxmemory, every new write triggers LRU eviction — Redis must scan keys to find candidates before processing the write. Under heavy write load at the memory limit, every operation pays eviction overhead.
+
+Additionally, **memory fragmentation** (check `mem_fragmentation_ratio` in `INFO memory`) means the allocator reports 8GB used but can't allocate contiguous blocks. Evicting a large sorted set or hash (millions of members) blocks the event loop during deallocation.
+
+**Fix:** Set maxmemory to ~75% of available RAM for headroom. Use `UNLINK` (async, non-blocking) instead of `DEL` for large keys. Consider `allkeys-lfu` if access is skewed — LFU protects frequently accessed keys better than LRU.
+{{< /details >}}
+
+{{< details title="You use Redis Cluster (16384 hash slots across 6 nodes). A product goes viral and all requests hit the same key. Adding more nodes doesn't help. Why?" closed="true" >}}
+`CRC16(key) % 16384` maps the hot key to exactly one hash slot on one node. All traffic for that key hits that single node regardless of cluster size. Adding nodes redistributes hash slots but the hot key's slot stays on one node.
+
+**Fixes:** (1) **Key sharding** — split `product:viral` into `product:viral:{0..9}`, read from a random shard. (2) **L1 in-process cache** with 1–5s TTL so most requests never reach Redis. (3) **Read from replicas** — Redis Cluster supports `READONLY` mode on replica nodes of the hot key's primary.
+{{< /details >}}
+
+{{< details title="Two instances call SET lock NX PX 30000 to acquire a distributed lock. Instance A gets OK, does its work for 35 seconds (exceeding the 30s TTL), and the lock expires. Instance B now acquires the lock. Both are in the critical section simultaneously. How do you prevent this?" closed="true" >}}
+This is the **lock expiry race condition** — the most common distributed lock bug. Instance A's work took longer than the lock TTL, so the lock expired while A was still working.
+
+**Fixes:**
+1. **Fencing tokens:** The lock server returns a monotonically increasing token with each lock grant. The protected resource (database, API) rejects operations with a token lower than the latest seen. Instance A's stale token is rejected even though A believes it holds the lock.
+2. **Lock extension:** Instance A periodically refreshes the TTL (watchdog pattern). If A crashes, the extension stops and the lock expires naturally. Redisson (Java Redis client) implements this as a "lock watchdog."
+3. **Conservative TTL:** Set the TTL much longer than expected work time. Accept that a crashed holder delays the next acquisition.
+
+Note: Redis-based locks are best-effort. For strict mutual exclusion, use ZooKeeper or etcd (which use consensus protocols).
+{{< /details >}}

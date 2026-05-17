@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+Your DynamoDB table is healthy. Every replica is online, no partitions, no failures — and yet on every single read you have to choose: do you accept a possibly-stale value from one replica in 0.5ms, or wait for a quorum and pay 2ms plus 2× the read cost for guaranteed freshness? CAP doesn't help here because there's no partition. **PACELC is the framing that does** — it says even in normal operation, every distributed system trades **Latency for Consistency** on every request, and that tradeoff happens millions of times more often than the rare partition CAP focuses on. Picking the right side of the Else clause, per data type, is the consistency conversation that actually shapes your bill.
+
 PACELC extends [CAP](../cap-theorem) by adding the tradeoff that exists in **normal operation** — when there is no partition. CAP forces a choice between Availability and Consistency only during a fault. PACELC says that even when the system is healthy, you must still choose between **Latency** and **Consistency** on every request.
 
 ```
@@ -135,4 +137,8 @@ This framing shows you understand that consistency is a per-operation decision, 
 
 {{< callout type="info" >}}
 PACELC doesn't replace CAP — it generalizes it. When an interviewer asks about consistency tradeoffs, lead with the Else clause: the L/C tradeoff on every request. Then address the Partition clause: what the system does during a fault. Most real systems are rarely partitioned; the L/C tradeoff is the one you actually tune.
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd frame PACELC precisely as "during Partition: A or C; Else: Latency or Consistency" — and stress that the **Else clause matters more day-to-day** because partitions are rare but every read pays the L-vs-C cost. Concretely: DynamoDB and Cassandra-at-ONE are PA/EL (fast eventually-consistent reads), Spanner and CockroachDB are PC/EC (always consistent, always paying coordination), and Cassandra is the interesting case because its consistency level lets you pick PA/EL or PA/EC per operation. The mistake I'd avoid is treating consistency as a system-level setting — it's a per-operation decision, so feeds and view counts go EL on the cheap path, while balances and idempotency keys go EC even though they're 3× the cost. And I'd remind myself the math: R + W > N is what makes quorum reads consistent; ONE/ONE doesn't satisfy it.
 {{< /callout >}}

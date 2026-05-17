@@ -272,3 +272,27 @@ X-RateLimit-Remaining: 0
 {{< callout type="info" >}}
 **Interview tip:** When designing a rate limiter, state the algorithm and why: "I'd use a token bucket with Redis — it allows burst traffic up to the bucket capacity while maintaining a long-term average rate. The bucket state is two fields (tokens, last_refill) stored in a Redis hash, checked atomically via a Lua script. For fault tolerance, I'd fail open on Redis failure — briefly allowing extra traffic is better than rejecting all requests." This shows you've thought about the algorithm choice, the distributed coordination, and the failure mode.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A fixed-window rate limiter allows 100 requests per minute. A client sends 100 requests in the last second of minute 1 and 100 in the first second of minute 2. They sent 200 requests in 2 seconds. Is this a bug?" closed="true" >}}
+**The boundary burst problem** — a known weakness of fixed-window counters. Each minute's counter resets to 0 at the boundary. The client legitimately stays within each window's limit but achieves 2x the intended rate by clustering requests around the boundary.
+
+**Fix:** Sliding window counter — weight the current window's count plus a fraction of the previous window's count based on elapsed time. This smooths the boundary and limits effective burst to ~1.5x. Or use a **token bucket**, which naturally limits burst to the bucket capacity.
+{{< /details >}}
+
+{{< details title="Your rate limiter uses Redis INCR + EXPIRE for a sliding window. The Redis node fails. Should you fail open (allow all traffic) or fail closed (reject all traffic)?" closed="true" >}}
+**Fail open** for most services. Rejecting all traffic during a Redis outage turns a rate-limiter failure into a full service outage — worse than the problem rate limiting solves.
+
+**Fail closed** only for: (1) payment endpoints where unlimited traffic could cause financial damage, (2) endpoints that are DDoS targets where removing rate limits exposes the backend to overload.
+
+**Mitigation:** Run Redis with Sentinel or Cluster for HA. Cache the last known rate limit state locally as a fallback. Or use per-node rate limiters (no coordination, less precise but no SPOF).
+{{< /details >}}
+
+{{< details title="Token bucket vs sliding window log — which uses more memory, and which is more precise?" closed="true" >}}
+**Sliding window log:** Stores a timestamp for **every request** within the window. For a user making 1000 requests/minute, that's 1000 timestamps in memory. Perfectly precise — you know the exact request count in any trailing window. Memory: O(requests per user).
+
+**Token bucket:** Stores only 2 values per user: current token count and last refill timestamp. Memory: O(1) per user regardless of request rate. Less precise — it allows bursts up to the bucket capacity, which a pure sliding window wouldn't.
+
+**In practice:** Token bucket for most use cases (low memory, burst-friendly). Sliding window log only when you need exact precision and can afford O(requests) memory per user.
+{{< /details >}}

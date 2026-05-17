@@ -62,13 +62,13 @@ ALTER SYSTEM SET synchronous_standby_names = 'FIRST 1 (standby1, standby2)';
 SET LOCAL synchronous_commit = 'local';  -- skip replica confirmation
 ```
 
-**MySQL semi-sync:**
+**MySQL semi-sync** (MySQL 8.0.26+ uses the renamed `_source_` / `_replica_` system variables; the older `_master_` / `_slave_` names still work as deprecated aliases):
 
 ```sql
--- On the primary
-INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';
-SET GLOBAL rpl_semi_sync_master_enabled = 1;
-SET GLOBAL rpl_semi_sync_master_wait_for_slave_count = 1;
+-- On the primary (MySQL 8.0.26+)
+INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so';
+SET GLOBAL rpl_semi_sync_source_enabled = 1;
+SET GLOBAL rpl_semi_sync_source_wait_for_replica_count = 1;
 ```
 
 ## Asynchronous Replication
@@ -99,7 +99,7 @@ sequenceDiagram
 This is the default mode in PostgreSQL (`synchronous_commit = on` only durably writes to the leader; standby replication is async unless configured otherwise) and MySQL (async replication is the default).
 
 {{< callout type="warning" >}}
-**"Eventually consistent" has no time bound.** Asynchronous replication guarantees that followers converge to the leader's state — but "eventually" could mean 50 ms or 5 minutes depending on replication throughput, network conditions, and follower load. Design read paths around this uncertainty: if something must be current, read from the leader or use [session guarantees](../replication-lag).
+**"Eventually consistent" has no time bound.** Asynchronous replication guarantees that followers converge to the leader's state — but "eventually" could mean 50 ms or 5 minutes depending on replication throughput, network conditions, and follower load. Design read paths around this uncertainty: if something must be current, read from the leader or use [session guarantees](../read-replicas).
 {{< /callout >}}
 
 ## Comparison
@@ -119,32 +119,42 @@ The correct answer is almost always **per-operation**, not per-system:
 | Operation | Required Consistency | Replication Mode |
 |-----------|---------------------|-----------------|
 | Account balance before debit | Linearizable | Read from leader or sync replica |
-| User profile after own edit | Read-your-writes | [Session guarantee](../replication-lag) or leader read |
+| User profile after own edit | Read-your-writes | [Session guarantee](../read-replicas) or leader read |
 | News feed timeline | Eventual | Read from nearest async replica |
 | Inventory count before purchase | Strong | Synchronous or leader read with lock |
 | Analytics dashboard | Eventual (seconds-stale acceptable) | Async read replica |
 
-The theoretical underpinnings — linearizability, sequential consistency, causal consistency, eventual consistency — are covered in [Consistency Models (distributed)](../distributed/consistency-models). This page focuses on how replication configuration delivers those guarantees in practice. For the anomalies that arise under asynchronous replication (stale reads, monotonic read violations, causal ordering violations), see [Replication Lag](../replication-lag).
+The theoretical underpinnings — linearizability, sequential consistency, causal consistency, eventual consistency — are covered in [Consistency Models (distributed)](../../distributed/consistency-models). This page focuses on how replication configuration delivers those guarantees in practice. For the anomalies that arise under asynchronous replication (stale reads, monotonic read violations, causal ordering violations), see [Read Replicas & Replication Lag](../read-replicas).
 
 {{< callout type="info" >}}
 **Interview tip:** When an interviewer asks about consistency in a replicated database, connect the replication mode to the consistency guarantee: "For the balance check, I'd read from the leader to get linearizable consistency — the write was synchronously replicated to one standby for durability, so failover is safe. For the activity feed, I'd read from the nearest async replica and tolerate seconds-stale data to keep read latency low." This shows you treat consistency as a per-operation cost decision, not a system-wide toggle.
 {{< /callout >}}
 
-### Hybrid Replication
+## Test Your Understanding
 
-The Hybrid Replication Model, also known as Semi-Synchronous Replication, combines features of both synchronous and asynchronous replication. In this model, the system processes a write operation synchronously to at least one replica (ensuring immediate acknowledgment to the client) while asynchronously replicating the write to other replicas.
+{{< details title="A system uses eventual consistency. Two users update the same document simultaneously in different regions. Both succeed. Which version wins?" closed="true" >}}
+**Conflict resolution determines the winner.** With eventual consistency, both writes are accepted (no coordination). When replicas converge, they must resolve the conflict. Common strategies:
 
-```mermaid
-sequenceDiagram
-  actor c as client
-  participant m as master replica
-  participant s1 as slave replica
-  participant s2 as slave replica
+- **Last-Write-Wins (LWW):** Highest timestamp wins. Simple but loses data — the other write is silently discarded. Clock skew can make a "later" write lose.
+- **Application-level merge:** The application defines merge logic (e.g., union of set elements, concatenation of lists).
+- **CRDTs (Conflict-free Replicated Data Types):** Data structures that mathematically guarantee convergence without coordination — counters, sets, registers.
 
-  c ->> +m: Read Write Queries
-  m -->> s1: Replication Request
-  m -->> s2: Replication Request
-  s1 -->> m: Acknowledgement
-  m ->> -c: Query Response
-  s2 -->> m: Acknowledgement
-```
+The key insight: eventual consistency doesn't mean "data will be correct eventually" — it means "replicas will converge to the same value eventually." Whether that value is correct depends on the conflict resolution strategy.
+{{< /details >}}
+
+{{< details title="Causal consistency is weaker than linearizability but stronger than eventual. Give a concrete example where causal consistency is sufficient but eventual is not." closed="true" >}}
+**Social media comments.** User A posts a comment. User B replies to A's comment. Under eventual consistency, some users might see B's reply before A's original comment — confusing and nonsensical.
+
+Causal consistency guarantees that if B's reply **causally depends** on A's comment (B read A's comment before replying), then every node will see A's comment before B's reply. Concurrent, unrelated comments may appear in any order — that's fine.
+
+Linearizability would be overkill here — it would require global coordination for every comment, adding latency. Causal consistency preserves the "makes sense" ordering without the performance cost of total ordering.
+{{< /details >}}
+
+{{< details title="A system claims 'strong consistency.' What question should you ask to determine if it's actually linearizable or just sequential?" closed="true" >}}
+Ask: **"If I write a value at time T1, will a read starting at time T2 > T1 from any node always see that write?"**
+
+- **Linearizable (strongest):** Yes. Operations appear to take effect at a single point in real time. A read that starts after a write completes must see it. Requires real-time ordering.
+- **Sequential:** Operations appear in some total order consistent with each process's program order, but NOT necessarily in real-time order. Process A's write at T1 might not be visible to Process B's read at T2 if the sequential order places B's read before A's write.
+
+Spanner is linearizable (TrueTime gives real-time ordering). Many "strongly consistent" systems are actually sequentially consistent — they guarantee a total order but not a real-time one.
+{{< /details >}}

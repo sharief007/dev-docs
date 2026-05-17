@@ -4,6 +4,8 @@ weight: 2
 type: docs
 ---
 
+You're building Kubernetes' control plane. Every kubectl apply, every pod scheduling decision, every secret update needs to be durably committed to a cluster store that survives node failures and never loses a write. If two API servers both believed they were authoritative and accepted conflicting updates to a Deployment spec, your cluster state would diverge irrecoverably. **etcd solves this with Raft** — a small group of nodes elects one leader, that leader sequences every write into a replicated log, and a majority must persist each entry before it counts as committed. The same algorithm powers CockroachDB's per-range replication, TiKV, Consul, and Kafka's KRaft controller.
+
 Raft is a consensus algorithm that ensures a cluster of servers agrees on a **replicated log** — the same sequence of commands applied in the same order on every node. It is designed to be understandable (unlike Paxos) while providing the same safety guarantees.
 
 If every server starts in the same state and applies the same deterministic commands in the same order, they all reach the same final state. This is **replicated state machine** — the foundation of etcd, CockroachDB, TiKV, and Kafka KRaft.
@@ -275,3 +277,30 @@ This allows the system to scale writes linearly with the number of ranges, while
 {{< callout type="info" >}}
 **Interview framing:** When asked "how does CockroachDB achieve both strong consistency and horizontal scaling," the answer is: "Each data range is a separate Raft group. Writes within a range go through Raft for linearizable consistency. Ranges are split across nodes so different ranges can accept writes in parallel — that's the horizontal scaling. Cross-range transactions use [2PC](../two-phase-commit) on top of Raft."
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When asked how to build a strongly consistent metadata store, I'd say: "I'd use a Raft group of 3 or 5 nodes — odd-sized so we always have a clear majority. Writes go to the leader, which appends to its log and replicates to followers; an entry is committed only when a majority has persisted it, which guarantees durability across one or two failures. The vote-grant rule — candidates must have at least as up-to-date a log as any voter — gives us the leader-completeness property, so no committed entry is ever lost across leader changes." For reads, I'd default to ReadIndex (one round-trip to confirm leadership) rather than reading from local state, since a stale leader can't safely serve linearizable reads. For scale, I'd shard with multi-Raft like CockroachDB rather than running one giant Raft group.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A Raft cluster has 5 nodes. The leader crashes. Two candidates start elections simultaneously with the same term. What happens?" closed="true" >}}
+**Split vote.** Each candidate votes for itself and requests votes from the other 3 nodes. If the votes split (each candidate gets 2 votes total — itself + 1 other), neither reaches the majority of 3. The term ends with no leader elected.
+
+Both candidates time out with **randomized election timeouts** (e.g., 150-300ms). One will time out first, increment the term, and start a new election — this time likely winning because the other candidate hasn't timed out yet. The randomization is specifically designed to break symmetry and prevent repeated split votes.
+{{< /details >}}
+
+{{< details title="A Raft leader receives a write, appends it to its log, and replicates to 2 of 4 followers (3/5 = majority). It responds success to the client. Then the leader crashes. Can this write be lost?" closed="true" >}}
+**No.** The write is committed (replicated to a majority). Raft's **leader completeness property** guarantees that any future leader must have all committed entries. During the next election, a candidate must have a log at least as up-to-date as the voter's log to receive a vote. The 2 followers with the committed entry won't vote for a candidate without it, and since they form part of any majority, no candidate without the entry can win.
+
+If only 1 follower had the entry (2/5, not a majority), the leader would NOT have responded success — the write would be uncommitted and could be lost.
+{{< /details >}}
+
+{{< details title="You read from a Raft follower for lower latency. The follower returns a value. Why might this value be stale, and how do you get a linearizable read?" closed="true" >}}
+The follower may not have applied the latest committed entries yet — it's catching up from the leader. Even the leader can serve stale reads: a leader that's been partitioned from the cluster doesn't know it's no longer the leader (a new leader may have been elected).
+
+**Linearizable read options:**
+1. **ReadIndex (default safe approach):** The leader sends a heartbeat to confirm it's still the leader, then returns the read from its committed state. One extra round-trip.
+2. **Lease-based reads:** The leader holds a time-based lease. As long as the lease hasn't expired, it can serve reads without confirming leadership. Relies on bounded clock drift — dangerous if clocks are wrong.
+3. **Read from quorum:** Forward the read to the leader and wait for it to confirm its leadership via heartbeat. Highest latency, strongest guarantee.
+{{< /details >}}

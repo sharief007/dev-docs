@@ -1,6 +1,6 @@
 ---
 title: Document Stores (MongoDB)
-weight: 8
+weight: 9
 type: docs
 ---
 
@@ -54,7 +54,7 @@ This is the core schema decision. There is no JOIN in MongoDB — related data m
 
 ## Indexes
 
-MongoDB builds indexes on a `mongod` collection level. All index types are B-trees except geospatial (2d/2dsphere use geohash).
+MongoDB builds indexes at the collection level. The default backing structure is a B-tree variant (WiredTiger), but several index types use specialized structures: **geospatial** indexes (2d/2dsphere) use a geohash-based scheme, **text** indexes use an inverted list with token weights, and **hashed** indexes store hashes of field values for shard distribution and equality lookups.
 
 | Index type | Declaration | Behavior |
 |-----------|-------------|---------|
@@ -258,3 +258,35 @@ try {
 ```
 
 Multi-document transactions use the same MVCC snapshot isolation as the replica set oplog. They add coordination overhead — prefer single-document atomicity via embedding where possible. Transactions across shards (distributed transactions) add further latency due to two-phase commit coordination across shard replica sets.
+
+{{< callout type="info" >}}
+**Interview tip:** When discussing MongoDB, I'd center the answer on the embed-vs-reference decision: "I embed when sub-data is bounded and always fetched together — single-document writes are atomic, so embedding is the simplest path to correctness. I reference when growth is unbounded (the 16 MB document limit), the sub-document is shared across documents, or it's queried independently." For sharding I'd flag that the shard key is immutable post-creation, so I'd choose for cardinality, even frequency, and non-monotonic change — never raw `ObjectId` or timestamp because of insert hotspots on the last chunk; usually a hashed `user_id` or compound `(user_id, day)`. For writes I'd specify `w: "majority", j: true` as the default to survive primary failure, and I'd keep `$lookup` joins limited and always indexed on the foreign field.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You embed order line items inside an Order document. After a year, some documents fail to save with a size error. Embedding seemed correct — what went wrong?" closed="true" >}}
+The embedding of line items (bounded at 1-20 per order) is fine. The issue is likely that the document also embeds **unbounded data** — comments, audit logs, status history — that grew past the **16 MB BSON document size limit** (BSON is Binary JSON, MongoDB's binary-encoded document format).
+
+**Fix:** Embed only bounded, frequently co-accessed data (line items). Reference unbounded or independently-queried data (comments, audit trail) in separate collections.
+{{< /details >}}
+
+{{< details title="You choose ObjectId as the shard key for a high-write collection. After scaling to 6 shards, one shard receives 90% of writes. Why?" closed="true" >}}
+**Monotonic shard key hotspot.** ObjectId starts with a timestamp component, making it monotonically increasing. All new documents land in the **last chunk** (highest key range) on one shard. The balancer migrates chunks eventually, but during write bursts the last shard is overwhelmed.
+
+**Fix:** Use a **hashed shard key** (`{user_id: 'hashed'}`) for random distribution, or a compound key with a non-monotonic lead (`{region: 1, created_at: 1}`) for both distribution and range queries within a region.
+{{< /details >}}
+
+{{< details title="A developer chains two $lookup stages in an aggregation pipeline on a sharded cluster. It's extremely slow. Why?" closed="true" >}}
+`$lookup` is a nested loop join — for each document, MongoDB sends a request to the shard(s) holding the foreign collection. On a sharded cluster, each $lookup may require a **scatter-gather** across all shards. Two chained $lookups multiply the problem.
+
+MongoDB has no merge join or hash join — it's optimized for single-document access, not relational joins.
+
+**Fix:** Denormalize — embed the needed fields in the document at write time. If complex joins are a primary access pattern, use PostgreSQL instead of MongoDB.
+{{< /details >}}
+
+{{< details title="You configure write concern w:1. The primary crashes immediately after acknowledging. Is the write lost?" closed="true" >}}
+**Possibly.** With `w:1`, the primary acknowledges before replicating to any secondary. If it crashes before the oplog entry replicates, and a secondary becomes the new primary, the write is lost. The old primary, on recovery, rolls back unreplicated entries.
+
+**Fix:** Use `w: "majority"` — acknowledged only after a majority of replica set members confirm. With 3 members, majority = 2. At least one secondary has the write before acknowledgment, so it survives primary failure.
+{{< /details >}}

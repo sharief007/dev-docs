@@ -20,7 +20,7 @@ The write rate dominates. Any storage system for this problem must handle **mill
 
 ### Core Idea
 
-1. Hash each driver's location to a [GeoHash](../specialized/geohash) cell at a fixed precision
+1. Hash each driver's location to a [GeoHash](../geohash) cell at a fixed precision
 2. Store drivers in Redis sorted sets, one per GeoHash cell
 3. To find nearby drivers: compute the 9 surrounding GeoHash cells, query all 9 sorted sets
 
@@ -246,3 +246,23 @@ The 9-cell read query fans out to at most 9 different Redis nodes (usually fewer
 {{< callout type="info" >}}
 **Interview tip:** "Drivers send GPS every 4 seconds — that's ~1.25M writes/sec for 5M concurrent drivers. I'd buffer through Kafka and have workers encode each update to a GeoHash cell (or H3 hex), storing driver IDs in Redis sorted sets keyed by cell. The score is the timestamp, which gives implicit TTL for stale cleanup. For 'find nearby drivers,' I compute the 9 surrounding cells, fetch from Redis, and post-filter by exact Haversine distance. In production, Uber uses H3 hexagons for uniform cell areas. Hot cells near stadiums or airports get replicated across Redis nodes to handle read spikes."
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="5 million drivers send GPS every 4 seconds. You process updates through Kafka into Redis. A driver's stored position is always 0-4 seconds stale. But Kafka consumer lag spikes to 30 seconds during a concert surge. Now positions are 34 seconds stale. Does the system break?" closed="true" >}}
+**The read path still works, but quality degrades.** Your `ZRANGEBYSCORE` uses `min=now-30` to filter stale entries. If a driver's timestamp is 34 seconds old, they disappear from search results — riders see fewer available drivers even though drivers are actually nearby.
+
+**Mitigation:** Widen the staleness window during surges (e.g., `min=now-60`), accept coarser results, and auto-scale Kafka consumers. The 30-second TTL is a tunable trade-off between freshness and availability — during surges, availability wins.
+{{< /details >}}
+
+{{< details title="A driver closes the Uber app but their phone's TCP connection lingers for 60 seconds before the OS kills it. During those 60 seconds, no GPS updates arrive but the sorted set entry hasn't expired. A rider gets matched to this ghost driver. How do you prevent this?" closed="true" >}}
+**The sorted set timestamp-as-score pattern handles this.** The driver's last GPS update was (at most) 4 seconds before they closed the app. After 30 seconds with no new update, `ZRANGEBYSCORE` with `min=now-30` excludes them. The ghost window is at most ~30 seconds, not 60.
+
+**For the matching service specifically:** After retrieving nearby drivers from Redis, the matching service should ping the driver's app via push notification or WebSocket before confirming a match. If no acknowledgment within 5 seconds, skip to the next driver. This is the "offer timeout" pattern — Uber gives drivers 15 seconds to accept.
+{{< /details >}}
+
+{{< details title="You're choosing between H3 and GeoHash for a new ride-hailing service launching in one city. The system needs to handle 100K drivers. Does H3's hexagonal superiority matter at this scale?" closed="true" >}}
+**No — at 100K drivers in one city, GeoHash is simpler and sufficient.** H3's advantages (uniform cell area, equidistant neighbors) matter at global scale with billions of queries. At 100K drivers, the 9-cell GeoHash query returns maybe 50 candidates per cell — the post-filter Haversine distance check is trivial.
+
+**Choose H3 when:** you operate globally (cell area varies 2× with latitude for GeoHash), need uniform hexagonal cells for surge pricing algorithms, or your ML models depend on consistent cell geometry. For an MVP, GeoHash with Redis sorted sets gets you to production in a week.
+{{< /details >}}

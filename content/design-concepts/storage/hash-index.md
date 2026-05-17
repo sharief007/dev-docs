@@ -4,6 +4,8 @@ weight: 3
 type: docs
 ---
 
+Your auth service does 200K req/s of "look up user by API token" — pure equality, never range, never sorted. The B-tree on `tokens(token)` works fine at 3 I/Os per lookup, but you wonder if hashing it could shave latency under load. Then you remember InnoDB has been silently building an in-memory hash index for you the whole time, and Riak's Bitcask uses a hash index as its entire storage engine. Knowing when O(1) hashing actually beats a 3-level B-tree — and when it doesn't — is what separates picking the right index from cargo-culting one.
+
 A hash index maps each key through a hash function to a bucket, then stores a pointer to the row in that bucket. Lookups are O(1) average — there is no tree to traverse. The tradeoff is absolute: a hash index answers only equality predicates. It cannot range-scan, sort, or match prefixes. [Database Indexes](../database-indexes) covers when to choose one over a B+ tree; this file covers how it works and where it appears in real systems.
 
 ## Mechanics
@@ -174,3 +176,35 @@ Read("k1"):
 | Default general-purpose index | ❌ (use B+ tree) |
 
 The default for any new index should be a B+ tree. Reach for a hash index only when profiling confirms that equality-only lookups on a specific high-cardinality column are a measured bottleneck, and range/sort queries on that column will never exist.
+
+{{< callout type="info" >}}
+**Interview tip:** If an interviewer asks "should we use a hash index?", I'd say: "Almost never as the default — a 3-level B+ tree finds 64 million rows in 3 I/Os, so O(log n) versus O(1) is rarely the bottleneck in practice. The real differentiator is that a hash index can't do range scans, ORDER BY, prefix LIKE, or composite leftmost-prefix lookups, so the moment requirements evolve you have to reindex." I'd mention InnoDB's Adaptive Hash Index as the case where hashing actually helps invisibly — accelerating buffer-pool-resident lookups — and Bitcask as the case where the entire storage engine is a hash index, with the tradeoff that the keydir must fit in RAM.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A hash index gives O(1) lookups vs a B+ tree's O(log n). With 1 billion rows, why doesn't the hash index always win?" closed="true" >}}
+**O(log n) with high fan-out is effectively O(1).** A B+ tree with fan-out 400 handles 1 billion rows in 4 levels — and the top 2-3 levels are cached in the buffer pool. A typical lookup is **1-2 disk I/Os**, the same as a hash index.
+
+The hash index wins on pure CPU cost (no tree traversal, no comparisons), but the difference is microseconds — invisible compared to disk/network latency. Meanwhile, the B+ tree supports range scans, ORDER BY, LIKE prefix, and composite key lookups. The hash index supports **none of these**. The O(1) vs O(log n) advantage almost never justifies losing all those capabilities.
+{{< /details >}}
+
+{{< details title="InnoDB has an Adaptive Hash Index (AHI) that automatically builds hash indexes on frequently accessed B+ tree pages. It can be disabled. When should you disable it?" closed="true" >}}
+**Disable AHI when:** The workload has many concurrent range scans or the table has high write throughput. AHI maintains an in-memory hash table that maps (index_id, key_prefix) → leaf page pointer. This adds:
+
+1. **Lock contention:** AHI uses a global partition lock. Under high concurrency, threads contend for the AHI latch even when they're accessing different parts of the tree.
+2. **Memory overhead:** AHI consumes buffer pool memory that could hold actual data pages.
+3. **Maintenance cost:** Every page split or merge must update the AHI.
+
+**Keep AHI enabled when:** The workload is primarily point lookups on a hot working set that fits in the buffer pool — AHI avoids the B+ tree traversal and goes directly to the leaf page.
+
+Check `SHOW ENGINE INNODB STATUS` → hash searches/s vs non-hash searches/s. If the hit rate is low, disable it.
+{{< /details >}}
+
+{{< details title="Bitcask (Riak's storage engine) stores an in-memory hash map of all keys pointing to on-disk values. What happens when the key count exceeds available RAM?" closed="true" >}}
+**The system stops working.** Bitcask's design requires the entire **keydir** (key → file_id + offset + size) to fit in memory. If keys exceed RAM, the hash map can't be loaded, and Bitcask can't serve any requests.
+
+This is the fundamental trade-off: Bitcask guarantees O(1) reads (one disk seek per lookup — the hash map tells you exactly where to read) at the cost of requiring all keys in memory. For 1 billion keys with 100-byte average key + 24-byte metadata, that's ~124 GB of RAM just for the keydir.
+
+**When Bitcask makes sense:** Small to moderate key counts (millions, not billions) with large values — e.g., a session store, a URL shortener, or blob metadata. The keydir is small relative to the data volume.
+{{< /details >}}

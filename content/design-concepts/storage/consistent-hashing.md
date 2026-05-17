@@ -1,6 +1,6 @@
 ---
 title: Consistent Hashing
-weight: 11
+weight: 13
 type: docs
 ---
 
@@ -224,3 +224,50 @@ Virtual nodes reduce statistical load imbalance, but they cannot solve **applica
 | Load distribution | Uniform (by math) | Skewed without vnodes; uniform with vnodes |
 | Hot key handling | Same problem | Same problem — needs application layer |
 | Complexity | O(1) lookup | O(log N) lookup (binary search on sorted ring) |
+
+{{< callout type="info" >}}
+**Interview tip:** When the design needs to distribute keys across a dynamic cluster — caches, Cassandra, sharded Redis — I'd say: "I'd use consistent hashing with virtual nodes. Naive `hash(key) % N` remaps roughly `(N-1)/N` of all keys when one node is added — for a 10-node cluster, adding one node invalidates ~90% of the cache, which is a thundering herd against the origin. Consistent hashing only moves about `1/(N+1)` of keys, and vnodes (typically 128–256 per physical node) smooth out the load distribution and let me weight more powerful machines with more arcs." I'd also call out the limit honestly: consistent hashing distributes different keys evenly, but it cannot split traffic for the same key — a viral key is still a single-node hotspot, and that needs an application-level layer like local caching or random-suffix replication.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You add a cache node to a 10-node cluster using naive modulo hashing (hash % N). How many keys are remapped? What about consistent hashing?" closed="true" >}}
+**Modulo:** Going from N=10 to N=11 changes `hash(key) % N` for **(N-1)/N ≈ 90%** of keys. Nearly every key maps to a different node — a **thundering herd** (all clients hitting the origin database because the cache is empty) that can take down the origin.
+
+**Consistent hashing:** Only keys between the new node and its predecessor are remapped — **~1/(N+1) ≈ 9%**. The other 91% stay on their existing nodes.
+{{< /details >}}
+
+{{< details title="Your consistent hash ring has 5 physical nodes with 1 virtual node each. One node holds 40% of keys while others hold ~15%. How do you fix it?" closed="true" >}}
+**Increase virtual nodes.** With 1 vnode per node, 5 hash values determine placement — the arcs between them are unevenly sized. With **128–256 vnodes per physical node**, the law of large numbers ensures approximately equal arcs.
+
+**Bonus:** Vnodes allow weighted assignment — a more powerful machine gets more vnodes and proportionally more keys. When a node fails, its vnodes scatter across many other nodes rather than all keys going to one successor.
+{{< /details >}}
+
+{{< details title="Cassandra uses a Murmur3 partitioner. What is Murmur3 and why not use SHA-256?" closed="true" >}}
+**Murmur3** is a fast, non-cryptographic hash function producing 128-bit hashes with excellent distribution. Chosen because:
+
+1. **Speed:** ~10x faster than SHA-256. Cassandra hashes the partition key on every read and write.
+2. **Distribution:** Near-uniform output — all consistent hashing needs. Cryptographic properties (collision resistance, preimage resistance) are unnecessary.
+3. **No security requirement:** The hash is for data placement, not authentication.
+
+Murmur3 maps partition keys to a 64-bit token space (-2^63 to 2^63-1). Each Cassandra node owns a range of tokens.
+{{< /details >}}
+
+{{< details title="Redis Cluster uses 16384 hash slots instead of a continuous hash ring. Why, and what's the trade-off?" closed="true" >}}
+Redis divides the key space into **16384 fixed slots** (`CRC16(key) % 16384`). Each slot is assigned to one node. Simpler than a continuous ring:
+
+1. **Explicit assignment:** Operators decide which slots go where. No vnodes, no ring math. Assignments are propagated via gossip protocol (each node periodically exchanges state with random peers).
+2. **Easy resharding:** Move slot 1000 from Node A to B = migrate all keys in that slot.
+3. **Small metadata:** 16384 slots × node-ID = a bitmap in a few KB.
+
+**Trade-off:** Max ~1000 nodes (need multiple slots per node for balance). A continuous ring with vnodes has no such limit — but for most Redis deployments, 16384 slots is plenty.
+{{< /details >}}
+
+{{< details title="You use consistent hashing for a CDN cache. During a deploy, all cache nodes restart simultaneously. What happens?" closed="true" >}}
+**Cache avalanche.** All nodes restart empty. Every request misses. The origin receives 100% of traffic simultaneously — potentially taking it down. Consistent hashing doesn't help because it solves the **node add/remove** problem, not the **cold cache** problem.
+
+**Prevention:**
+1. **Rolling restart** — one node at a time. While one is down, only its keys miss.
+2. **Cache warming** — pre-populate hot keys from a snapshot or recent access logs.
+3. **Request coalescing** — multiple concurrent misses for the same key result in one origin fetch; all requesters get the result. Prevents N-fold amplification.
+{{< /details >}}

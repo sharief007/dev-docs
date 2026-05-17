@@ -1,6 +1,6 @@
 ---
 title: SQL vs NoSQL Decision Framework
-weight: 5
+weight: 6
 type: docs
 ---
 
@@ -269,3 +269,45 @@ The decision framework above covers systems built today. These categories are be
 {{< callout type="info" >}}
 In a system design interview, mentioning vector databases for AI-powered features (semantic search, recommendations using embeddings) signals awareness of modern architectures. Pinecone and Weaviate are managed; pgvector (PostgreSQL extension) is the pragmatic choice if you are already on PostgreSQL and embedding count is in the millions, not billions.
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** When asked "SQL or NoSQL?", I'd refuse to answer until I've enumerated the access patterns: "What's the read shape — point lookup, range, full-text, aggregation? What's the relationship structure? Is the schema stable? Do we need multi-entity ACID?" Only then would I pick. I'd push back hard on "we chose NoSQL because it scales" — Instagram ran on PostgreSQL at a billion users, GitHub on MySQL — and I'd default to SQL unless a specific access pattern (high-write time-series, full-text, key-value caching) makes it unworkable. Real systems are polyglot: PostgreSQL for transactions, Elasticsearch for search, Redis for sessions, ClickHouse for analytics — kept in sync via CDC, not dual writes.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A team picks MongoDB because 'we don't know the schema yet and NoSQL is schemaless.' Why is this reasoning flawed?" closed="true" >}}
+**"Schemaless" is a myth.** MongoDB doesn't enforce schema at the database level, but your application code always assumes a structure — it expects fields to exist, have specific types, and follow conventions. The schema is just moved from the database to the application, where it's harder to enforce, version, and validate.
+
+**The real trade-off:** Schema-on-write (SQL) catches errors at insert time. Schema-on-read (document stores) catches errors when the application reads the data — which may be months later in a different code path. Schema flexibility is useful when the data is genuinely polymorphic (varying attributes per document, like product catalogs), not when the team hasn't designed the data model yet.
+
+**Better approach:** Start with PostgreSQL + JSONB columns for the parts of the schema that are truly variable. You get ACID transactions, SQL joins, and schema flexibility where you need it.
+{{< /details >}}
+
+{{< details title="Your system uses PostgreSQL for orders and Elasticsearch for search. An order is created but doesn't appear in search for 30 seconds. What's wrong with using dual writes to fix this, and what should you use instead?" closed="true" >}}
+**Dual writes are unsafe.** If you write to PostgreSQL and then to Elasticsearch, and the ES write fails (network error, ES down), the data is inconsistent — the order exists in PG but not in search. You can't wrap both in a transaction because they're different systems.
+
+Even if both writes succeed, there's no ordering guarantee. Under concurrent updates, PG might have version 3 while ES has version 2 — permanent inconsistency.
+
+**Fix: CDC (Change Data Capture).** Use Debezium (an open-source tool that reads the database's WAL/binlog) to capture every committed change from PostgreSQL and publish it to Kafka. An ES sink connector consumes from Kafka and updates Elasticsearch. This guarantees: (1) only committed data reaches ES, (2) ordering is preserved via the WAL, (3) if ES is down, events queue in Kafka and are applied when it recovers.
+{{< /details >}}
+
+{{< details title="An architect proposes using Cassandra for a financial ledger because 'it scales horizontally.' What critical requirement does Cassandra lack for this use case?" closed="true" >}}
+**Multi-row ACID transactions.** A financial ledger requires that a debit and its corresponding credit are atomically committed (double-entry bookkeeping). Cassandra offers lightweight transactions (LWT) via Paxos, but only for single-partition conditional writes — not multi-partition atomic operations.
+
+If the debit and credit are on different partition keys (different accounts), Cassandra cannot guarantee both succeed or both fail. A crash between the two writes leaves the ledger imbalanced.
+
+**Better choice:** PostgreSQL (or CockroachDB/Spanner for global scale) for the ledger — ACID guarantees correctness. Use Cassandra for the access patterns it excels at: high-write, append-only, query-by-partition-key workloads like activity feeds, time-series metrics, or messaging.
+{{< /details >}}
+
+{{< details title="A startup uses DynamoDB for everything — user profiles, orders, analytics. At Series B scale, engineers complain about expensive scatter-gather queries and inability to do ad-hoc reporting. What went wrong?" closed="true" >}}
+**Access pattern mismatch.** DynamoDB excels at known, simple access patterns — point lookups and range queries by partition key. But:
+
+1. **Ad-hoc queries** ("show me all orders over $100 in the last week grouped by region") require full table scans, which are slow and expensive on DynamoDB.
+2. **Cross-partition joins** don't exist — every query that touches multiple partition keys becomes a scatter-gather in application code.
+3. **Analytics** (aggregations, GROUP BY) must be done client-side after scanning, which is orders of magnitude slower than a columnar store.
+
+**The polyglot fix:** Keep DynamoDB for what it's good at (user sessions, high-throughput key-value access). Add PostgreSQL for transactional data that needs joins and ad-hoc queries. Add a columnar store (Athena, ClickHouse) for analytics. Sync via CDC.
+
+**Lesson:** "NoSQL scales" is true for the access patterns it was designed for. Using it for access patterns it wasn't designed for creates a **distributed monolith** — the worst of both worlds.
+{{< /details >}}

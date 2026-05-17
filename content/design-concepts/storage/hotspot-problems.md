@@ -1,6 +1,6 @@
 ---
 title: Hot-Key / Hotspot Problems
-weight: 15
+weight: 17
 type: docs
 ---
 
@@ -273,3 +273,39 @@ The celebrity's record is still read by many clients, but the reads are served f
 | **Kafka** | Skewed key | Compound key, null key (round-robin), custom partitioner, repartition topic |
 | **Social feed** | Celebrity write | Hybrid push/pull: push for regular users, pull for celebrities |
 | **Any** | Read hot entity | CDN / edge cache the hot object; requests never reach the origin cluster |
+
+{{< callout type="info" >}}
+**Interview tip:** The first thing I'd say when an interviewer asks about hotspots: "Consistent hashing distributes different keys across nodes — it cannot distribute traffic for the same key. So sharding does not solve viral content, celebrity accounts, or hot counters." For a viral product page in Redis I'd shard the key (`product:99:0` through `product:99:9`) and pick a random replica on read, plus a 1-second L1 in-process cache so most requests never reach Redis. For a hot Cassandra partition I'd add a random suffix to the partition key for writes and scatter-gather on reads, or use a sharded counter for like/view counts. For Kafka skew I'd use a more granular key (`user_id` instead of `provider`) or repartition downstream. And for the celebrity problem I'd describe Twitter's hybrid: push fan-out for users below a follower threshold, pull on read for celebrities — solved at the application layer because it cannot be solved by the storage layer alone.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A product goes viral. Your Redis cache is sharded with consistent hashing. Adding more Redis nodes doesn't reduce load on the hot key's node. Why?" closed="true" >}}
+Consistent hashing distributes **different keys** across nodes — it cannot distribute traffic for **the same key**. All requests for `product:viral` hash to exactly one node, regardless of cluster size. Adding nodes redistributes other keys but the hot key stays put.
+
+**Fix:** Application-level key sharding (`product:viral:{0..9}` with random read), L1 in-process cache (1-5s TTL), or read replicas on the hot key's shard.
+{{< /details >}}
+
+{{< details title="DynamoDB auto-scales read capacity based on traffic. A flash sale hits one partition key with 100x normal traffic. DynamoDB throttles requests despite having available total capacity. Why?" closed="true" >}}
+DynamoDB distributes capacity across partitions. Each partition has a **per-partition throughput limit** (~3000 RCU, ~1000 WCU). Even if total table capacity is 100K RCU, one partition can only serve 3K RCU. The flash sale concentrates all traffic on one partition key — that partition hits its limit while other partitions sit idle.
+
+**DynamoDB Adaptive Capacity** helps by automatically rebalancing, but has limits and latency. The architectural fix: design the partition key for even distribution. For a flash sale product, use `product_id#shard_N` as the partition key and scatter-gather across N shards.
+{{< /details >}}
+
+{{< details title="Your Kafka topic has 12 partitions. Messages are keyed by provider_id and one provider generates 80% of all messages. Consumer lag grows only on partition 3. What's happening?" closed="true" >}}
+**Skewed partition key.** `hash(provider_id) % 12` maps the dominant provider to partition 3. That partition receives 80% of messages while the other 11 share 20%. The consumer assigned to partition 3 can't keep up.
+
+**Fixes:**
+1. **More granular key:** Use `user_id` instead of `provider_id` to distribute messages more evenly.
+2. **Compound key:** `provider_id + random_suffix` distributes within the provider, but loses per-provider ordering.
+3. **Custom partitioner:** Route the hot provider across multiple partitions (round-robin for that specific key).
+4. **Repartition downstream:** A second topic re-keyed by user_id for the consumer that needs even distribution.
+{{< /details >}}
+
+{{< details title="Twitter's home timeline uses fan-out on write for regular users and fan-out on read for celebrities. Why can't they use the same strategy for both?" closed="true" >}}
+**Fan-out on write for celebrities is prohibitively expensive.** When a celebrity with 50M followers posts a tweet, fan-out on write means inserting the tweet ID into 50M timeline caches — taking minutes and consuming massive I/O. By the time it finishes, the tweet is old news.
+
+**Fan-out on read for regular users is too slow at read time.** A user with 500 followees who all post regularly means fetching and merging 500 timelines on every timeline load — too much latency for a responsive feed.
+
+**The hybrid:** Fan-out on write for users with < N followers (fast write, pre-computed read). Fan-out on read for celebrities (cheap write, compute at read time by merging the celebrity's recent tweets with the pre-computed timeline). This is application-level sharding of the hotspot problem — the storage layer can't solve it.
+{{< /details >}}

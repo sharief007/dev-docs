@@ -1,6 +1,6 @@
 ---
 title: RDBMS Internals
-weight: 4
+weight: 5
 type: docs
 ---
 
@@ -159,6 +159,12 @@ sequenceDiagram
 
 **Synchronous replication:** `COMMIT` does not return until the WAL record has been acknowledged by at least one standby. Eliminates data loss on primary failure at the cost of commit latency.
 
+### Checkpointing
+
+A **checkpoint** records a point in time at which all dirty pages have been flushed to disk. After a checkpoint, WAL records prior to that checkpoint are no longer needed for crash recovery and can be archived or deleted.
+
+**Checkpoint I/O spike:** flushing all dirty pages at once causes a burst of disk writes. `checkpoint_completion_target = 0.9` (PostgreSQL) spreads the dirty page writes over 90% of the checkpoint interval, reducing the spike.
+
 ## Buffer Pool
 
 The buffer pool (PostgreSQL: `shared_buffers`) is an in-memory cache of 8 KB data pages. All reads and writes go through it — the database never reads from or writes to data files directly.
@@ -182,6 +188,19 @@ Query: SELECT * FROM orders WHERE id = 42
 When a transaction modifies a row, the page containing that row is updated in the buffer pool and marked **dirty**. The dirty page is not immediately written to disk — that would serialize every write to disk I/O.
 
 The **background writer** (PostgreSQL) and **page cleaner** (InnoDB) continuously flush dirty pages to disk in the background, smoothing out I/O. The **checkpointer** forces all dirty pages to disk at checkpoint time.
+
+### Sizing the Buffer Pool
+
+```
+shared_buffers = 25% of RAM       ← PostgreSQL rule of thumb
+innodb_buffer_pool_size = 70–80%  ← MySQL InnoDB rule of thumb (dedicated server)
+```
+
+PostgreSQL keeps `shared_buffers` deliberately smaller than InnoDB because it relies on the OS page cache for the rest. InnoDB bypasses the OS cache (via O_DIRECT) and manages its own buffer pool, so it should claim most of the RAM directly.
+
+### Double-Write Buffer (InnoDB)
+
+InnoDB writes dirty pages to a sequential **double-write buffer** on disk before writing them to their actual locations. If a crash occurs mid-write (a torn page — only part of the 16 KB page was written), InnoDB uses the complete copy from the double-write buffer to recover. PostgreSQL relies on the WAL for torn-page recovery instead — it logs full page images on the first modification after each checkpoint (`full_page_writes = on`).
 
 ## Query Planner and EXPLAIN
 
@@ -239,9 +258,51 @@ Key fields in each node:
 | **Sort** | Sorts input rows | `ORDER BY`, merge join input, or `DISTINCT` |
 | **Aggregate** | `COUNT`, `SUM`, `GROUP BY` | Aggregation query |
 
+The planner uses cost units (I/O pages + CPU cycles weighted by `random_page_cost`, `seq_page_cost`, `cpu_tuple_cost`) to compare plans. Lowering `random_page_cost` from `4.0` to `1.1` on SSDs makes the planner more likely to choose index scans, since random reads are no longer dramatically slower than sequential ones.
+
+### When Each Join Algorithm Is Picked
+
+```sql
+-- Hash join likely:
+SELECT o.id, c.name
+FROM orders o JOIN customers c ON o.customer_id = c.id;
+-- orders: 50M rows, customers: 5M rows
+-- → planner builds hash table on customers (smaller), probes with orders
+
+-- Nested loop likely:
+SELECT * FROM orders o JOIN customers c ON o.customer_id = c.id
+WHERE o.id = 42;
+-- → orders filtered to 1 row → nested loop into indexed customers lookup
+
+-- Merge join likely:
+SELECT * FROM orders o JOIN order_items i ON o.id = i.order_id
+ORDER BY o.id;
+-- → both sides already sorted by the join key (PK / FK index) → no sort step
+```
+
+### Diagnostic Fields in EXPLAIN ANALYZE
+
+Beyond the headline cost/rows, watch these signals when running `EXPLAIN (ANALYZE, BUFFERS)`:
+
+| Field | What to look for |
+|-------|-----------------|
+| `rows=X (actual rows=Y)` | Large discrepancy → stale statistics → run `ANALYZE` |
+| `Buffers: hit=X read=Y` | High `read` → data not in buffer pool; consider increasing `shared_buffers` or adding an index |
+| `Sort (external)` / `Sort Method: external merge` | Sort spilled to disk — `work_mem` too low for this query |
+| `Hash Batches: N` (N > 1) | Hash table didn't fit in `work_mem` — spilled to disk |
+| `Planning time` vs `Execution time` | Planning ≫ execution → complex query with many join options; tune `join_collapse_limit` or `from_collapse_limit` |
+
 ### Why Plans Go Wrong
 
-The optimizer relies on **table statistics** — row counts, distinct values per column, most common values, histogram buckets. If statistics are stale, the planner makes bad estimates, which lead to bad plans.
+The optimizer relies on **table statistics** stored in `pg_statistic` (PostgreSQL) and refreshed by `ANALYZE`:
+
+- **Row count** per table
+- **Column cardinality** (number of distinct values)
+- **Most common values** and their frequencies
+- **Value histograms** (distribution buckets — used for selectivity estimates)
+- **Correlation** between physical row order and sorted order (affects index vs seq scan cost)
+
+If statistics are stale, the planner makes bad estimates, which lead to bad plans.
 
 ```sql
 -- PostgreSQL: force a statistics refresh
@@ -281,83 +342,52 @@ Common symptoms of stale statistics:
 **Interview tip:** When discussing database performance, say: "I'd start with `EXPLAIN ANALYZE` to see the actual execution plan. The most common issue I look for is a Seq Scan on a large table where an Index Scan is expected — that usually means either a missing index or stale statistics. Running `ANALYZE` refreshes the planner's statistics; if the plan still chooses Seq Scan, I'd check if the filter selectivity is too low for an index to help." This shows you debug from evidence, not guesswork.
 {{< /callout >}}
 
-```
-shared_buffers = 25% of RAM       ← PostgreSQL rule of thumb
-innodb_buffer_pool_size = 70–80%  ← MySQL InnoDB rule of thumb (dedicated server)
-```
+## Test Your Understanding
 
-### Checkpointing
+{{< details title="Two concurrent transactions read a row, then both try to update it. Under MVCC with snapshot isolation, neither sees the other's write. What happens?" closed="true" >}}
+This is a **write-write conflict** (lost update). The behavior depends on the isolation level:
 
-A checkpoint records a point in time at which all dirty pages have been flushed to disk. After a checkpoint, WAL records prior to that checkpoint are no longer needed for crash recovery and can be archived or deleted.
+- **Read Committed (PostgreSQL default):** The second transaction's UPDATE blocks until the first commits. Then it re-evaluates the WHERE clause against the committed data. If the row still matches, it proceeds. No lost update — but the second transaction sees the first's changes mid-flight.
+- **Repeatable Read / Snapshot Isolation:** The second transaction gets a serialization error (`ERROR: could not serialize access due to concurrent update`) and must retry. This prevents lost updates but requires application-level retry logic.
+- **Serializable:** Same error, stricter checks. Also catches write skew anomalies.
 
-**Checkpoint I/O spike:** flushing all dirty pages at once causes a burst of disk writes. `checkpoint_completion_target = 0.9` (PostgreSQL) spreads the dirty page writes over 90% of the checkpoint interval, reducing the spike.
+**Key insight:** MVCC doesn't prevent write conflicts — it prevents **read** blocking. Write conflicts are still resolved via locking or error-and-retry.
+{{< /details >}}
 
-### Double-Write Buffer (InnoDB)
+{{< details title="A production PostgreSQL database has 500GB of data but the disk shows 900GB used. No other data is on the disk. What's consuming the extra 400GB?" closed="true" >}}
+**Dead tuples and bloat.** Under MVCC, UPDATE creates a new row version and marks the old one as dead (but doesn't delete it). DELETE similarly marks rows dead. These dead tuples accumulate until `VACUUM` reclaims them.
 
-InnoDB writes dirty pages to a sequential **double-write buffer** on disk before writing them to their actual locations. If a crash occurs mid-write (torn page — only part of the 16 KB page was written), InnoDB uses the complete copy from the double-write buffer to recover. PostgreSQL relies on the WAL for torn-page recovery instead.
+Additionally:
+- **Index bloat:** Each dead row version has corresponding dead index entries
+- **WAL files:** pg_wal/ can accumulate if archiving or replication falls behind
+- **TOAST tables:** Large column values stored out-of-line may have bloated TOAST tables
 
-## Query Planner
+**Fix:** Run `VACUUM FULL` (rewrites the entire table — requires exclusive lock and doubles disk usage temporarily) or use `pg_repack` (online rebuild without exclusive lock). For ongoing prevention, tune autovacuum to be more aggressive: lower `autovacuum_vacuum_scale_factor` from 0.2 to 0.01 for large tables.
+{{< /details >}}
 
-The query planner takes a SQL query and generates the lowest-cost physical execution plan — the sequence of scans, joins, sorts, and aggregations to produce the result.
+{{< details title="Your application writes to the database, gets a success response, and the server immediately crashes (power loss). Is the write lost?" closed="true" >}}
+**No — if WAL (Write-Ahead Log) is configured with `synchronous_commit = on` (the default).** The WAL entry is fsynced to disk before the database returns success to the client. On recovery, the database replays the WAL and reconstructs the committed state.
 
-### Statistics
+**However:** With `synchronous_commit = off` (a performance optimization), the database returns success before the WAL is fsynced. A crash in that window loses the transaction. This is a deliberate durability-for-latency trade-off — useful for metrics or logs where losing a few seconds of data is acceptable.
 
-The planner estimates cost using statistics stored in `pg_statistic` (PostgreSQL) and updated by `ANALYZE`:
-- **Row count** per table
-- **Column cardinality** (number of distinct values)
-- **Value histograms** (distribution of values — helps estimate selectivity)
-- **Correlation** (how well physical order matches sorted order — affects index vs seq scan cost)
+The WAL → dirty page → checkpoint cycle is the core of ACID durability: changes hit the WAL first (sequential write, fast), then accumulate in the buffer pool as dirty pages, and are flushed to data files during checkpoints (batched, efficient).
+{{< /details >}}
 
-Stale statistics lead to bad plans. After large bulk loads, run `ANALYZE` (or `VACUUM ANALYZE`) to refresh.
+{{< details title="EXPLAIN shows a Nested Loop Join with 10,000 loop iterations. The outer table has 10,000 rows, the inner table has 1 million. Is this efficient?" closed="true" >}}
+**It depends on whether the inner side has an index.** With an index on the join column, each of the 10,000 loops does an index lookup (O(log n)) — total cost is 10,000 × ~3 I/Os = ~30,000 I/Os. This is efficient.
 
-### Scan Types
+**Without an index:** Each loop does a full scan of the 1M-row inner table — 10,000 × 1M = 10 billion row comparisons. This is catastrophically slow.
 
-| Scan | When chosen | Cost characteristic |
-|------|------------|---------------------|
-| **Sequential Scan** | Low selectivity (>5–20% of rows), small table, no useful index | High throughput, predictable I/O |
-| **Index Scan** | High selectivity, fetches matching rows via index → heap | Random I/O per row — slow if many rows |
-| **Index Only Scan** | Covering index — all needed columns in index | No heap access — fastest for covered queries |
-| **Bitmap Heap Scan** | Medium selectivity, multiple indexes OR'd/AND'd | Collects row pointers, sorts by physical location, batches heap reads |
+**When the planner chooses Nested Loop:** It expects the outer side to be small AND the inner side to have an indexed lookup. If `actual rows` in EXPLAIN is much higher than `rows` estimate, the planner made a bad choice due to stale statistics → run `ANALYZE`.
 
-The planner uses cost units (I/O pages + CPU cycles weighted by `random_page_cost`, `seq_page_cost`, `cpu_tuple_cost`) to compare plans. Lowering `random_page_cost` from 4.0 to 1.1 on SSDs makes the planner more likely to choose index scans.
+**Alternatives the planner might choose:** Hash Join (build hash table on smaller table, probe with larger — good for equality joins) or Merge Join (both sides sorted on join key — good when both inputs are already ordered via indexes).
+{{< /details >}}
 
-### Join Algorithms
+{{< details title="You set up streaming replication from a primary to a read replica. A write on the primary is immediately followed by a read on the replica. The read returns stale data. Why?" closed="true" >}}
+**Replication lag.** Streaming replication is asynchronous by default — the primary sends WAL records to the replica, but doesn't wait for confirmation before acknowledging the client's write. The replica applies WAL records as they arrive, which introduces a delay (milliseconds to seconds under normal load, minutes under heavy write load).
 
-| Algorithm | How it works | Best for |
-|-----------|-------------|---------|
-| **Nested Loop Join** | For each row in outer relation, scan inner for matching rows | Small outer + indexed inner; low row counts |
-| **Hash Join** | Build in-memory hash table on smaller relation; probe it with every row from the larger | Large unsorted tables; no useful index on join key |
-| **Merge Join** | Simultaneously scan two already-sorted inputs | Both inputs sorted on join key (e.g., both indexed); no sort step needed |
-
-```sql
--- Hash join likely:
-SELECT o.id, c.name
-FROM orders o JOIN customers c ON o.customer_id = c.id
--- orders: 50M rows, customers: 5M rows
--- planner builds hash table on customers (smaller), probes with orders
-
--- Nested loop likely:
-SELECT * FROM orders o JOIN customers c ON o.customer_id = c.id
-WHERE o.id = 42
--- orders filtered to 1 row → nested loop into indexed customers lookup
-```
-
-### Reading EXPLAIN ANALYZE
-
-```sql
-EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
-SELECT c.name, COUNT(o.id)
-FROM customers c JOIN orders o ON c.id = o.customer_id
-GROUP BY c.name;
-```
-
-Key fields to check:
-
-| Field | What to look for |
-|-------|-----------------|
-| `Seq Scan` | Missing index — acceptable only on small tables or full-table aggregations |
-| `rows=X (actual rows=Y)` | Large discrepancy → stale statistics → run `ANALYZE` |
-| `Buffers: hit=X read=Y` | High `read` → data not in buffer pool; consider increasing `shared_buffers` or adding index |
-| `Sort (external)` | Sort spilled to disk — `work_mem` too low for this query |
-| `Hash Batches: N` (N > 1) | Hash table didn't fit in `work_mem` — spilled to disk |
-| `Planning time` vs `Execution time` | High planning time → complex query with many join options; consider `SET join_collapse_limit` |
+**Fixes:**
+1. **Synchronous replication:** Primary waits for at least one replica to confirm WAL receipt before acknowledging. Eliminates lag but increases write latency.
+2. **Read-your-writes routing:** After a write, route that user's reads to the primary for a short window (e.g., 5 seconds), then switch back to the replica.
+3. **Check `pg_last_wal_replay_lsn()`** on the replica and compare to the write's LSN — only serve the read if the replica has caught up.
+{{< /details >}}

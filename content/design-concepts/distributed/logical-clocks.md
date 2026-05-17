@@ -4,6 +4,8 @@ weight: 12
 type: docs
 ---
 
+Two replicas of a chat database receive concurrent edits to the same message — one from a user in Tokyo, one from a user in São Paulo. Whose write wins? If you trust wall-clock timestamps, NTP skew of 50ms can silently let an *earlier* write overwrite a later one. Or: a Kafka consumer needs to know whether the "Answer: 4" event was caused by the "Question: 2+2?" event or arrived independently — wall-clock time can't tell you, because causality and time aren't the same thing. **Logical clocks solve this** by tracking what *could have influenced what*, independent of physical time, and they're the foundation of MVCC in CockroachDB, oplog ordering in MongoDB, and conflict detection in Dynamo-style systems.
+
 In a distributed system, there is no global clock. Each machine has its own physical clock that drifts independently. NTP synchronization keeps clocks within ~1–10ms of each other, but that error is large enough to make wall-clock timestamps unreliable for ordering events across machines.
 
 Logical clocks solve this by tracking **causality** — which event could have influenced which — without relying on physical time.
@@ -229,4 +231,8 @@ flowchart TD
 
 {{< callout type="info" >}}
 **Interview framing:** "We'd use Hybrid Logical Clocks for MVCC timestamps — they're monotonic, close to wall-clock time, and fixed-size regardless of cluster size. CockroachDB uses this approach. If we need to detect concurrent writes for conflict resolution (like in a Dynamo-style system), we'd use vector clocks per key, but that only works with a small number of replicas per partition."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** I'd pick the clock by what the system needs to detect: Lamport timestamps give a total order consistent with causality but **cannot distinguish concurrent events from causally ordered ones** — fine for sequencing within a Kafka partition, not enough for conflict resolution. Vector clocks fix that (V(a) ‖ V(b) iff a ‖ b) and are what Riak and original Dynamo use, but they're O(N) per timestamp so they only scale to a small number of replicas. For modern systems with thousands of nodes, I'd use Hybrid Logical Clocks — fixed size, close enough to wall-clock to be human-meaningful, and they preserve causality — which is why CockroachDB and MongoDB picked them. The trap I'd avoid is leaning on NTP wall-clock timestamps for last-write-wins: clock skew silently discards newer writes, which is the same mistake LWW makes in active-active geo-replication.
 {{< /callout >}}

@@ -187,3 +187,59 @@ This is the same mechanism root nameservers use. There aren't 13 physical root s
 | **DNS amplification** | Attacker spoofs the victim's IP as the source of UDP DNS queries. Sends small queries (ANY type) to open resolvers; resolver sends large responses to the victim. Amplification factor up to 70×. Mitigated by rate-limiting and disabling open recursion. |
 | **DNS over HTTPS (DoH)** | Encrypts DNS queries inside HTTPS. Your ISP cannot see what domains you're resolving. Used by Chrome and Firefox by default when the resolver supports it. |
 | **Split-horizon DNS** | Authoritative server returns different records based on the query source. Internal clients (VPN, corporate network) get private IPs; external clients get public IPs. Used for private service discovery without exposing internal topology. |
+
+{{< callout type="info" >}}
+**Interview tip:** Lead with TTL discipline: "I'd treat TTL as the most consequential knob — 3600s for stable records, but 24–48 hours before any migration I'd drop it to 60s so the change propagates within a minute. DNS failover alone can't guarantee sub-minute recovery because clients keep hitting cached IPs until TTL expiry, so I'd pair short TTLs with application-level retry and circuit breakers. For multi-region routing I'd use GeoDNS with EDNS Client Subnet so decisions are based on client IP, not resolver IP. For the apex domain I'd use Route 53 ALIAS or Cloudflare CNAME flattening because raw CNAMEs at the root violate RFC 1034."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="You update an A record from 1.2.3.4 to 5.6.7.8 but the TTL was 86400 (24 hours). How long can traffic still hit the old IP? Can you force faster propagation?" closed="true" >}}
+Traffic can hit the old IP for up to **24 hours** — any resolver that cached the record in the last 24 hours keeps serving `1.2.3.4` until its cache expires. You **cannot force faster propagation**. There's no global "flush" mechanism — each resolver is independent.
+
+**What you can do:** Keep the old server running for the full TTL. For future changes, lower TTL to 60s **at least 24–48 hours in advance** (so all resolvers pick up the new short TTL before you make the actual IP change). Then make the change, wait ~60s, and raise TTL back.
+{{< /details >}}
+
+{{< details title="You configure GeoDNS to route EU users to an EU endpoint. A developer in Berlin on a US-based corporate VPN reports 200ms latency instead of 20ms. Why, and how do you fix it?" closed="true" >}}
+GeoDNS routes based on the **resolver's IP**, not the client's. The Berlin developer's DNS queries go through a US-based corporate DNS resolver. GeoDNS sees a US resolver → returns the US endpoint → the developer's traffic crosses the Atlantic.
+
+**Fix:** Enable **EDNS Client Subnet (ECS)** — the resolver forwards a `/24` prefix of the actual client IP to the authoritative DNS server, allowing geo-routing based on client location. However, privacy-focused resolvers (Cloudflare 1.1.1.1) disable ECS. Alternative: use **Anycast** instead of GeoDNS — BGP routes the client's traffic to the nearest endpoint regardless of resolver location.
+{{< /details >}}
+
+{{< details title="You add a CNAME from your root domain (example.com) to your CDN (d1234.cloudfront.net). DNS validation fails. Why?" closed="true" >}}
+RFC 1034 prohibits CNAMEs at the zone apex (root domain). The root **must** have SOA and NS records, and a CNAME at the same name conflicts with them — CNAME semantically means "this name is an alias for another name," which contradicts the existence of other record types at the same name.
+
+**Workarounds:**
+- **Cloudflare CNAME flattening** — resolves the CNAME chain internally and returns an A record to clients
+- **AWS Route 53 ALIAS** — a proprietary record type that behaves like A but accepts a hostname target
+- Both resolve the target at query time and return the IP. Clients never see the CNAME.
+{{< /details >}}
+
+{{< details title="Your microservice registers itself in DNS. It crashes, gets replaced, but for the next 5 minutes clients get NXDOMAIN (name not found) errors even though the new instance is running. What happened?" closed="true" >}}
+**Negative caching.** When the service was briefly unregistered, resolvers that queried DNS during that window cached the **NXDOMAIN** response. This negative result is cached for the SOA minimum TTL (often 300–900 seconds).
+
+Even though the new instance re-registered in DNS within seconds, resolvers with the cached NXDOMAIN won't re-query until the negative cache expires. This is particularly insidious because most engineers only think about caching for positive responses.
+
+**Fix:** Set a low SOA minimum TTL for service discovery zones (e.g., 30s). Or better: don't use DNS for service discovery of ephemeral instances — use a dedicated service registry (Consul, Kubernetes service endpoints) with health-check-based TTLs.
+{{< /details >}}
+
+{{< details title="Your DNS provider supports health-check failover — it removes unhealthy endpoints from DNS responses. An endpoint goes down. Why do some users still hit it for minutes?" closed="true" >}}
+DNS health-check failover removes the record from **future DNS responses**, but resolvers that already cached the old response keep returning the dead IP until TTL expires. DNS is a **pull** system — there's no way to push an invalidation to resolvers.
+
+**The gap:** Health check detects failure in ~10s. DNS updates immediately. But clients using resolvers with cached records keep hitting the dead IP for up to TTL seconds. If TTL is 300s, that's 5 minutes of partial outage.
+
+**Why DNS failover alone is insufficient:** You must pair it with:
+1. **Short TTLs** (60s) for endpoints behind failover
+2. **Client-side retry** with a different resolved IP
+3. **Application-level health checks** (circuit breakers) that bypass DNS entirely
+{{< /details >}}
+
+{{< details title="DNSSEC signs zone records to prevent cache poisoning. Why is adoption still low (~30% of domains), and what does DNSSEC NOT protect against?" closed="true" >}}
+**Low adoption reasons:**
+1. **Operational complexity** — key management, zone signing, key rotation. A botched rotation takes your entire domain offline.
+2. **Amplification risk** — signed responses are larger (RRSIG, DNSKEY records), making DNSSEC-enabled servers better DDoS amplifiers.
+3. **No encryption** — DNSSEC only ensures **authenticity** (the response hasn't been tampered with). Query/response content is still plaintext — anyone on the path can see what domains you're resolving.
+4. **Chain of trust fragility** — if any link in the delegation chain (root → TLD → your zone) is broken, validation fails.
+
+**What DNSSEC doesn't protect against:** DNS over plaintext (eavesdropping), DDoS attacks, registrar hijacking (attacker changes your NS records at the registrar level), or compromise of the authoritative server itself. For privacy, you need **DNS over HTTPS (DoH)** or **DNS over TLS (DoT)**.
+{{< /details >}}

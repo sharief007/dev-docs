@@ -4,6 +4,8 @@ weight: 3
 type: docs
 ---
 
+Black Friday traffic hits your checkout service. A single backend can handle 5K RPS; you're seeing 80K. You spin up 16 instances behind a load balancer and the system absorbs the spike — but only if requests actually distribute evenly. Pick round-robin and one slow `/checkout` request stalls behind it; pick least-connections and you get a thundering herd on the freshest instance; misconfigure health checks and a half-dead backend silently sinks 1/16 of traffic. The load balancer is where throughput, availability, and operational sanity all converge.
+
 Load balancing distributes incoming requests across multiple backend servers to achieve higher throughput, availability, and fault tolerance. The type of load balancer and algorithm chosen determines performance characteristics and failure behavior.
 
 ## Layer 4 vs Layer 7 Load Balancing
@@ -434,3 +436,7 @@ Application Backends
 - **Observability:** Distributed tracing, metrics for every request
 
 Load balancing is foundational to building scalable, resilient distributed systems. The choice between L4 vs L7, algorithm selection, and global distribution strategy depends on your specific latency, throughput, and availability requirements.
+
+{{< callout type="info" >}}
+**Interview tip:** When asked to design the LB layer, separate the layers: "I'd put L4 (NLB or HAProxy in TCP mode) at the front for HA and millions of connections at near-wire speed — ~10μs of overhead per packet. Behind it I'd run L7 (Envoy, Nginx) for content-based routing, TLS termination, and authentication, which costs 1–5ms but unlocks path/header/JWT-claim routing. For the algorithm I'd default to **Power of Two Choices** rather than pure least-connections because P2C avoids the thundering-herd flip where every LB picks the same 'least loaded' backend simultaneously. For caches and stateful services I'd use consistent hashing so adding a node only reshuffles 1/N keys. I'd avoid sticky sessions — they're an anti-pattern that loses sessions on backend failure; externalize state to Redis or JWT instead. For globals I'd use anycast for stateless edge (CDN, DNS) and DNS-based GSLB for regional failover, knowing DNS-based failover can't beat the TTL, so I'd pair it with client-side retries."
+{{< /callout >}}

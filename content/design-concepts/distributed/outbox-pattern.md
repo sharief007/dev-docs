@@ -4,6 +4,8 @@ weight: 10
 type: docs
 ---
 
+Your order service inserts a row into PostgreSQL and then publishes an `OrderCreated` event to Kafka so the inventory service, payment service, and notification service can react. The DB write succeeds, but the Kafka publish times out — and now downstream services have no idea the order exists. Or the Kafka publish succeeds and *then* the DB transaction rolls back due to a constraint violation — and now downstream services are processing an order that doesn't exist. **No amount of retry logic in your application code can fix this**, because the database and the message broker are two independent systems with no shared transaction. The outbox pattern dissolves the problem by writing to only one system — the database — and letting a relay extract events from the database's own log.
+
 The Outbox Pattern solves the **dual-write problem**: how do you atomically update a database **and** publish an event to a message broker? The answer is — you don't. You write both to the database in a single transaction, and a separate process publishes the event later.
 
 ## The Dual-Write Problem
@@ -242,4 +244,8 @@ The end-to-end guarantee is **effectively exactly-once**: at-least-once delivery
 
 {{< callout type="info" >}}
 **Interview framing:** "The order service writes the order and an outbox event in a single database transaction — atomicity is guaranteed by the database. Debezium tails the WAL and publishes the event to Kafka. Consumers are idempotent using an inbox table. This gives us effectively exactly-once delivery across service boundaries without distributed transactions."
+{{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** The outbox pattern is my standard answer to **the dual-write problem** — the moment a service has to update its own DB and publish to Kafka, I write the business row and an outbox row in the same DB transaction so either both happen or neither does, and let a separate relay publish the events. I'd strongly prefer Debezium reading the WAL (CDC) over a polling relay — no `published` flag to manage, no DB load from periodic queries, and near-real-time latency. The honest caveat I'd raise unprompted: this is **at-least-once delivery, not exactly-once** — Debezium can republish events on restart, so consumers must be idempotent (inbox table or business-key dedup in the same transaction as the side effect). Combined, you get effectively exactly-once *processing* across service boundaries without distributed transactions.
 {{< /callout >}}

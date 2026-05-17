@@ -87,7 +87,7 @@ flowchart TB
 | Cost | Detail |
 |------|--------|
 | **Network overhead** | Every cross-service call is an RPC — serialization, latency, failure handling. A local function call becomes a distributed system problem. |
-| **Data consistency** | No shared transactions. Cross-service consistency requires [Saga pattern](../distributed/saga-pattern) or [eventual consistency](../distributed/consistency-models). |
+| **Data consistency** | No shared transactions. Cross-service consistency requires [Saga pattern](../../distributed/saga-pattern) or [eventual consistency](../../distributed/consistency-models). |
 | **Operational complexity** | N services = N build pipelines, N monitoring dashboards, N deployment configurations. Requires container orchestration (Kubernetes), service discovery, distributed tracing. |
 | **Debugging difficulty** | A request touches 5 services. Finding the root cause requires distributed tracing (Jaeger, Zipkin), correlated logs, and service dependency maps. |
 
@@ -194,3 +194,21 @@ monolith/
 {{< callout type="info" >}}
 **Interview tip:** When asked "monolith or microservices?" don't default to microservices. Say: "For an early-stage system with a small team, I'd start with a modular monolith — strict module boundaries, separate schemas per module, inter-module communication through events. This gives us the option to extract services later without premature complexity. The first extraction candidate would be the module with the most distinct scaling requirement — say, the image processing pipeline — because it needs GPU workers while the rest of the system is CPU-bound." This shows you understand when and why to decompose, not just how.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A team splits a monolith into 8 microservices. Every service calls 3-4 others synchronously. A change in the Order service requires coordinated deploys of 5 services. What went wrong?" closed="true" >}}
+**Distributed monolith** — the worst of both worlds. Services are split by code boundary but remain tightly coupled via synchronous calls and shared deployment schedules. You pay the operational cost of microservices (network, observability, deployment complexity) without the benefits (independent deployability, isolated failure domains).
+
+**Fix:** Services should communicate via async events (Kafka), not synchronous HTTP chains. Each service owns its data and makes decisions based on local state + consumed events. If 5 services must deploy together, the boundaries are wrong — recombine them or redraw boundaries along business capabilities with clear data ownership.
+{{< /details >}}
+
+{{< details title="When should you extract the first microservice from a monolith? Give a concrete signal." closed="true" >}}
+**When one module has a distinctly different scaling or deployment requirement.** Concrete signals:
+
+1. **Scaling mismatch:** The image processing module needs GPU workers while the rest is CPU-bound. Scaling the monolith wastes GPU resources on the API layer.
+2. **Deploy cadence mismatch:** The payment module changes quarterly (compliance), the feed algorithm changes daily. Deploying the monolith for a feed tweak risks the payment path.
+3. **Technology mismatch:** The ML ranking module needs Python; the rest is Java. Running both in one process is painful.
+
+**Don't extract based on:** "this code is complex" (refactor the module boundary first), "microservices are best practice" (they're not universal), or "to reduce team coupling" (Conway's Law means the team structure must change too).
+{{< /details >}}

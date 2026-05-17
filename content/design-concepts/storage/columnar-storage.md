@@ -1,6 +1,6 @@
 ---
 title: Columnar Storage
-weight: 3
+weight: 12
 type: docs
 ---
 
@@ -135,3 +135,35 @@ Parquet file layout:
 {{< callout type="info" >}}
 A common architecture at FAANG: OLTP data in MySQL/PostgreSQL → CDC pipeline (Debezium/Kafka) → Parquet on S3 → queried by Athena/Spark/BigQuery. The row store handles transactions; the columnar layer handles analytics. This separation avoids OLAP queries degrading OLTP latency.
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** If the question is "how do we run analytics on a billion rows?", I'd say: "Don't run it on the OLTP database — push the data into a columnar store." Columnar layouts read only the columns the query touches, compress 5–10x better than row stores because each column is a single type with high repetition (RLE, dictionary, delta, bit-packing), and enable vectorized SIMD execution that processes thousands of values per CPU instruction. The standard architecture I'd propose is OLTP in PostgreSQL → CDC into Parquet on S3 → queried by Athena, Spark, or ClickHouse. I'd flag that columnar is wrong for point lookups and updates — every row touches N column files — so the row store stays authoritative for transactions and the columnar layer is a derived view.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A query scans 1 billion rows but only needs 3 columns out of 50. Why is a columnar store 10-15x faster than a row store for this query?" closed="true" >}}
+**Row store:** Reads all 50 columns for every row from disk, then discards 47 columns. If each row is 500 bytes, that's 500 GB of I/O for 1B rows.
+
+**Columnar store:** Reads only the 3 needed columns. If each column averages 10 bytes × 1B rows = 30 GB before compression. Columnar compression (each column has homogeneous data type → 5-10x compression via RLE, dictionary encoding, delta encoding) reduces this to ~3-6 GB of actual I/O.
+
+Additionally, columnar stores enable **vectorized execution** using SIMD (Single Instruction Multiple Data — CPU instructions that process multiple values in a single operation, e.g., comparing 32 integers in one cycle) — processing thousands of values per CPU instruction instead of one row at a time.
+{{< /details >}}
+
+{{< details title="Your OLTP application uses PostgreSQL. An analyst runs SELECT AVG(price) FROM orders WHERE created_at > '2024-01-01' on the same database. Transaction latency spikes 5x. Why?" closed="true" >}}
+**Resource contention.** The analytical query performs a full table scan (or large index scan), consuming: disk I/O bandwidth (evicting hot OLTP pages from the buffer pool), CPU (aggregation), and potentially holding MVCC snapshots that prevent vacuum from reclaiming dead tuples.
+
+OLTP and OLAP have **conflicting access patterns**: OLTP needs fast point lookups on hot data; OLAP needs sequential scans of cold historical data. Running both on the same instance means the OLAP scan evicts OLTP's cached pages, and OLTP's random I/O interferes with OLAP's sequential scans.
+
+**Fix:** Separate OLTP and OLAP. Replicate data to a columnar store (Athena, ClickHouse, BigQuery) via CDC. The row store handles transactions; the columnar store handles analytics. Neither interferes with the other.
+{{< /details >}}
+
+{{< details title="Parquet files are immutable — you can't update a row in place. How do data lakes handle updates and deletes?" closed="true" >}}
+**Delta/merge approach.** Formats like **Delta Lake**, **Apache Iceberg**, and **Apache Hudi** add a metadata layer on top of Parquet:
+
+1. **Deletes:** Write a "delete file" (tombstone) that records which row IDs are deleted. On read, the query engine filters them out.
+2. **Updates:** Write a new Parquet file with the updated rows. The metadata layer tracks which file version is current.
+3. **Compaction:** Periodically merge delete files and new data files into clean Parquet files (similar to LSM compaction).
+
+This gives ACID semantics (snapshot isolation, atomic commits) on top of immutable files. The trade-off: reads must merge base files + delta files, adding latency until compaction runs.
+{{< /details >}}

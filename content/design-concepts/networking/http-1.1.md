@@ -4,7 +4,9 @@ weight: 3
 type: docs
 ---
 
-HTTP/1.1 (RFC 2616, updated by RFC 7230–7235) is a text-based, stateless, request-response protocol over TCP. It became the dominant web protocol from 1997 and introduced persistent connections, chunked transfer, and request pipelining.
+You're profiling a slow page load and notice the browser opens six TCP connections to your origin even though only one CSS file is being fetched. Looking deeper, you see headers like `User-Agent` and `Cookie` — hundreds of bytes — repeated verbatim on every single asset request. Welcome to HTTP/1.1: the protocol that powered the web for two decades, and whose limitations are the entire reason HTTP/2 and HTTP/3 exist.
+
+HTTP/1.1 (originally RFC 2616, replaced by RFC 7230–7235 in 2014, and currently specified by RFC 9110/9112 in 2022) is a text-based, stateless, request-response protocol over TCP. It became the dominant web protocol from 1997 and introduced persistent connections, chunked transfer, and request pipelining.
 
 ## Message Structure
 
@@ -307,3 +309,43 @@ Enabled via `Accept-Encoding` (request) and `Content-Encoding` (response).
 | No request prioritization | All requests treated equally | Critical resources compete with non-critical ones |
 
 These limitations motivated **HTTP/2** (binary framing, multiplexing, header compression, server push) and **HTTP/3** (QUIC, no TCP-level HOL blocking).
+
+{{< callout type="info" >}}
+**Interview tip:** "HTTP/1.1's three structural problems: HOL blocking (pipelining is dead, browsers open 6 parallel connections as a workaround), header bloat (plaintext `User-Agent` and `Cookie` repeated on every request), and no multiplexing (one outstanding request per connection). These are exactly what [HTTP/2](../http-2)'s binary framing, HPACK, and stream multiplexing solve."
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="HTTP/1.1 pipelining was supposed to fix HOL blocking by letting clients send multiple requests without waiting. Why did it fail, and what constraint did it impose that HTTP/2 removed?" closed="true" >}}
+Pipelining required the server to respond **in FIFO order** — responses had to come back in the same order as requests were sent. A slow `/checkout` response blocked every response behind it, even if `/health` was ready in 1ms. This is application-level HOL blocking — the same problem pipelining was meant to solve.
+
+Additionally, most HTTP proxies didn't correctly implement pipelining (some reordered responses, others dropped connections), so all major browsers disabled it by default.
+
+**HTTP/2's fix:** Streams are independent. Stream 3's response can arrive before Stream 1's. No FIFO constraint. The server sends whichever response is ready first.
+{{< /details >}}
+
+{{< details title="A page loads 50 sub-resources from the same origin over HTTP/1.1. The browser opens 6 parallel connections. How many RTTs does it take to fetch all resources, assuming each response fits in one round trip?" closed="true" >}}
+With 6 connections, the browser can fetch 6 resources per RTT (one per connection, serially within each connection due to HTTP/1.1's request-response model).
+
+50 resources / 6 connections = **~9 RTTs** (ceil(50/6) = 9, with the last round having only 2 resources).
+
+This assumes each resource completes in one RTT. In reality, slow responses on one connection (HOL blocking) can delay resources queued behind them, making the actual time worse.
+
+**HTTP/2** eliminates this: all 50 requests go out immediately on a single connection as interleaved streams. The server responds to whichever is ready first. In the best case, all 50 complete in **~1 RTT** (limited by server processing and TCP congestion window).
+{{< /details >}}
+
+{{< details title="You're sending a large dynamically-generated report over HTTP/1.1. The server doesn't know the total size upfront. If you don't use chunked transfer encoding, what happens?" closed="true" >}}
+Without chunked encoding, the server **must** set `Content-Length`, which means it must **buffer the entire response in memory** before sending. For a 2GB report, that's 2GB of server memory per concurrent request.
+
+With `Transfer-Encoding: chunked`, the server streams data as it's generated — each chunk has its own size prefix, and a zero-length chunk signals the end. The server never needs to know the total size upfront, and memory usage stays constant regardless of response size.
+
+**Important:** `Content-Length` and `Transfer-Encoding: chunked` are **mutually exclusive**. If both are present, `Transfer-Encoding` takes precedence per RFC 7230.
+{{< /details >}}
+
+{{< details title="Your HTTP/1.1 API uses Connection: keep-alive. Under a load test, you see 6000 connections from a single client IP. Is this a bug or expected behavior?" closed="true" >}}
+If the "client" is a load testing tool making parallel requests, this is expected. HTTP/1.1 is one-request-per-connection-at-a-time. To achieve high concurrency (e.g., 6000 concurrent requests), the client must open 6000 connections. Keep-alive just means each connection is **reused** after a response completes — it doesn't enable multiplexing.
+
+If this is a single browser, it's likely a bug — browsers limit to 6 connections per origin. 6000 connections would require ~1000 origins (domain sharding) or a non-browser client ignoring the limit.
+
+**The fix for high-concurrency clients:** HTTP/2, where a single connection multiplexes all requests. The load test would use 1 connection instead of 6000.
+{{< /details >}}

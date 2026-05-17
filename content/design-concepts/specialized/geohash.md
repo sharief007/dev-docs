@@ -207,7 +207,7 @@ For most applications (ride-sharing, restaurant search) this doesn't matter beca
 
 ### GeoHash vs Other Spatial Indexes
 
-| Property | GeoHash | [QuadTree](../specialized/quadtree) | S2 / H3 |
+| Property | GeoHash | [QuadTree](../quadtree) | S2 / H3 |
 |----------|---------|----------|---------|
 | Cell shape | Rectangle | Rectangle (adaptive) | Hexagon (H3) / Sphere cap (S2) |
 | Cell size uniformity | Varies with latitude | Adapts to data density | Near-uniform globally |
@@ -219,3 +219,17 @@ For most applications (ride-sharing, restaurant search) this doesn't matter beca
 {{< callout type="info" >}}
 **Interview tip:** When asked about proximity search, start with: "I'd encode locations as GeoHash strings and store them with a B-tree index. For a radius query, I compute the 9 neighbouring GeoHash cells at a precision matching the radius (~6 chars for 1km) and query all 9, then post-filter by exact Haversine distance. For a production system at Uber/Google scale, I'd consider H3 or S2 for more uniform cell areas, but GeoHash with Redis GEO commands works well up to millions of points." This shows you understand the encoding, the 9-cell search trick, the post-filter step, and when to upgrade.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Two restaurants are 50 meters apart but have different 6-character GeoHash prefixes. Your proximity search misses one. Why?" closed="true" >}}
+**GeoHash cell boundary problem.** GeoHash divides the world into rectangular cells. Two points near a cell boundary can have completely different prefixes despite being physically close. A prefix match only finds points in the **same cell**.
+
+**Fix:** Always search the **target cell + 8 neighboring cells** (the 9-cell grid). This guarantees coverage of nearby points regardless of which side of a boundary they fall on. Then post-filter by exact Haversine distance to remove results outside the desired radius.
+{{< /details >}}
+
+{{< details title="GeoHash uses rectangular cells. Near the poles, a 6-character cell covers a vastly different area than at the equator. Why does this matter for a ride-sharing app?" closed="true" >}}
+**Unequal cell areas.** GeoHash cells get narrower (in the east-west direction) as latitude increases because longitude lines converge at the poles. A 6-char cell at the equator covers ~1.2km × 0.6km. Near the Arctic, the same precision covers ~1.2km × 0.1km. A "find drivers within 1km" query needs different precisions at different latitudes.
+
+**Alternatives:** **H3** (Uber's hexagonal grid) and **S2** (Google's spherical cells) provide more uniform cell areas across latitudes. For global services like Uber or Google Maps, these are preferred. For regional services (US-only restaurant finder), GeoHash's non-uniformity is negligible.
+{{< /details >}}

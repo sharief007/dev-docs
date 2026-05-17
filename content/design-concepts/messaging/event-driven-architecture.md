@@ -4,6 +4,8 @@ weight: 3
 type: docs
 ---
 
+Picture your checkout service today: it synchronously calls Payments, then Inventory, then Shipping, then Notifications, all in a single request. Add fraud detection next quarter and that's another RPC bolted into the chain. Now any one of those services hiccups and checkout latency degrades for every user. This is the pain point event-driven architecture solves — the producer publishes one fact and walks away; consumers react on their own time.
+
 Event-Driven Architecture (EDA) is a design paradigm where services communicate by producing and consuming **events** — immutable facts about things that have happened. Instead of Service A calling Service B directly (synchronous RPC), Service A publishes an event and moves on. Any number of services can react independently.
 
 This decoupling is the foundation of scalable microservice systems: producers don't know or care who consumes their events, and new consumers can be added without modifying the producer.
@@ -340,3 +342,29 @@ Events within a single Kafka partition are ordered, but events across different 
 {{< callout type="info" >}}
 **Interview framing:** "I'd design this as an event-driven system. The Order Service publishes `OrderPlaced` to Kafka — that's an immutable fact, not a command. Payment, Inventory, and Notifications each subscribe independently as separate consumer groups. This gives us loose coupling: adding Fraud Detection next quarter requires zero changes to the Order Service. The trade-off is eventual consistency — the search index may be a few hundred milliseconds behind — which is acceptable for this use case. Events carry a `correlationId` for distributed tracing across the async flow."
 {{< /callout >}}
+
+{{< callout type="info" >}}
+**Interview tip:** The first thing I'd nail is event vs command — events are past-tense immutable facts owned by the producer (`OrderPlaced`); commands are imperatives owned by the consumer (`PlaceOrder`). Pub/sub over a durable log like Kafka decouples producers from consumers so new subscribers can be added without touching upstream code, but the cost I'd call out explicitly is eventual consistency — the read side trails the write by tens to hundreds of milliseconds, so I'd plan for read-your-writes on user-facing flows and ship every event with a `correlationId` so distributed tracing still works. I'd also flag schema evolution as the operational tax: enforce backward-compatible changes via a schema registry from day one, because old events live forever.
+{{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="Service A publishes OrderPlaced events. A new field 'priority' is added. Service B hasn't updated. What happens?" closed="true" >}}
+**With backward-compatible schema evolution:** B ignores the unknown field and continues normally — adding an optional field is a non-breaking change.
+
+**Without schema management:** If B uses strict deserialization (`failOnUnknownProperties=true`), it throws an error. Every event with `priority` goes to the DLQ.
+
+**Best practice:** Schema Registry with backward compatibility mode — new schemas can add optional fields but not remove or rename existing ones. Consumers must ignore unknown fields.
+{{< /details >}}
+
+{{< details title="An event-sourced system replays 500 million events to rebuild read models after a bug fix. It takes 8 hours. How do you speed this up?" closed="true" >}}
+**Snapshots.** Periodically persist the materialized state. On rebuild, load the latest snapshot and replay only events after it. With snapshots every 1M events: load snapshot at 499M, replay 1M events. Minutes instead of hours.
+
+**Additional:** Parallelize by partition key (each entity's events are independent). Use a faster store during rebuild (in-memory, then bulk-write). Pre-filter — skip event types the read model doesn't care about.
+{{< /details >}}
+
+{{< details title="Subscriber C falls 2 hours behind on a Kafka topic. Does this affect Subscribers A and B in the same topic?" closed="true" >}}
+**On Kafka: No.** Each consumer group tracks its own offset independently. C's lag doesn't affect A and B. The log retains events for the configured retention period regardless.
+
+**On RabbitMQ: Potentially yes.** If C's queue backs up with unacknowledged messages, it consumes broker memory. If the broker hits memory limits, it applies back-pressure to **all** publishers, slowing delivery to A and B's queues too.
+{{< /details >}}
