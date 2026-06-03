@@ -219,3 +219,29 @@ The [PACELC](../pacelc) model extends CAP to describe the latency vs. consistenc
 {{< callout type="info" >}}
 **Interview tip:** I always lead with: "P is not optional — networks partition, so the real question is CP or AP per data type." Then I separate concerns: inventory, balances, and idempotency keys are CP (refuse the request rather than oversell or double-charge); feeds, view counts, and search indexes are AP (stale is fine, downtime isn't). I'm careful never to conflate CAP's C — which is **linearizability**, a single-object cross-replica freshness guarantee — with ACID's C, which is invariant preservation within a single node. And I follow up with [PACELC](../pacelc) because partitions are rare; the real cost most days is the latency-vs-consistency tradeoff on every read.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="An AP database allows local writes on both sides of a network split to stay available. The partition heals — and both sides accepted conflicting writes to the same key. What does CAP actually promise you here, and who cleans up the mess?" closed="true" >}}
+**CAP promises nothing about reconciliation.** Choosing A during the partition only guarantees both sides kept responding — it says nothing about how the divergent values get merged afterward. That is entirely your problem to solve at the application or storage layer.
+
+The conflict-resolution strategy is what you actually have to design: **last-write-wins** (highest timestamp wins — but clock skew can silently discard a newer write), **vector clocks** (detect which writes were truly concurrent), **CRDTs** (data structures where any merge order is correct — counters, add-only sets), or **multi-version** (keep both, let the app/user resolve, as CouchDB does). The lesson: availability during a partition is not free — you pay for it later with reconciliation complexity.
+{{< /details >}}
+
+{{< details title="A colleague says 'we run MySQL, so we're CA — consistent and available.' Why is that statement meaningless the moment you add a single read replica?" closed="true" >}}
+**Because CA only describes a single-node system, which has no partition to tolerate.** A lone MySQL instance never faces a network split between nodes, so the CP/AP question is moot. The instant you add a replica, you have a distributed system, and the link between primary and replica *can* partition.
+
+Now you must choose: does the replica keep serving reads when it loses contact with the primary (AP — risk stale data), or does it refuse reads to avoid serving staleness (CP — risk unavailability)? "CA" was never a deployment choice you could make for a distributed system — P is mandatory, so the real options are CP or AP.
+{{< /details >}}
+
+{{< details title="Your inventory service is CP, so during a partition the minority side refuses writes. A stakeholder asks: 'Why not let both sides keep selling and reconcile the counts later?' What's the failure mode you're protecting against?" closed="true" >}}
+**Overselling — and you can't un-sell.** With both sides accepting orders for the last unit in stock, each side sees stock available (neither can see the other's decrement during the partition), so both sell it. After the partition heals you discover you sold the same physical item twice. Reconciliation can detect the conflict but cannot reverse a shipped order or an honored promise to a customer.
+
+This is exactly why inventory, balances, and seat reservations are CP: refusing the request (a lost sale, recoverable) is strictly better than serving a stale "in stock" answer (an oversell, not recoverable). The CP choice trades availability for correctness *on purpose*.
+{{< /details >}}
+
+{{< details title="Cassandra is widely called an 'AP' system. Under what configuration does it behave like a CP system instead — and what does that tell you about the CP/AP label?" closed="true" >}}
+**At consistency level `ALL` (or `QUORUM` when a partition drops you below quorum), Cassandra refuses the operation rather than serve a potentially stale result — that's CP behavior.** With `ALL`, every replica must acknowledge; if one is unreachable due to a partition, the read or write fails.
+
+The takeaway: **CP vs AP is not a fixed property of a database — it's a per-operation decision** for systems with tunable consistency. The same Cassandra cluster is AP at `ONE` (answer fast, maybe stale) and CP-leaning at `QUORUM`/`ALL` (refuse rather than risk staleness). Classifying a whole system as "AP" is a simplification; the honest answer is "AP at these consistency levels, CP at those."
+{{< /details >}}

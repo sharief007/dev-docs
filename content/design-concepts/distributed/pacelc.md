@@ -142,3 +142,29 @@ PACELC doesn't replace CAP — it generalizes it. When an interviewer asks about
 {{< callout type="info" >}}
 **Interview tip:** I'd frame PACELC precisely as "during Partition: A or C; Else: Latency or Consistency" — and stress that the **Else clause matters more day-to-day** because partitions are rare but every read pays the L-vs-C cost. Concretely: DynamoDB and Cassandra-at-ONE are PA/EL (fast eventually-consistent reads), Spanner and CockroachDB are PC/EC (always consistent, always paying coordination), and Cassandra is the interesting case because its consistency level lets you pick PA/EL or PA/EC per operation. The mistake I'd avoid is treating consistency as a system-level setting — it's a per-operation decision, so feeds and view counts go EL on the cheap path, while balances and idempotency keys go EC even though they're 3× the cost. And I'd remind myself the math: R + W > N is what makes quorum reads consistent; ONE/ONE doesn't satisfy it.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A database is AP under CAP, and under PACELC it's PA/EL — even with a perfectly healthy network and no partition, it prioritizes Latency over Consistency. If nothing is broken, why would it still sacrifice consistency? What specific overhead forces the tradeoff?" closed="true" >}}
+**The coordination tax of strong consistency, paid on every single request even when the network is healthy.** Linearizability requires nodes to *agree on the current value before* acknowledging a read or write, and that agreement costs latency in two concrete ways:
+
+1. **Network round-trips for quorum/consensus.** To make a write consistent, the coordinator must replicate it to a quorum (Raft/Paxos or synchronous replication) and wait for acknowledgments — multi-hop latency added to every write.
+2. **The straggler problem.** A strongly consistent operation is only as fast as the slowest replica in the required set. One node with a GC pause, disk I/O hiccup, or CPU spike stalls the whole operation.
+
+A PA/EL system sidesteps both by replicating **asynchronously**: the primary acks the client immediately and syncs replicas in the background. Latency stays low, but a window opens where a read can hit a replica that hasn't caught up — that's the consistency it traded away. Consistency is never free: you either pay it as downtime during partitions (CP) or as latency during normal operation (EC).
+{{< /details >}}
+
+{{< details title="You run an active-active multi-region DB (Mumbai + N. Virginia), configured PA/EL with async multi-master replication. A user updates their profile photo in Mumbai (acked instantly), then a second later opens a tab routed to Virginia and sees the OLD photo. How do you give this user read-your-own-writes WITHOUT switching the whole database to a slow PC/EC config?" closed="true" >}}
+**Apply strong consistency selectively — only for this user, only for a short window — instead of globally.** The database stays PA/EL for everyone else. Two patterns:
+
+- **Version/verification token (RYOW pinning):** the write returns a monotonic version (e.g. `version=105`). The client carries it on subsequent reads. If a read lands on Virginia and its local copy is only at `version=104`, the app layer knows it's stale and either reads strongly from the Mumbai master for that one request or blocks a few ms until replication catches up.
+- **Temporary master-routing:** on write, set a flag in a globally replicated cache (`user_123_updated_at`). For the next few minutes (max replication lag), *all* reads for that user — any device, any region — are explicitly routed to the master region. After the flag expires, reads drop back to fast local replicas.
+
+**Why not just sticky sessions by user?** Sticky routing works until the user switches devices or networks (phone on cellular → laptop on VPN) and lands on a different region — then the session breaks and they hit stale data. Version tokens and master-routing follow the *data*, not the connection, so they survive device switches.
+{{< /details >}}
+
+{{< details title="A teammate says 'tunable consistency means I can get strong consistency at ONE-level latency by just bumping the consistency level.' Why is that wrong, and what's the math that decides when quorum reads are actually consistent?" closed="true" >}}
+**There is no setting that gives strong consistency at ONE-level latency — every consistency upgrade costs latency and availability.** Raising from `ONE` to `QUORUM` means waiting for more replicas to respond; in a geo-distributed cluster a `QUORUM` read may cross datacenter boundaries and add 50–200ms.
+
+The consistency guarantee comes from the overlap rule: **R + W > N**, where N is the replication factor, W the write quorum, R the read quorum. When R + W > N, the read set is guaranteed to share at least one node with the most recent write set, so the read sees the latest write. With RF=3, `QUORUM` gives W=2, R=2 → 4 > 3 ✓ (consistent). `ONE` gives W=1, R=1 → 2 ≤ 3 ✗ (stale reads possible). You buy consistency with latency — the math just tells you the minimum price.
+{{< /details >}}

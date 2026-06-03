@@ -228,3 +228,23 @@ In a system design interview, the strongest signal is knowing which operations r
 {{< callout type="info" >}}
 **Interview tip:** I'd be precise about the term: linearizability is a **single-object** guarantee — every read sees the most recent write across replicas, in real-time order. It's not the same as serializability, which is a **multi-object** isolation guarantee about transaction interleaving; you can have one without the other, and conflating them is the most common interview red flag here. In practice I'd reach for linearizability only on operations where staleness causes correctness failures (balances, inventory, locks, idempotency keys) and accept causal or eventual consistency everywhere else. Session guarantees — read-your-writes and monotonic reads — are usually the right middle ground; they're cheap to implement with LSN-based routing and they prevent the "I just updated my photo, why is the old one back?" failure that users actually notice.
 {{< /callout >}}
+
+## Test Your Understanding
+
+{{< details title="A social platform guarantees Sequential Consistency but NOT Linearizability. User A posts 'Going to grab coffee' (Event X), then immediately 'Forgot my wallet, turning back' (Event Y). Can User C, on a third, lagging data center, ever see Event Y BEFORE Event X? Why or why not?" closed="true" >}}
+**No — never.** Sequential consistency drops the *real-time* requirement that linearizability adds, but it strictly preserves two things: **program order** (each process's own operations appear in the order it issued them) and **a single agreed-upon total order** seen by all observers. Since User A issued X then Y, every node and every observer in the system must see X before Y. Program order is sacrosanct.
+
+**The catch — what's lost without linearizability:** User C can still experience a *time-warp delay*. A posts X and Y at 9:00; User B sees them instantly; User C on a lagging replica might see nothing until 9:05. But when the events do arrive at C, they arrive **in the correct order (X then Y)**. Sequential consistency allows staleness, never reordering of a single author's events.
+{{< /details >}}
+
+{{< details title="An interviewer says 'this system is serializable, so reads are linearizable too, right?' Why is that a trap?" closed="true" >}}
+**They're different guarantees about different things — you can have one without the other.** Linearizability is a **single-object, real-time** guarantee: any read of one object sees the most recent write to it, ordered by wall-clock. Serializability is a **multi-object isolation** guarantee: concurrent transactions produce a result equivalent to *some* serial order — but that order need not match real time.
+
+So a serializable system can still let transaction T2 commit in a serial order *before* T1 even though T1 finished first in real time (that's **not** linearizable). Conversely, a single linearizable register isn't transactional at all. The combination — serializable *and* respecting real-time order — is **strict serializability** (what Spanner/CockroachDB provide). Conflating serializability with linearizability is the classic red flag.
+{{< /details >}}
+
+{{< details title="A client reads x=2 from a fast nearby replica, then its next read is routed to a different replica that's behind and returns x=1. The value 'went backward in time.' Which session guarantee was violated, and how do you fix it cheaply without making the system linearizable?" closed="true" >}}
+**Monotonic reads was violated** — it guarantees that once a client reads version V, all its later reads return V or newer, never an older value. Hitting a lagging replica on the second read let the value travel backward.
+
+**Cheap fix:** sticky replica routing — hash the client/session ID to a specific replica so all of that client's reads go to the same node, which only moves forward. If that replica fails, re-hash and accept a brief blip during failover. This is a *session-scoped* guarantee, so it costs far less than global linearizability: you're not coordinating across replicas, just pinning one client's reads to a monotonic source.
+{{< /details >}}
