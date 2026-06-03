@@ -97,63 +97,23 @@ Every message-passing system — queues, event streams, RPCs — provides one of
 
 **Exactly-once** requires coordination and is significantly more expensive. The claim "exactly-once delivery" often hides the caveat "exactly-once within a specific component" — true end-to-end exactly-once across heterogeneous systems requires careful design.
 
-## Exactly-Once in [Kafka](../../messaging/kafka)
+## Exactly-Once = At-Least-Once + Deduplication
 
-Kafka provides exactly-once semantics through two mechanisms that work together.
+"Exactly-once" is not a delivery primitive the network gives you — it's **at-least-once delivery plus deduplication on the consumer.** Two ideas make it work, and [Kafka](../../messaging/kafka) is the canonical implementation of both:
 
-### Idempotent Producer (per-partition deduplication)
-
-Each producer is assigned a **ProducerID (PID)** by the broker. Every message carries a monotonically increasing **sequence number** per `(PID, partition)` pair.
+- **Idempotent producer (dedup retries).** Each message carries a per-producer, per-partition **sequence number**. The broker remembers the last number it applied and silently discards any retry carrying a number it has already seen — so producer retries never create duplicates in the log.
 
 ```
-Producer → Broker: msg (PID=42, partition=3, seq=100, data=...)
-Broker applies msg, advances expected_seq to 101
-
-Producer retries (network timeout):
-Producer → Broker: msg (PID=42, partition=3, seq=100, data=...)  ← same seq
-Broker: seq=100 ≤ last_applied_seq=100 → duplicate, discard silently
-Producer receives ACK as if it succeeded → no duplicate in the log
+Producer → Broker: msg (seq=100)   → applied, expected_seq advances to 101
+Producer → Broker: msg (seq=100)   ← retry after a timeout
+Broker: seq=100 ≤ last_applied → duplicate, discard silently (ACK as if new)
 ```
 
-This prevents duplicates from producer retries **within a single session**. If the producer restarts, it gets a new PID and sequence numbering resets — deduplication window is per-session.
+- **Transactions (atomic consume-process-produce).** A producer can write to multiple partitions *and* commit the consumer's read offset **in one atomic unit** — all of it commits or none does. For a consume → process → produce loop, the output write and the offset commit become inseparable: on a crash the transaction aborts, the message is re-consumed, and the aborted output is never visible downstream. Consumers set `isolation.level=read_committed` so they only see committed transactions.
 
-### Transactions (multi-partition atomicity)
-
-Transactions allow a producer to atomically write to multiple partitions — either all writes commit or none do. A **Transaction Coordinator** (a special Kafka broker) manages the two-phase commit protocol.
-
-```mermaid
-sequenceDiagram
-    participant P as Producer
-    participant TC as Transaction Coordinator
-    participant B1 as Broker (partition A)
-    participant B2 as Broker (partition B)
-
-    P->>TC: initTransactions (transactional.id="order-processor")
-    TC->>P: ProducerID=42, epoch=1
-
-    P->>TC: beginTransaction
-    P->>B1: write to partition A (PID=42, seq=0)
-    P->>B2: write to partition B (PID=42, seq=0)
-
-    P->>TC: commitTransaction
-    TC->>B1: COMMIT marker
-    TC->>B2: COMMIT marker
-    TC->>P: transaction committed
-
-    Note over B1,B2: Consumers at isolation.level=read_committed<br/>only see data after COMMIT marker
-```
-
-**Consumer side:** Set `isolation.level=read_committed`. The consumer only reads messages that have been committed; messages from aborted transactions are invisible. This prevents consumers from processing partial transactions.
-
-**Exactly-once stream processing (Kafka Streams):**
-The consume → process → produce loop is made exactly-once by wrapping it in a transaction:
-1. Consume message from input topic (don't commit offset yet)
-2. Process and produce to output topic (inside transaction)
-3. Commit input offset to `__consumer_offsets` topic **inside the same transaction**
-
-The offset commit and the output write are atomic. If the process crashes, the transaction aborts; on restart the message is re-consumed but the output write (also aborted) is not visible — no duplicate in the output.
-
-**Limitation:** Kafka's exactly-once only covers Kafka-to-Kafka. Writing to an external database in the processing step re-introduces the at-least-once problem — the DB write is not part of the Kafka transaction.
+{{< callout type="warning" >}}
+**Exactly-once is scoped, not universal.** The guarantee holds only Kafka-to-Kafka. The moment your processing step writes to an external database, that write is not part of the Kafka transaction — you are back to at-least-once and need the deduplication patterns below.
+{{< /callout >}}
 
 ## Deduplication Patterns
 
@@ -248,10 +208,6 @@ SET balance = 600, last_transaction_id = 'txn_abc'
 WHERE id = 42
   AND last_transaction_id != 'txn_abc';  -- no-op if already applied
 ```
-
-{{< callout type="info" >}}
-In a system design interview, when you add a payment, inventory decrement, or any write that gets called over a network: immediately say "this must be idempotent." Explain: client generates idempotency key → server stores key+result → duplicate returns cached result. Then address the deduplication storage: Redis SETNX for speed, DB unique constraint for transactional safety. This signals you've thought about failure modes, not just the happy path.
-{{< /callout >}}
 
 {{< callout type="info" >}}
 **Interview tip:** I'd be careful never to claim "exactly-once delivery" as a network primitive — what you actually get is **at-least-once delivery plus an idempotent consumer**, which together produce exactly-once *processing*. For any non-GET endpoint that touches money, inventory, or external side effects, I'd require a client-supplied idempotency key (UUID v4), store the key + the response in the same DB transaction as the business write using `INSERT ... ON CONFLICT DO NOTHING`, and return the cached response on duplicates. Kafka's transactional producer plus `read_committed` consumers gives exactly-once semantics within Kafka, but the moment you write to an external database in the processing step, you're back to needing the inbox-table dedup pattern. The race I always call out: never read-then-write to check for duplicates — use atomic operations (`SETNX`, unique constraints) so two concurrent retries can't both pass the check.

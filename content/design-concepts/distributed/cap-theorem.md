@@ -80,81 +80,36 @@ There is no third option. You cannot conjure the value `x = 2` on Node B without
 
 ## CP Systems
 
-CP systems choose **consistency over availability** during a partition. The minority partition — the side that cannot reach a quorum — stops accepting requests until the partition heals.
-
-### ZooKeeper
-
-ZooKeeper uses the **Zab** (ZooKeeper Atomic Broadcast) protocol. Writes require a quorum (majority) of nodes to acknowledge before committing. If the leader loses contact with a quorum, it steps down and the cluster becomes unavailable for writes until a new leader is elected with quorum support.
+CP systems choose **consistency over availability** during a partition. The mechanism is always the same: **a write must reach a majority (quorum) before it commits.** A node that cannot reach a quorum refuses requests rather than risk serving stale data, until the partition heals.
 
 ```
-5-node ZooKeeper cluster, partition splits into [3, 2]:
-  Majority (3 nodes): continues serving reads and writes
-  Minority (2 nodes): refuses all requests — "not currently the leader"
+5-node cluster, partition splits into [3, 2]:
+  Majority side (3 nodes): can form quorum → serves reads and writes
+  Minority side (2 nodes): cannot form quorum → refuses all requests
 
-During partition, the 2-node side is unavailable.
-After partition heals, ZooKeeper guarantees all nodes see the same state.
+After the partition heals, all nodes converge on the same state.
 ```
 
-**Use case:** Distributed coordination, leader election, configuration storage — where giving out stale configuration (e.g., wrong leader address) is worse than being temporarily unavailable.
+You'll see this in coordination and metadata stores, where handing out stale data (a wrong leader address, a deleted config) is worse than briefly refusing requests:
 
-### etcd
-
-etcd uses [**Raft**](../../consensus/raft) consensus. Raft requires a majority quorum to commit any entry to the log. A minority partition cannot elect a leader and will reject all client requests with `etcdserver: request timed out`.
-
-```
-3-node etcd cluster, network splits into [2, 1]:
-  2-node side: can elect leader, accepts reads/writes
-  1-node side: cannot form quorum, rejects all requests
-```
-
-**Use case:** Kubernetes control plane (stores cluster state, service endpoints, secrets) — data must be correct even at the cost of temporary unavailability.
-
-### HBase
-
-HBase coordinates via ZooKeeper. The RegionServer that loses ZooKeeper connectivity is fenced off — other RegionServers take over its regions. A client hitting a fenced RegionServer gets an error until failover completes. HBase prioritizes not serving stale or conflicting data.
+| System | Quorum mechanism | Typical role |
+|--------|-----------------|--------------|
+| **ZooKeeper** | Zab atomic broadcast | Leader election, config, locks |
+| **etcd** | [Raft](../../consensus/raft) | Kubernetes control-plane state |
+| **HBase** | Coordinated via ZooKeeper | Fences off partitioned RegionServers |
 
 ## AP Systems
 
-AP systems choose **availability over consistency** during a partition. All nodes accept reads and writes, even though different partitions may diverge. After the partition heals, the system converges via reconciliation.
+AP systems choose **availability over consistency** during a partition. Every node keeps accepting reads and writes, so partitions may diverge; after the partition heals, the system **reconciles** the conflicting versions. Two ideas matter more than any product:
 
-### Cassandra
+- **Tunable consistency** — the CP/AP label isn't fixed. A quorum-based store behaves as AP when it answers from a single replica (fast, maybe stale) and as CP when it requires a majority (refuse rather than serve stale). The same cluster sits on different sides of CAP depending on the per-operation setting.
+- **Reconciliation on reconnect** — because both sides accepted writes, the system must merge them: last-write-wins by timestamp, version/vector clocks to detect concurrent writes, or [CRDTs](../multi-region-design#crdts-conflict-free-replicated-data-types) where any merge order is correct. Availability *during* the partition is paid for with reconciliation complexity *after* it.
 
-Cassandra's consistency is **tunable per operation** using consistency levels. With `ONE` or `LOCAL_ONE`, Cassandra is AP: any node responds immediately, even if it hasn't replicated recent writes.
-
-```
-3-node Cassandra cluster, RF=3, partition splits [2, 1]:
-
-  Write x=2 at CL=ONE:
-    Coordinator writes to 1 available replica → ACK immediately
-    Partitioned node still has x=1
-
-  Read x at CL=ONE from partitioned node:
-    Returns x=1 ← stale, but no error
-
-  After partition heals:
-    Anti-entropy repair (Merkle tree comparison) reconciles x=2 to all nodes
-    Last-write-wins (LWW) timestamp determines the winner if conflicting writes occurred
-```
-
-Cassandra with `QUORUM` behaves more like CP — reads and writes require a majority. This illustrates that the CP/AP classification is not fixed; it depends on how you configure the system.
-
-### DynamoDB
-
-DynamoDB defaults to **eventually consistent reads** — AP behavior. A read after a write may return the old value from a replica that hasn't yet received the write.
-
-`ConsistentRead=true` enables strongly consistent reads routed to the primary, but at higher latency and 2× read unit cost. Even then, if the primary is unavailable, strongly consistent reads fail rather than returning stale data — making that mode behave more like CP.
-
-**Conflict resolution:** DynamoDB uses vector clocks (internally) and last-writer-wins semantics. Conditional writes (`PutItem` with `ConditionExpression`) let applications implement optimistic concurrency.
-
-### CouchDB
-
-CouchDB is explicitly designed for multi-master active-active replication (including mobile offline sync). Each document has a revision tree. When two replicas diverge due to a partition and both accept writes, CouchDB tracks both revision branches. On reconnection:
-
-- One revision is deterministically chosen as the winner (by revision hash comparison)
-- The "losing" revision is preserved as a conflict
-- The application resolves the conflict if needed
-
-This is the **merge-on-reconnect** AP model, maximizing availability at the cost of requiring conflict resolution logic.
+| System | Default | How it stays available |
+|--------|---------|-----------------------|
+| **Cassandra** | AP at `ONE`, CP-leaning at `QUORUM` | Tunable consistency level per operation |
+| **DynamoDB** | AP (eventually consistent reads) | Strongly consistent reads are opt-in (CP-like) |
+| **CouchDB** | AP | Multi-master, merge-on-reconnect via revision trees |
 
 ## System Classification
 
@@ -171,37 +126,13 @@ This is the **merge-on-reconnect** AP model, maximizing availability at the cost
 
 ## Common Misconceptions
 
-### "You choose 2 out of 3"
+**"You pick 2 of 3."** The framing implies P is optional — it isn't. Any system spanning multiple machines must tolerate partitions, so the real choice is **CP or AP when one occurs**. With no partition, a system can satisfy all three at once.
 
-The framing "pick two" implies P is optional. It isn't. Every distributed system spanning multiple machines must tolerate partitions — hardware fails, networks partition, VMs restart. The real choice is: **CP or AP when a partition occurs**.
+**"CA systems exist."** CA only describes a single node, which has no partition to tolerate. "MySQL is CA" means *single-node* MySQL; the moment you add a replica, the primary–replica link can partition and you must choose CP or AP.
 
-During normal operation (no partition), well-designed systems appear to satisfy all three. CAP only forces a choice when something actually breaks.
+**"CAP-C = ACID-C."** CAP's C is **linearizability** (every read reflects the latest write globally); ACID's C is **invariant preservation** (constraints hold within a transaction). A system can be ACID-consistent on one node while returning stale cross-node reads during a partition.
 
-### "CA systems exist"
-
-"CA" (consistent and available, not partition tolerant) only applies to single-node systems — a traditional RDBMS running on one machine has no network partition to worry about. The moment you add a second node, you have a distributed system and partitions become possible.
-
-When people say "MySQL is CA," they mean MySQL in a single-node deployment is not required to handle partitions. A replicated MySQL cluster must still choose between CP and AP behavior when a replica loses connectivity.
-
-### "CAP consistency = ACID consistency"
-
-CAP Consistency (C) = **linearizability** — every read reflects the most recent write globally.
-
-ACID Consistency (C) = **invariants** — a transaction takes the database from one valid state to another (e.g., referential integrity, constraints).
-
-These are different properties. An AP system can have full ACID transactions within a single node while still returning stale reads across nodes during a partition.
-
-### "Cassandra is always AP"
-
-Cassandra with `ALL` consistency level requires all replicas to respond. If one replica is unreachable (due to a partition or failure), the write or read fails — this is CP behavior. The classification depends on which consistency level you configure.
-
-### "CAP applies all the time"
-
-CAP's tradeoff is only forced when there is a **network partition**. In normal operation with all nodes connected, a system can be both consistent and available. Partitions are rare in well-maintained clusters — but they happen (planned maintenance, network hiccups, AZ failures).
-
-{{< callout type="info" >}}
-In a system design interview, lead with the partition question: *"Does this component need to stay available during a partition, or must it refuse requests to avoid serving stale data?"* Inventory and payment systems (CP — never serve stale stock/balance), vs. social feeds and view counts (AP — stale data is acceptable). This framing shows you understand CAP as an operational decision, not just a theorem.
-{{< /callout >}}
+**"Cassandra is always AP."** At `ALL` (or `QUORUM` when a partition drops below quorum) it refuses the operation rather than serve stale data — CP behavior. The label depends on the configured consistency level, not the product.
 
 ## CAP in Practice
 

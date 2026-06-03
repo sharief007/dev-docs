@@ -101,17 +101,11 @@ W + R = 2 ≤ N = 3 ✗ → stale reads possible
 **"Tunable consistency" does not mean free consistency.** Raising the consistency level from ONE to QUORUM increases read/write latency proportionally (you wait for more replicas). In a geo-distributed cluster, a QUORUM read may cross datacenter boundaries, adding 50–200ms. Per-operation tuning is powerful, but every consistency upgrade has a latency and availability cost — there is no setting that gives you strong consistency at ONE-level latency.
 {{< /callout >}}
 
-## DynamoDB: PA/EL with an Escape Hatch
+## PA/EL with an Escape Hatch
 
-DynamoDB defaults to eventually consistent reads (PA/EL) but offers `ConsistentRead=true` for strongly consistent reads (EC behavior) at 2× read unit cost and higher latency.
+A common pattern is a system that is PA/EL by default but lets you opt into EC per request. DynamoDB is the canonical example: reads are eventually consistent by default, but `ConsistentRead=true` gives a strongly consistent read at **higher latency and higher cost**.
 
-```
-Eventually consistent read:  may return data up to ~1s old, 0.5ms p50
-Strongly consistent read:    always current, 1–3ms p50, 2× RCU cost
-Transactional read:          serializable, 2× RCU + coordination overhead
-```
-
-The default is EL because most DynamoDB workloads — session state, user preferences, product catalog — tolerate brief staleness. Applications opt into EC selectively for the operations that require it (inventory reservation, balance checks).
+The default is EL because most workloads — session state, user preferences, product catalog — tolerate brief staleness. Applications opt into EC selectively for the few operations that require it (inventory reservation, balance checks). This is the PACELC tradeoff made adjustable per request rather than fixed system-wide.
 
 ## Applying PACELC in System Design Interviews
 
@@ -134,10 +128,6 @@ CAP framing asks: "What happens during a failure?" PACELC framing asks: "What is
 Instead of saying "I'll use Cassandra because it's AP," say: "For the activity feed I'll use Cassandra at `LOCAL_ONE` — users can tolerate a few seconds of staleness and I want low read latency. For the balance ledger I'll use the primary replica at `LOCAL_QUORUM` or route to the SQL primary — staleness here has monetary consequences."
 
 This framing shows you understand that consistency is a per-operation decision, not a system-level binary.
-
-{{< callout type="info" >}}
-PACELC doesn't replace CAP — it generalizes it. When an interviewer asks about consistency tradeoffs, lead with the Else clause: the L/C tradeoff on every request. Then address the Partition clause: what the system does during a fault. Most real systems are rarely partitioned; the L/C tradeoff is the one you actually tune.
-{{< /callout >}}
 
 {{< callout type="info" >}}
 **Interview tip:** I'd frame PACELC precisely as "during Partition: A or C; Else: Latency or Consistency" — and stress that the **Else clause matters more day-to-day** because partitions are rare but every read pays the L-vs-C cost. Concretely: DynamoDB and Cassandra-at-ONE are PA/EL (fast eventually-consistent reads), Spanner and CockroachDB are PC/EC (always consistent, always paying coordination), and Cassandra is the interesting case because its consistency level lets you pick PA/EL or PA/EC per operation. The mistake I'd avoid is treating consistency as a system-level setting — it's a per-operation decision, so feeds and view counts go EL on the cheap path, while balances and idempotency keys go EC even though they're 3× the cost. And I'd remind myself the math: R + W > N is what makes quorum reads consistent; ONE/ONE doesn't satisfy it.

@@ -222,10 +222,6 @@ Search index:           Eventual consistency (EL) — seconds of lag is fine
 ```
 
 {{< callout type="info" >}}
-In a system design interview, the strongest signal is knowing which operations require linearizability and which tolerate eventual consistency. State it explicitly: "The balance read before a debit must be linearizable — I'll route it to the primary. The feed read can be eventually consistent — I'll read from the nearest replica." This shows you treat consistency as a per-operation decision with cost implications, not a binary system property.
-{{< /callout >}}
-
-{{< callout type="info" >}}
 **Interview tip:** I'd be precise about the term: linearizability is a **single-object** guarantee — every read sees the most recent write across replicas, in real-time order. It's not the same as serializability, which is a **multi-object** isolation guarantee about transaction interleaving; you can have one without the other, and conflating them is the most common interview red flag here. In practice I'd reach for linearizability only on operations where staleness causes correctness failures (balances, inventory, locks, idempotency keys) and accept causal or eventual consistency everywhere else. Session guarantees — read-your-writes and monotonic reads — are usually the right middle ground; they're cheap to implement with LSN-based routing and they prevent the "I just updated my photo, why is the old one back?" failure that users actually notice.
 {{< /callout >}}
 
