@@ -121,7 +121,7 @@ AP systems choose **availability over consistency** during a partition. Every no
 | **Cassandra** | AP (default) | Tunable; `ONE` = AP, `QUORUM` = closer to CP |
 | **DynamoDB** | AP (default) | Eventually consistent reads by default; strong reads = CP-like |
 | **CouchDB** | AP | Multi-master with merge-on-reconnect; always accepts writes |
-| **MongoDB** | CP (default) | Primary-only writes via Raft; secondary reads are optionally AP |
+| **MongoDB** | CP (default) | Primary-only writes via a Raft-like protocol (pv1); secondary reads are optionally AP |
 | **Spanner** | CP | TrueTime-based external consistency; minority partition unavailable |
 
 ## Common Misconceptions

@@ -144,6 +144,7 @@ flowchart TB
 ```python
 import jwt
 import time
+import uuid
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 

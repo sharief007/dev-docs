@@ -38,7 +38,7 @@ A system is classified as **PA/EL**, **PC/EC**, **PA/EC**, or **PC/EL** based on
 | **Google Spanner** | PC/EC | Rejects requests without quorum | TrueTime-bounded consistent reads; ~5ms+ latency always |
 | **etcd / ZooKeeper** | PC/EC | Minority partition refuses requests | All reads/writes through leader — consistent, higher latency |
 | **Riak** | PA/EL | Always available, vector clock conflicts | Low latency, eventual consistency |
-| **MongoDB** (primary reads) | PC/EC | Primary-only writes; secondary reads optionally AP | Reads from primary — consistent |
+| **MongoDB** (primary reads) | PC/EC | Primary-only writes via a Raft-like protocol (pv1); secondary reads optionally AP | Reads from primary — consistent |
 | **CockroachDB** | PC/EC | Raft quorum required | Serializable isolation; consistent, ~2ms+ coordination |
 | **Redis** (standalone) | PC/EL | Single node — partition = unavailability | In-memory, sub-ms — no replication latency overhead |
 

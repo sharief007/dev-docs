@@ -50,7 +50,7 @@ flowchart TD
 | **Topic** | Named category of events (e.g., `orders`). Logical grouping — data lives in partitions. |
 | **Partition** | Ordered, immutable, append-only log. The unit of parallelism and ordering. |
 | **Replica** | Copy of a partition on another broker. One is the **leader** (handles reads + writes); others are **followers** (replicate from leader, take over on failure). |
-| **Controller** | Manages cluster metadata: partition leadership, broker liveness. Since Kafka 3.3, this is a [Raft](../consensus/raft.md)-based **KRaft** quorum (replacing ZooKeeper). |
+| **Controller** | Manages cluster metadata: partition leadership, broker liveness. Since Kafka 3.3, this is a [Raft](../../consensus/raft)-based **KRaft** quorum (replacing ZooKeeper). |
 
 Producers and consumers **only talk to partition leaders**. Followers exist purely for durability.
 
@@ -232,7 +232,7 @@ Three components combine:
 | **Consumer isolation** (`isolation.level=read_committed`) | Consumer only sees messages from committed transactions. Uncommitted/aborted messages are invisible. |
 
 {{< callout type="warning" >}}
-**Scope limitation:** Kafka's exactly-once only covers **Kafka-to-Kafka** pipelines (consume → process → produce). If processing writes to an external database, that write is outside the Kafka transaction. For external systems, use the [outbox pattern](../distributed/outbox-pattern.md) or make the consumer [idempotent](../distributed/idempotency.md).
+**Scope limitation:** Kafka's exactly-once only covers **Kafka-to-Kafka** pipelines (consume → process → produce). If processing writes to an external database, that write is outside the Kafka transaction. For external systems, use the [outbox pattern](../../distributed/outbox-pattern) or make the consumer [idempotent](../../distributed/idempotency).
 {{< /callout >}}
 
 {{< details title="Producer internals: batching, compression, and acks" closed="true" >}}
@@ -285,7 +285,7 @@ The `.index` file is sparse — Kafka binary-searches it, then scans forward in 
 {{< details title="If Kafka guarantees ordering within a partition, why can't you just use one partition for strict global ordering across all events?" closed="true" >}}
 One partition = one consumer per group. You lose **all** parallelism. Throughput is capped at what a single consumer can handle.
 
-In practice, you design your partition key so ordering matters *within a key* (per-user, per-order), not globally. If you truly need global ordering (rare), consider whether you can relax the requirement to "causal ordering" and use techniques like [logical clocks](../distributed/logical-clocks.md) instead.
+In practice, you design your partition key so ordering matters *within a key* (per-user, per-order), not globally. If you truly need global ordering (rare), consider whether you can relax the requirement to "causal ordering" and use techniques like [logical clocks](../../distributed/logical-clocks) instead.
 {{< /details >}}
 
 {{< details title="You set acks=all and replication.factor=3. A network partition isolates Broker 1 (the leader) from Brokers 2 and 3. What happens to producers? What happens to consumers?" closed="true" >}}

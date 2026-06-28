@@ -1,6 +1,6 @@
 ---
 title: Load Balancing
-weight: 3
+weight: 10
 type: docs
 ---
 

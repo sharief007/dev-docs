@@ -26,7 +26,7 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;  -- undo: restore bala
 COMMIT;
 ```
 
-In PostgreSQL, undo information is embedded in the WAL (there is no separate undo log file). In MySQL InnoDB, undo logs live in the rollback segment within the system tablespace (or separate undo tablespace).
+PostgreSQL has no undo log at all: it keeps old row versions in the heap (MVCC) and simply never marks an aborted transaction as committed, so a rollback requires no undo work — VACUUM later reclaims the dead tuples (the WAL is used for crash recovery, not undo). In MySQL InnoDB, undo logs live in the rollback segment within the system tablespace (or a separate undo tablespace) and are used both for rollback and to reconstruct MVCC read views.
 
 ### Consistency
 

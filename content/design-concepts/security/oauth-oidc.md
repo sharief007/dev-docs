@@ -269,7 +269,9 @@ import jwt
 class TokenService:
     """Issue and manage OAuth tokens."""
 
-    def __init__(self, signing_key: str, db):
+    def __init__(self, signing_key, db):
+        # signing_key is an RSA private key (PEM string or key object), not an
+        # HMAC secret — RS256 signs with a private key and verifiers hold the public key.
         self.signing_key = signing_key
         self.db = db
 

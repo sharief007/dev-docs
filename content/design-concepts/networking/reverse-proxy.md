@@ -1,6 +1,6 @@
 ---
 title: Reverse Proxy vs Forward Proxy
-weight: 2
+weight: 9
 type: docs
 ---
 

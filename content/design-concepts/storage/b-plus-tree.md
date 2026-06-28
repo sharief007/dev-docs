@@ -137,7 +137,7 @@ The split propagates upward: the parent internal node gains a new key and pointe
 
 ### Fill Factor
 
-Databases leave internal pages partly empty by default (PostgreSQL default: **90% fill factor for leaf pages, 70% for internal**). The spare capacity absorbs insertions and delays splits. For append-only or monotonically increasing keys (e.g., auto-increment IDs), a fill factor of 100% is safe — splits only ever happen at the rightmost page.
+Databases leave leaf pages partly empty by default (PostgreSQL's default B-tree `fillfactor` is **90%**, applied to leaf pages; internal pages are filled by the split algorithm, not a separate fillfactor setting). The spare capacity absorbs insertions and delays splits. For append-only or monotonically increasing keys (e.g., auto-increment IDs), a fill factor of 100% is safe — splits only ever happen at the rightmost page.
 
 {{< callout type="warning" >}}
 Monotonically increasing insert patterns (auto-increment, ULIDs, time-sorted IDs) concentrate all writes on the **rightmost leaf page**. At high insert rates this creates a "right-edge hotspot" where that single page is the write bottleneck. This is why some workloads use random UUIDs as primary keys — distributing writes across all pages — at the cost of more page splits and cache fragmentation.

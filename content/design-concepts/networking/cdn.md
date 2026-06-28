@@ -1,6 +1,6 @@
 ---
 title: CDN
-weight: 9
+weight: 11
 type: docs
 ---
 

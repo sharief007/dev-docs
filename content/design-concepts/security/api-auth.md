@@ -339,7 +339,7 @@ flowchart LR
 
 **Example: Stripe's model**
 
-- **Public API calls:** API key (`example_key_...`) in `Authorization: Bearer` header identifies the merchant account + authenticates
+- **Public API calls:** secret API key (`sk_live_...`) sent via HTTP Basic auth (`Authorization: Basic <base64(sk_live_...:)>`) identifies the merchant account + authenticates
 - **Webhook deliveries to your server:** HMAC-SHA256 signature in `Stripe-Signature` header, verified with your webhook secret
 - **User-initiated actions:** OAuth 2.0 Connect for platform integrations, JWT for session management
 

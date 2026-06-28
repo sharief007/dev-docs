@@ -1,6 +1,6 @@
 ---
 title: HTTP Headers
-weight: 8
+weight: 7
 type: docs
 ---
 

@@ -15,7 +15,7 @@ These are order-of-magnitude numbers from 2024. The exact values change with har
 | L1 cache reference | ~1 ns | CPU-local, fastest possible |
 | L2 cache reference | ~4 ns | Still on-chip |
 | L3 cache reference | ~10 ns | Shared across cores |
-| RAM access | ~100 ns | Main memory; 10× slower than L2 |
+| RAM access | ~100 ns | Main memory; ~10× slower than L3 |
 | SSD random read | ~100 µs | 1,000× slower than RAM |
 | SSD sequential read (1 MB) | ~1 ms | SSDs shine at sequential I/O |
 | HDD random seek | ~10 ms | 100× slower than SSD random |

@@ -168,7 +168,7 @@ Corner neighbors are farther   All neighbors are equidistant
 | Property | GeoHash (Rectangle) | H3 (Hexagon) |
 |----------|-------------------|---------------|
 | Neighbor distance | Corner neighbors are √2× farther than edge neighbors | All 6 neighbors are equidistant from center |
-| Cell area uniformity | Varies with latitude (see [GeoHash](../specialized/geohash#limitations)) | Near-uniform globally (icosahedron projection) |
+| Cell area uniformity | Varies with latitude (see [GeoHash](../geohash#limitations)) | Near-uniform globally (icosahedron projection) |
 | Cells to search for radius | 9 (including corners that barely overlap) | 7 (center + 6 neighbors, all meaningful) |
 | Resolution levels | Determined by string length | 16 predefined resolutions (0-15) |
 | Implementation | Simple string encoding | Library required (`h3-py`, `h3-java`) |

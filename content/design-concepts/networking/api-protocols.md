@@ -1,6 +1,6 @@
 ---
 title: REST vs gRPC vs GraphQL
-weight: 11
+weight: 13
 type: docs
 ---
 
