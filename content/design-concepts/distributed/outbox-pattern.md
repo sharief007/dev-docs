@@ -249,3 +249,25 @@ The end-to-end guarantee is **effectively exactly-once**: at-least-once delivery
 {{< callout type="info" >}}
 **Interview tip:** The outbox pattern is my standard answer to **the dual-write problem** — the moment a service has to update its own DB and publish to Kafka, I write the business row and an outbox row in the same DB transaction so either both happen or neither does, and let a separate relay publish the events. I'd strongly prefer Debezium reading the WAL (CDC) over a polling relay — no `published` flag to manage, no DB load from periodic queries, and near-real-time latency. The honest caveat I'd raise unprompted: this is **at-least-once delivery, not exactly-once** — Debezium can republish events on restart, so consumers must be idempotent (inbox table or business-key dedup in the same transaction as the side effect). Combined, you get effectively exactly-once *processing* across service boundaries without distributed transactions.
 {{< /callout >}}
+
+## Test Your Understanding
+
+### Why isn't broker-level deduplication enough?
+
+A consumer reads `PaymentCharged`, charges the card, then crashes *before* committing its offset. The broker redelivers `PaymentCharged`. Can't the broker just deduplicate this?
+
+**No — the duplicate was created by the processing workflow, not the broker.** Even a broker that *never* duplicates a message will redeliver here, because the offset was never committed. Broker-level dedup only catches duplicates the broker itself produces; it can't know your consumer already applied a side effect. The fix lives in the consumer: processing the same event any number of times must yield the same business outcome. Production systems store an `eventId` / `idempotencyKey` and check it before executing the side effect — the inbox table above is exactly this.
+
+### Can't I just deduplicate using message ordering?
+
+"The broker can drop any message whose ID is lower than the last committed ID — a global monotonic sequence gives me dedup for free." Why is this fragile?
+
+**A global monotonic sequence breaks in practice.** It falls apart with partitioned brokers, multiple producers, multi-region deployments, and out-of-order delivery — none of which guarantee a single increasing ID stream. This is why production systems deduplicate on a stable `eventId` or `idempotencyKey` rather than relying on ordering.
+
+### The charge succeeded but the event never published — what's this called?
+
+A payment service charges the card, then crashes *before* publishing `PaymentCharged`. Money moved; no event exists; the saga waits forever. What is this problem, why can't the saga fix it, and which pattern solves it?
+
+- **It's the dual-write problem** — writing to the database (the charge) and publishing to the broker (the event) are two independent operations with no shared transaction.
+- **The saga can't solve it** because the saga *depends on* that event being published; the gap sits underneath the saga, between the local commit and the publish.
+- **The Transactional Outbox Pattern solves it** — write the business change and an outbox row in one local transaction, then let a relay publish the outbox row. CDC (Debezium) is one way to publish, but it isn't required — a polling publisher reading unpublished rows implements the same pattern. Either way the relay may publish twice, so consumers stay idempotent.

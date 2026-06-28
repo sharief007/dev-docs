@@ -243,3 +243,42 @@ Does the transaction span multiple services?
 {{< callout type="info" >}}
 **Interview tip:** When a workflow spans multiple services with their own databases, I reach for a Saga and explicitly *not* 2PC — distributed transactions across microservices recouple the services you intentionally decoupled. I'd default to **orchestration** over choreography because a central orchestrator gives you a single place to track saga state, retry, and trigger compensations; choreography only stays simple for 2–3 step flows before the implicit event graph becomes impossible to reason about. The two correctness rules I'd state unprompted: **compensating transactions must be idempotent** (orchestrator may retry them after crashes, so `RefundPayment(id)` called twice must produce one refund), and **they must always eventually succeed** — design with retry queues, not give-up paths. And I'd flag the tradeoff honestly: sagas give eventual consistency, not atomicity, so I'd use semantic locks (`status = PENDING_FULFILLMENT`) to hide intermediate states from concurrent readers.
 {{< /callout >}}
+
+## Test Your Understanding
+
+Interviewers rarely ask "what is a saga?" — they probe the edges where the happy path breaks down. Work through these.
+
+### A step fails — must the saga always compensate?
+
+A checkout saga runs Create Order ✓, Reserve Inventory ✓, Charge Payment ✗. Should it immediately release the inventory and cancel the order?
+
+**Not necessarily — a failed step does not automatically imply compensation.** Two designs are both valid:
+
+- **All-or-nothing:** the order must be fully fulfilled or fully rolled back. Here you *do* compensate — release inventory, cancel the order.
+- **Pending payment:** keep the order in a `PAYMENT_FAILED` state, optionally hold the inventory reservation for 15 minutes, and let the customer retry. No compensation runs immediately.
+
+Most real checkouts use the second design — releasing inventory the instant a card is declined is poor UX when the customer would happily retry with another card. The principle: **a saga compensates when a business invariant can no longer be satisfied.** A step failure is just one signal; the workflow decides whether to retry, wait, escalate to a human, or compensate.
+
+### Can every saga step be compensated?
+
+A saga runs Create Order ✓, Charge Payment ✓, Send Confirmation Email ✓, Create Shipping Label ✗ and decides to compensate. What is the compensation for "send confirmation email"?
+
+**You can't unsend an email — so the compensation is a new corrective action, not a literal undo.** You send a follow-up "your order could not be completed" message. Not every step has a clean inverse: emails, SMS, push notifications, and physical shipments are irreversible side effects. Compensations are **semantic** — they issue a forward action that offsets the original effect, which is why a refund is a new credit transaction, not a `DELETE` of the payment row.
+
+### How do you stop a saga from hanging IN_PROGRESS forever?
+
+The payment service hasn't responded for 48 hours. It might be down, or it might have charged the customer and lost the response. How do you keep the saga from sitting in `IN_PROGRESS` indefinitely?
+
+Retries alone won't save you. A production answer layers several mechanisms:
+
+- **Reconciliation jobs** — a periodic job inspects sagas stuck past their window, compares state across services (`Payment = SUCCESS`, `Shipping = NOT_STARTED`), and repairs the workflow. Nearly every payments and banking system runs these, because some failures can't be resolved in real time.
+- **Query APIs** — instead of *assuming* the payment timed out, the reconciler calls `GET /payments/{sagaId}` and reacts to the real state (`SUCCESS`, `FAILED`, `PROCESSING`, `NOT_FOUND`).
+- **A bounded lifecycle with SLA-based escalation** — past a timeout the saga moves through explicit states and, past a business SLA, stops auto-retrying and escalates to a human:
+
+```
+STARTED → WAITING_FOR_PAYMENT → PAYMENT_TIMEOUT (30 min)
+        → RECONCILIATION_PENDING → MANUAL_REVIEW (after SLA)
+        → COMPENSATED or COMPLETED
+```
+
+One misconception to correct: a long-running orchestrator does **not** have to hold threads or burn resources while it waits. It persists state and wakes only when an event arrives, a timer fires, or a timeout expires — frameworks like Temporal, Netflix Conductor, and Camunda run orchestrated sagas lasting days or weeks. A 48-hour orchestrated saga is a perfectly valid design.
