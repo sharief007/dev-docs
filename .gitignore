@@ -1,9 +1,10 @@
+# Hugo build output and cache
 public/
+resources/
+.hugo_build.lock
 
-public/*
-
+# Dependencies
 node_modules/
 
-node_modules/*
-
+# Editor
 .idea
