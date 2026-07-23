@@ -1,41 +1,34 @@
 ---
-title: Real-time Leaderboard System
+title: 'Leaderboard'
 weight: 1
 type: docs
 ---
 
-Imagine you are tasked with designing a real-time leaderboard system for a massive multiplayer online game. This system needs to track player scores from millions of matches, provide players with their live ranking instantly, and be highly available and scalable to handle peak tournament traffic.
+Every competitive game — from mobile titles like PUBG Mobile and Clash of Clans to web-scale esports tournaments — needs a leaderboard: a ranked list of millions of players that updates in real time. When a match ends, a player's score is written, and within seconds the global top-100 board and the "what is my rank?" query must both reflect the change. The problem sounds simple — "sort by score" — but at scale it becomes anything but: a SQL `SELECT COUNT(*) WHERE score > ?` on a 50-million-row table takes hundreds of milliseconds under write load, which is impractical as a hot read path with a 10 ms latency target.
 
-The user gets a point when they win a match. We can go with a simple point system in which each user has a score associated with them. Each time the user wins a match, we should add a point to their total score. Each month, a new tournament kicks off which starts a new leaderboard.
+The interesting design space lives at the intersection of the right data structure (Redis sorted sets), the right write path (synchronous vs. Kafka-buffered), and two genuinely hard sub-problems: **tie-breaking** (when thousands of players share the same integer score) and **sharding** (how to compute a global rank when no single Redis instance can hold all 50 million members and serve 250,000 reads per second).
 
-**Data Volume:**
+## Functional Requirements
 
-* Up to **25 million Monthly Active Users (MAU)** participating in a tournament.
-* An average of **5 million Daily Active Users (DAU)**, with each user playing approximately 10 matches per day.
-* Each monthly leaderboard will contain entries for all 25 million MAU.
+1. **Update score**: Accept a score event for a user; maintain their best (or cumulative) score on the board.
+2. **Global top-K**: Return the top *K* players (e.g. top 100) with their rank, username, and score.
+3. **My rank**: Given a user ID, return their current rank and score.
+4. **Nearby ranks**: Given a user ID, return the *N* players immediately above and below them.
+5. **Segmented leaderboards**: Maintain separate ranked boards per country, per friend-group, and per time window (daily, weekly, all-time).
 
-**Functional Requirements:**
+## Out of Scope
 
-The system must support the following primary queries for any given monthly tournament:
+- Score validation and anti-cheat pipelines (scores arrive pre-computed from game servers).
+- Authentication and authorisation (handled by an upstream API gateway).
+- Rich player profiles, avatars, or social graphs beyond name and country.
+- Push notifications when a player's rank changes (can layer on top via a separate notification service).
 
-1.  **Top N Players:**
-    * Return the **top 10 players** (showing `user_id`, `score`, and `rank`) on the current leaderboard.
-2.  **Specific User Rank:**
-    * For a given `user_id`, return that user's current **rank and total score**.
-3.  **Surrounding Ranks (Player Context View):**
-    * *(Bonus Requirement)* For a given `user_id`, return a list of players who are **four places above and four places below** that user, including the user themselves (a total of 9 players). The response should include each player's `user_id`, `score`, and `rank`.
-4.  **Tie-Breaking:**
-    * If two players have the same score, they are considered to have the same rank. A mechanism to break ties (e.g., using `win_timestamp` to favor the player who reached the score first) can be considered.
+## Non-Functional Requirements
 
-**Non-Functional Requirements:**
-
-1.  **Latency:**
-    * **Real-Time Updates:** The end-to-end latency from a "Match Win" event to the updated rank being queryable must be minimal (seconds, not minutes). A batched or delayed history of results is not acceptable.
-    * **Read Performance:** Queries for the top 10, user rank, and surrounding ranks must be served with very low latency (sub-200ms).
-2.  **Correctness:**
-    * The score for each user must be an accurate sum of their wins. The system must not lose or double-count win events.
-3.  **Scalability:**
-    * The system must be horizontally scalable to handle the current and future growth of the user base and match volume without performance degradation.
-4.  **Reliability & Resilience:**
-    * **High Availability:** The leaderboard service must be highly available. Failure of a single component should not lead to system downtime or data loss.
-    * **Data Integrity:** The system must be resilient to transient failures in downstream components (e.g., the leaderboard data store). Score updates should not be lost if a dependency is temporarily unavailable.
+- **Scale:** 50 M active players; **5,000 score writes/s** sustained; **50,000 rank reads/s** sustained.
+- **Peak factor:** 5× during live tournaments → **25,000 writes/s**, **250,000 reads/s**.
+- **Latency:** top-K and my-rank reads p99 **< 10 ms**; score write acknowledgment p99 **< 50 ms**.
+- **Availability:** 99.9% for reads; 99.5% for writes (a brief write outage is recoverable by replaying the event log).
+- **Consistency:** near-real-time — rank updates must be visible within a few seconds of a score event; minor staleness is acceptable in friend-group boards.
+- **Durability:** no score loss across node failures; durable persistence required before acknowledgment.
+- **Memory budget:** the global sorted set for 50 M players must fit within a Redis cluster (target ≤ 60 GB total per board including replicas).
