@@ -1,0 +1,65 @@
+{{/*
+  Project override of Hextra's utils/fragments.html (theme v0.2.9).
+
+  Why this override exists:
+  Hextra builds the search index (json/search-data.json) by calling markdownify
+  on each page's raw content. When that raw content contains any Hugo shortcode
+  (such as a relref), markdownify panics inside goldmark with a non-deterministic
+  "slice bounds out of range" or "nil pointer dereference" error, which fails the
+  production build.
+
+  Fix: strip shortcode invocations from the raw content before it is markdownified.
+  Shortcodes carry no useful text for the search index, so removing them is safe
+  and leaves the indexed content otherwise identical. For pages without shortcodes
+  (such as the existing design-concepts pages) the strip is a no-op, so their
+  search data is unchanged. This keeps relref usable across the system-design
+  designs, which in turn preserves Hugo's build-time validation of those links.
+
+  Everything below is identical to the upstream theme partial except the single
+  content assignment marked with OVERRIDE.
+*/}}
+{{ $page := . }}
+
+{{ $headingKeys := slice }}
+{{ $headingTitles := slice }}
+
+{{ range $h1 := $page.Fragments.Headings }}
+  {{ if eq $h1.Title "" }}
+    {{ $headingKeys = $headingKeys | append $h1.Title }}
+  {{ else }}
+    {{ $headingKeys = $headingKeys | append (printf "%s#%s" $h1.ID $h1.Title) }}
+  {{ end }}
+  {{ $headingTitles = $headingTitles | append (printf "# %s" $h1.Title) }}
+
+  {{ range $h2 := $h1.Headings }}
+    {{ $headingKeys = $headingKeys | append (printf "%s#%s" $h2.ID $h2.Title) }}
+    {{ $headingTitles = $headingTitles | append (printf "## %s" $h2.Title) }}
+  {{ end }}
+{{ end }}
+
+{{/* OVERRIDE: strip Hugo shortcode invocations before markdownify */}}
+{{ $content := $page.RawContent | replaceRE `(?s)\{\{[%<].*?[%>]\}\}` " " }}
+{{ $len := len $headingKeys }}
+{{ $data := dict }}
+
+{{ if eq $len 0 }}
+  {{ $data = $data | merge (dict "" $page.Plain) }}
+{{ else }}
+  {{ range seq $len }}
+    {{ $i := sub $len . }}
+    {{ $headingKey := index $headingKeys $i }}
+    {{ $headingTitle := index $headingTitles $i }}
+
+    {{ if eq $i 0 }}
+      {{ $data = $data | merge (dict $headingKey ($content | markdownify | plainify)) }}
+    {{ else }}
+      {{ $parts := split $content (printf "\n%s\n" $headingTitle) }}
+      {{ $lastPart := index $parts (sub (len $parts) 1) }}
+
+      {{ $data = $data | merge (dict $headingKey ($lastPart | markdownify | plainify)) }}
+      {{ $content = strings.TrimSuffix $lastPart $content }}
+      {{ $content = strings.TrimSuffix (printf "\n%s\n" $headingTitle) $content }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ return $data }}
