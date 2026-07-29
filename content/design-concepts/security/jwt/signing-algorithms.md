@@ -1,5 +1,5 @@
 ---
-title: Signing Algorithms: HS256 vs RS256
+title: "Signing Algorithms: HS256 vs RS256"
 weight: 2
 type: docs
 ---

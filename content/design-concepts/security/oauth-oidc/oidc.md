@@ -1,5 +1,5 @@
 ---
-title: OIDC: Identity Layer
+title: "OIDC: Identity Layer"
 weight: 4
 type: docs
 ---
