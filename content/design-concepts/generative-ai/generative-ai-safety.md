@@ -1,6 +1,8 @@
 ---
 title: GenAI Safety, Prompt Injection & Data Privacy
-weight: 13
+weight: 10
+aliases:
+  - /design-concepts/ml/generative-ai-safety/
 type: docs
 ---
 
@@ -42,7 +44,7 @@ flowchart TD
     P --> M["Model with minimal evidence and restricted tools"]
     M --> V["Validate output and any proposed action"]
     V --> C["Recheck source access before release"]
-    C --> O["Escaped answer and access-checked citations"]
+    C --> O["HTML-escaped answer and access-checked citations"]
     V --> D["Deny unapproved tool calls or destinations"]
 ```
 
@@ -142,7 +144,7 @@ Even a well-grounded answer can propose a bad action. For any consequential tool
 - Recheck authorization at execution time.
 - Use idempotency and reconcile uncertain outcomes.
 
-See [tool calling and agents]({{% relref "/design-concepts/ml/tool-calling-and-agents" %}}). A read-only tool can still expose confidential information, so "read-only" is not equivalent to harmless.
+See [tool calling and agents]({{% relref "/design-concepts/generative-ai/tool-calling-and-agents" %}}). A read-only tool can still expose confidential information, so "read-only" is not equivalent to harmless.
 
 ## Provider Settings Are Part of the Design
 
@@ -187,8 +189,8 @@ Passing these examples is evidence, not proof against every input. Deterministic
 ## Related Concepts
 
 - [OAuth and OIDC]({{% relref "/design-concepts/security/oauth-oidc" %}}) covers identity.
-- [RAG ingestion]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}) covers lifecycle and revocation.
-- [Evaluation]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}) covers hard release gates.
+- [RAG ingestion]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}) covers lifecycle and revocation.
+- [Evaluation]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}) covers hard release gates.
 
 ## Trade-offs
 
@@ -202,6 +204,8 @@ Passing these examples is evidence, not proof against every input. Deterministic
 | Model-side filtering | Additional signal | Can be bypassed or mistaken; needs external controls |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. A trusted employee uploaded the PDF. Are its instructions trusted?" closed="true" >}}
 No. Upload permission does not make every sentence an application instruction. Treat document content as reference data, even when the uploader is legitimate.

@@ -1,6 +1,8 @@
 ---
 title: Generative AI & LLM Fundamentals
-weight: 4
+weight: 1
+aliases:
+  - /design-concepts/ml/generative-ai-fundamentals/
 type: docs
 ---
 
@@ -181,9 +183,9 @@ Use the model where flexible language is helpful. Do not replace reliable busine
 
 ## Related Concepts
 
-- [Tokens, context, and sampling]({{% relref "/design-concepts/ml/tokens-context-and-sampling" %}}) explains what fits in one request.
-- [Prompt design and structured outputs]({{% relref "/design-concepts/ml/prompt-design-and-structured-outputs" %}}) turns a vague request into a clearer contract.
-- [Retrieval-augmented generation]({{% relref "/design-concepts/ml/retrieval-augmented-generation" %}}) supplies searchable evidence.
+- [Tokens, context, and sampling]({{% relref "/design-concepts/generative-ai/tokens-context-and-sampling" %}}) explains what fits in one request.
+- [Prompt design and structured outputs]({{% relref "/design-concepts/generative-ai/prompt-design-and-structured-outputs" %}}) turns a vague request into a clearer contract.
+- [Retrieval-augmented generation]({{% relref "/design-concepts/generative-ai/retrieval-augmented-generation" %}}) supplies searchable evidence.
 
 ## Trade-offs
 

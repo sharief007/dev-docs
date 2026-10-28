@@ -81,10 +81,13 @@ Assume an average request contains 2,000 input tokens and generates 400 output t
 |--------|-------------|--------|
 | Average token volume/day | 200,000 * 2,400 | 480M tokens/day |
 | Peak request quota | 30 * 60 | 1,800 requests/minute |
-| Peak token volume | 30 * 60 * 2,400 | 4.32M tokens/minute |
+| Average peak token volume | 30 * 60 * 2,400 | 4.32M tokens/minute |
+| Admission-cap peak token volume | 30 * 60 * (6,000 + 600) | 11.88M tokens/minute |
 | In-flight requests | 30/s * 4 s assumed mean duration | 120 average at peak |
 
 The four-second value is a planning mean at the specified admitted load, not a derivation from p50. Tail latency and provider quota accounting require separate tests.
+
+The 4.32 million tokens/minute figure forecasts typical load and spend. It is not the provider quota. The API admits up to 6,000 input tokens and reserves up to 600 output tokens, so a fully loaded minute is 11.88 million tokens. Buy quota for that admission cap, or lower the cap and reject the oversized question before the model call. Do not truncate mandatory policy text to make an average-sized quota look sufficient. Many providers reserve `max_output` even when generation stops early.
 
 If one asynchronous application instance safely supports 40 in-flight requests in a benchmark, five instances provide 200 slots; losing one leaves 160. This is a starting hypothesis with headroom, not proof that five servers meet the target.
 
@@ -131,7 +134,7 @@ Identity and tenant come from the authenticated session. Clients cannot choose a
 | `POST /api/v1/documents/{id}/versions` | Prepare a replacement | `202` accepted, `409` revision conflict |
 | `GET /api/v1/jobs/{id}` | View authorized ingestion status | `200` with processing state |
 | `PATCH /api/v1/documents/{id}/permissions` | Update access under revision control | `200`, `409` revision conflict |
-| `DELETE /api/v1/documents/{id}` | Tombstone and block future use | `204` |
+| `DELETE /api/v1/documents/{id}` | Durably tombstone the document and block future use | `204` once the tombstone commits |
 | `POST /api/v1/questions` | Ask a scoped policy question | `200` domain result; explicit errors below |
 | `GET /api/v1/conversations/{id}` | Read owned, revalidated history | `200` |
 | `DELETE /api/v1/conversations/{id}` | Delete retained history | `204` |
@@ -177,14 +180,17 @@ Other `200` domain statuses are `needs_clarification` and `unsupported`, with a 
 |-------|---------|
 | `400 invalid_question` | Empty, oversized, or invalid input |
 | `409 source_changed` | Selected source eligibility changed before release |
+| `422 provider_refused` | Provider returned a classified safety refusal, not a schema payload |
 | `429 tenant_quota_exceeded` | Caller/tenant exceeded a documented quota |
+| `502 invalid_model_output` | Completion failed validation after bounded recovery |
 | `503 capacity_limited` | Internal admission capacity unavailable |
 | `503 authorization_unavailable` | Source permission could not be established |
 | `503 model_unavailable` | No approved model path succeeded |
-| `502 invalid_model_output` | Completion failed validation after bounded recovery |
 | `504 deadline_exceeded` | Overall request deadline expired |
 
-For retryable limits/failures, include appropriate retry guidance. Do not map operational errors into `unsupported`.
+For retryable limits/failures, include appropriate retry guidance. Do not map operational errors, or a provider safety refusal, into `unsupported`.
+
+`204` on document delete means the tombstone is durable and new questions must not use that document. It does not mean originals, chunks, vectors, and caches are already purged. A retention job must finish that purge before the privacy deadline. Callers who need purge confirmation poll job status. Do not treat `204` as proof the bytes are gone.
 
 ## Data Model
 

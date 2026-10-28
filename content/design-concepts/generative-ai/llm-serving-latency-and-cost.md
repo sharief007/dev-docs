@@ -1,6 +1,8 @@
 ---
 title: LLM Serving, Latency & Cost
-weight: 15
+weight: 12
+aliases:
+  - /design-concepts/ml/llm-serving-latency-and-cost/
 type: docs
 ---
 
@@ -78,21 +80,25 @@ Once a token is delivered, later revocation cannot retract it.
 
 ## Capacity: Requests and Tokens Are Both Resources
 
-Suppose peak admitted traffic is **40 requests/second**, with an average in-flight duration of **3 seconds** at that load:
+Use ExampleCo's admitted peak: **30 requests/second**, with a planning mean duration of **4 seconds** at that load. That is the same peak and the same in-flight estimate as the [case study]({{% relref "/system-design/rag-document-assistant/high-level-design" %}}).
 
 ```text
 Average concurrent requests = arrival rate * average duration
-                            = 40/s * 3 s
+                            = 30/s * 4 s
                             = 120
 ```
 
 This is Little's law for a stable system. It is not a guarantee of p99 capacity; add headroom and test queueing.
 
-A provider might separately limit requests/minute and tokens/minute. With 2,000 input and 400 output tokens per request:
+A provider might separately limit requests/minute and tokens/minute. Average tokens are not the quota. ExampleCo's hard admission cap is 6,000 input tokens and 600 reserved output tokens. The 2,000 + 400 average is only the cost forecast.
 
 ```text
-40 requests/s * 60 s * 2,400 tokens = 5,760,000 tokens/minute
+Peak requests             = 30/s * 60 s = 1,800 requests/minute
+Average token volume      = 1,800 * 2,400 = 4.32 million tokens/minute
+Admission-cap token volume = 1,800 * (6,000 + 600) = 11.88 million tokens/minute
 ```
+
+Size the provider token quota to the admission cap, or lower the cap and reject the oversized question before calling the model. Do not truncate mandatory policy text so that an average-sized quota appears to fit. Many providers reserve `max_output` even when generation stops early, so the 600 output tokens belong in the quota even though the average output is 400.
 
 Actual quota accounting can differ. Check the provider's rules, including reserved output or model-specific tokens.
 
@@ -110,6 +116,8 @@ Output cost =   400 / 1,000,000 * $4 = $0.0016
 Model total per request             = $0.0036
 10,000 requests/day * $0.0036        = $36/day
 ```
+
+That $36/day figure is a smaller drill, not ExampleCo. At the same invented rates, ExampleCo's 200,000 questions/day cost about $720 before retries and the rest of the path. The full arithmetic is in the case study.
 
 That excludes embeddings, retrieval, reranking, storage, network, retries, and operational work. These are not provider prices.
 
@@ -204,6 +212,8 @@ See [circuit breakers]({{% relref "/design-concepts/reliability/circuit-breaker"
 
 ## Test Your Understanding
 
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
+
 {{< details title="1. The first token arrives in 200 ms. Is the answer latency 200 ms?" closed="true" >}}
 Only time to first token is 200 ms. The full answer and validation may take much longer. Report time to usable completion separately.
 {{< /details >}}
@@ -212,12 +222,12 @@ Only time to first token is 200 ms. The full answer and validation may take much
 Not inherently. It changes delivery timing. Cost depends on actual processing and provider billing, including whether cancellation stops generation.
 {{< /details >}}
 
-{{< details title="3. At 40 requests/s and three seconds average duration, what is average concurrency?" closed="true" >}}
-Approximately 120 in a stable system. This is not a p99 capacity target; account for variability, queueing, and headroom.
+{{< details title="3. At 30 requests/s and four seconds average duration, what is average concurrency?" closed="true" >}}
+Approximately 120 in a stable system. This is the same planning mean as the case study. It is not a p99 capacity target; account for variability, queueing, and headroom.
 {{< /details >}}
 
 {{< details title="4. Why can a request-rate quota pass while a token quota fails?" closed="true" >}}
-A small number of long requests can consume many tokens. Model traffic has both per-request and per-token resource dimensions.
+A small number of long requests can consume many tokens. Model traffic has both per-request and per-token resource dimensions. ExampleCo's average peak is 4.32 million tokens/minute, but the admission cap is 11.88 million. A quota sized from the average fails closed, or worse, forces silent truncation, exactly when evidence-heavy questions arrive together.
 {{< /details >}}
 
 {{< details title="5. With the hypothetical rates, what does one 2,000-input, 400-output request cost?" closed="true" >}}

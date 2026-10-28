@@ -53,7 +53,7 @@ flowchart TD
     V --> O["Answer with server-resolved citations"]
 ```
 
-Use the existing response contract from [prompt design]({{% relref "/design-concepts/ml/prompt-design-and-structured-outputs" %}}). The model selects source IDs, not arbitrary URLs.
+Use the existing response contract from [prompt design]({{% relref "/design-concepts/generative-ai/prompt-design-and-structured-outputs" %}}). The model selects source IDs, not arbitrary URLs.
 
 ### Justification and Trade-offs
 
@@ -355,7 +355,9 @@ if evidence is insufficient:
 prompt = pack(question, facts, history, evidence)
 require_serialized_input_at_most(6000_tokens)
 response = generate_with_total_attempt_limit(2, deadline, max_output=600_tokens)
-require_complete_nonrefusal_response(response)
+if provider_safety_refusal(response):
+    return provider_refused_without_mapping_to_unsupported()
+require_complete_schema_response(response)
 answer = validate_schema_status_and_supplied_citations(response)
 apply_evaluated_claim_support_policy(answer, evidence)
 
@@ -367,7 +369,7 @@ transaction using one current authorization snapshot:
 return server_rendered_answer_and_citations(answer)
 ```
 
-Domain outcomes such as `unsupported` also need durable request completion if idempotency replay is supported. Provider or infrastructure errors must record failed/uncertain state, not completed success.
+Domain outcomes such as `unsupported` also need durable request completion if idempotency replay is supported. A classified `422 provider_refused` is a completed outcome and may be replayed; it is not an uncertain provider call and not a successful `unsupported` answer. Provider or infrastructure errors must record failed/uncertain state, not completed success.
 
 ### Token Budget
 
@@ -402,6 +404,7 @@ No schema or secondary model proves arbitrary natural-language entailment perfec
 | Source changes during generation | Discard answer; return `409 source_changed` or bounded safe retry |
 | Authorization cannot be checked | Fail closed with an operational error |
 | Provider returns partial JSON | Bounded recovery or explicit invalid-output failure |
+| Provider safety refusal | Return `422 provider_refused`; do not relabel it as `unsupported` or `503` |
 | Provider times out | Respect remaining deadline and retry budget |
 | Conversation belongs to another employee | Deny before reading any turns |
 | Prior answer cites a deleted source | Do not reuse it as current evidence |

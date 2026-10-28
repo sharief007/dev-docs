@@ -1,6 +1,8 @@
 ---
 title: Prompting vs RAG vs Fine-Tuning
-weight: 11
+weight: 8
+aliases:
+  - /design-concepts/ml/prompting-vs-rag-vs-fine-tuning/
 type: docs
 ---
 
@@ -67,7 +69,7 @@ The benefit is **externalized knowledge**: changing the authoritative source and
 
 The cost is an evidence pipeline. Retrieval can miss a passage, return stale data, or supply distracting text. Fix and measure those failures directly.
 
-See [RAG]({{% relref "/design-concepts/ml/retrieval-augmented-generation" %}}) for the request flow.
+See [RAG]({{% relref "/design-concepts/generative-ai/retrieval-augmented-generation" %}}) for the request flow.
 
 ## Fine-Tuning: Practice a Repeatable Task
 
@@ -178,8 +180,8 @@ A fine-tuned smaller model can lower serving cost for a stable task. A prompt ch
 
 ## Related Concepts
 
-- [Prompt design]({{% relref "/design-concepts/ml/prompt-design-and-structured-outputs" %}}) establishes the baseline.
-- [Evaluation]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}) separates improvement from leakage.
+- [Prompt design]({{% relref "/design-concepts/generative-ai/prompt-design-and-structured-outputs" %}}) establishes the baseline.
+- [Evaluation]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}) separates improvement from leakage.
 - [ML platform design]({{% relref "/design-concepts/ml/ml-platform" %}}) covers model registration and rollout.
 
 ## Trade-offs
@@ -194,6 +196,8 @@ A fine-tuned smaller model can lower serving cost for a stable task. A prompt ch
 | Stable high-volume behavior | Evaluate tuning after baselines | Added lifecycle complexity must pay off |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. The model uses last year's entitlement. Should you fine-tune on the new policy?" closed="true" >}}
 First fix the evidence path. Retrieve the active policy and verify that the model uses it. Fine-tuning is an unnecessarily indirect way to synchronize changing facts.

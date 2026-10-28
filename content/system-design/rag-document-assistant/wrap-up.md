@@ -95,16 +95,16 @@ Do not put unrestricted prompts, source excerpts, employee details, or raw conve
 
 ## Concepts Used
 
-- [LLM fundamentals]({{% relref "/design-concepts/ml/generative-ai-fundamentals" %}}): fluent output is not evidence.
-- [Tokens and context]({{% relref "/design-concepts/ml/tokens-context-and-sampling" %}}): explicit input/output budgets.
-- [Prompt design]({{% relref "/design-concepts/ml/prompt-design-and-structured-outputs" %}}): typed response states and validation.
-- [Embeddings]({{% relref "/design-concepts/ml/embeddings-and-semantic-search" %}}) and [vector search]({{% relref "/design-concepts/ml/vector-search-and-databases" %}}): compatible representation and measured indexes.
-- [RAG]({{% relref "/design-concepts/ml/retrieval-augmented-generation" %}}): external evidence at request time.
-- [Ingestion and freshness]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}): versioned preparation and retirement.
-- [Prompting vs tuning]({{% relref "/design-concepts/ml/prompting-vs-rag-vs-fine-tuning" %}}): choose the lever matching the failure.
-- [Evaluation]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}): component metrics and release gates.
-- [Safety]({{% relref "/design-concepts/ml/generative-ai-safety" %}}): independent authorization and data minimization.
-- [Serving]({{% relref "/design-concepts/ml/llm-serving-latency-and-cost" %}}): quotas, latency, cost, and buffering.
+- [LLM fundamentals]({{% relref "/design-concepts/generative-ai/generative-ai-fundamentals" %}}): fluent output is not evidence.
+- [Tokens and context]({{% relref "/design-concepts/generative-ai/tokens-context-and-sampling" %}}): explicit input/output budgets.
+- [Prompt design]({{% relref "/design-concepts/generative-ai/prompt-design-and-structured-outputs" %}}): typed response states and validation.
+- [Embeddings]({{% relref "/design-concepts/generative-ai/embeddings-and-semantic-search" %}}) and [vector search]({{% relref "/design-concepts/generative-ai/vector-search-and-databases" %}}): compatible representation and measured indexes.
+- [RAG]({{% relref "/design-concepts/generative-ai/retrieval-augmented-generation" %}}): external evidence at request time.
+- [Ingestion and freshness]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}): versioned preparation and retirement.
+- [Prompting vs tuning]({{% relref "/design-concepts/generative-ai/prompting-vs-rag-vs-fine-tuning" %}}): choose the lever matching the failure.
+- [Evaluation]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}): component metrics and release gates.
+- [Safety]({{% relref "/design-concepts/generative-ai/generative-ai-safety" %}}): independent authorization and data minimization.
+- [Serving]({{% relref "/design-concepts/generative-ai/llm-serving-latency-and-cost" %}}): quotas, latency, cost, and buffering.
 - [Idempotency]({{% relref "/design-concepts/distributed/idempotency" %}}), [outbox]({{% relref "/design-concepts/distributed/outbox-pattern" %}}), and [retry handling]({{% relref "/design-concepts/messaging/dlq-and-retry" %}}): durable processing.
 
 ## Final Trade-offs
@@ -140,7 +140,7 @@ No. It excludes text, metadata, graph/index structures, retained versions, repli
 {{< /details >}}
 
 {{< details title="5. Why does 30 requests/s also require a token-quota estimate?" closed="true" >}}
-At 2,400 average input-plus-output tokens, peak traffic is about 4.32 million tokens/minute. A request quota alone does not establish that the provider can serve the workload.
+At 2,400 average input-plus-output tokens, typical peak traffic is about 4.32 million tokens/minute. The admission cap is 6,000 input plus 600 reserved output, or 11.88 million tokens/minute. A request quota, or a token quota sized from the average, does not establish that the provider can serve the workload.
 {{< /details >}}
 
 {{< details title="6. What is the assumed average number of in-flight requests at peak?" closed="true" >}}
@@ -188,7 +188,7 @@ Source existence and access pass, but claim support and citation coverage fail. 
 {{< /details >}}
 
 {{< details title="17. Why return a service error rather than unsupported during a provider outage?" closed="true" >}}
-Unsupported describes missing evidence. An outage is an operational failure and must remain visible to users, retries, availability metrics, and alerts.
+Unsupported describes missing evidence. An outage is an operational failure and must remain visible to users, retries, availability metrics, and alerts. A classified provider safety refusal is `422 provider_refused`, not `unsupported` and not `503`, when it arrives before the deadline. A timely `409 source_changed` is a valid consistency result and does not count against availability; a timeout during that recheck does.
 {{< /details >}}
 
 {{< details title="18. The question is identical but the employee's region changed. Can the cache hit be reused?" closed="true" >}}

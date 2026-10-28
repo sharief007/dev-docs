@@ -1,6 +1,8 @@
 ---
 title: Embeddings & Semantic Search
-weight: 7
+weight: 4
+aliases:
+  - /design-concepts/ml/embeddings-and-semantic-search/
 type: docs
 ---
 
@@ -144,7 +146,7 @@ Similarity ranks candidates. It must not grant access or decide that a claim is 
 | "not eligible for carryover" | Finds related carryover text | Can preserve important literal terms |
 | An employee name | Can return related but wrong names | Exact or normalized name match |
 
-**Hybrid search** combines results from semantic and keyword retrieval. Do not add raw cosine and keyword scores blindly: they may have different scales. Rank-based fusion is one option, covered in [RAG ingestion and retrieval]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}).
+The keyword side of a production assistant is usually **BM25**, not a raw substring scan. **Hybrid search** combines BM25 and embedding ranks. Do not add those scores: they are different scales, not probabilities. Rank-based fusion, and the later **cross-encoder** that rescores a shortlist, are covered in [RAG ingestion and retrieval]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}). The embedding model itself is the **bi-encoder**: passage vectors are computed once and reused.
 
 ## Choosing a Model and a Threshold
 
@@ -164,7 +166,7 @@ There is no universal similarity score meaning "safe to answer." A top result ca
 
 Embeddings are derived from source content, not guaranteed anonymized versions of it. Protect vector storage, metadata, query logs, and the original text.
 
-When a document is deleted or access is revoked, future retrieval must stop returning it. Cached search results and answers must follow the same rules. See [GenAI safety]({{% relref "/design-concepts/ml/generative-ai-safety" %}}).
+When a document is deleted or access is revoked, future retrieval must stop returning it. Cached search results and answers must follow the same rules. See [GenAI safety]({{% relref "/design-concepts/generative-ai/generative-ai-safety" %}}).
 
 ## Trade-offs
 
@@ -177,6 +179,8 @@ When a document is deleted or access is revoked, future retrieval must stop retu
 | Larger embeddings | May improve task representation | More storage and comparison cost; not guaranteed quality |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. A cosine score is 0.92. Can the UI display 92% confidence?" closed="true" >}}
 Not without a separately validated calibration model. Cosine measures a geometric relationship in an embedding space. It does not directly measure factual support, applicability, or probability of correctness.

@@ -1,6 +1,8 @@
 ---
 title: Multimodal Generative AI
-weight: 16
+weight: 13
+aliases:
+  - /design-concepts/ml/multimodal-generative-ai/
 type: docs
 ---
 
@@ -175,7 +177,7 @@ For frequently queried static policies, preprocessing can amortize cost. For a o
 - Instructions inside media remain untrusted content.
 - A hosted OCR or speech service is a data processor too.
 
-Apply source permissions, provider review, encryption, retention, deletion, and safe logging across originals and derivatives. See [GenAI safety]({{% relref "/design-concepts/ml/generative-ai-safety" %}}).
+Apply source permissions, provider review, encryption, retention, deletion, and safe logging across originals and derivatives. See [GenAI safety]({{% relref "/design-concepts/generative-ai/generative-ai-safety" %}}).
 
 ## Evaluate by Modality and Failure Type
 
@@ -192,9 +194,9 @@ Do not let good clean-image performance hide poor scanned-table performance. Sep
 
 ## Related Concepts
 
-- [RAG ingestion]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}) covers evidence preparation.
-- [Evaluation]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}) covers slices and stage isolation.
-- [Serving and cost]({{% relref "/design-concepts/ml/llm-serving-latency-and-cost" %}}) covers complete-path budgets.
+- [RAG ingestion]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}) covers evidence preparation.
+- [Evaluation]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}) covers slices and stage isolation.
+- [Serving and cost]({{% relref "/design-concepts/generative-ai/llm-serving-latency-and-cost" %}}) covers complete-path budgets.
 
 ## Trade-offs
 
@@ -207,6 +209,8 @@ Do not let good clean-image performance hide poor scanned-table performance. Sep
 | Human-reviewed extraction | Stronger critical-data confidence | Review effort and delay |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. The PDF has no selectable text. Does that mean it contains no policy content?" closed="true" >}}
 No. It may consist of scanned images. Use an appropriate extraction or visual-processing path and expose processing failures rather than indexing empty text.

@@ -1,6 +1,8 @@
 ---
 title: Prompt Design & Structured Outputs
-weight: 6
+weight: 3
+aliases:
+  - /design-concepts/ml/prompt-design-and-structured-outputs/
 type: docs
 ---
 
@@ -85,7 +87,7 @@ Use an explicit status instead of forcing the application to interpret prose suc
 | `needs_clarification` | A user-applicability detail is missing | Ask a specific question; do not guess |
 | `unsupported` | Available evidence cannot answer | Explain the gap without inventing policy |
 
-A provider-level refusal or transport error is **not** the same as an `unsupported` business response. Handle those outside the generated payload.
+A provider-level refusal or transport error is **not** the same as an `unsupported` business response. Handle those outside the generated payload. The case study returns a classified safety refusal as `422 provider_refused`, and a transport failure as `503 model_unavailable`.
 
 ### Illustrative JSON Schema
 
@@ -188,9 +190,9 @@ For consequential decisions, prefer showing verified data in a server-owned temp
 
 ## Related Concepts
 
-- [Tokens and context]({{% relref "/design-concepts/ml/tokens-context-and-sampling" %}}) covers prompt size.
-- [Evaluation and observability]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}) covers regression tests.
-- [Safety and privacy]({{% relref "/design-concepts/ml/generative-ai-safety" %}}) covers trust boundaries.
+- [Tokens and context]({{% relref "/design-concepts/generative-ai/tokens-context-and-sampling" %}}) covers prompt size.
+- [Evaluation and observability]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}) covers regression tests.
+- [Safety and privacy]({{% relref "/design-concepts/generative-ai/generative-ai-safety" %}}) covers trust boundaries.
 
 ## Trade-offs
 
@@ -203,6 +205,8 @@ For consequential decisions, prefer showing verified data in a server-owned temp
 | Few-shot examples | Demonstrate subtle behavior | Consume context and can bias answers |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. The model returned valid JSON containing 25 days. What did JSON validation prove?" closed="true" >}}
 Only that the output satisfies the checked shape and types. It did not establish the entitlement. Compare the claim with the supplied, applicable policy, which says 20 days in this example.

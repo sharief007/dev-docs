@@ -1,6 +1,8 @@
 ---
 title: Generative AI Evaluation & Observability
-weight: 12
+weight: 9
+aliases:
+  - /design-concepts/ml/generative-ai-evaluation/
 type: docs
 ---
 
@@ -197,9 +199,9 @@ Online user feedback is valuable but noisy. A user clicking "helpful" does not i
 
 ## Related Concepts
 
-- [RAG]({{% relref "/design-concepts/ml/retrieval-augmented-generation" %}}) supplies the evidence chain.
-- [Fine-tuning decisions]({{% relref "/design-concepts/ml/prompting-vs-rag-vs-fine-tuning" %}}) require fair baselines.
-- [Serving and cost]({{% relref "/design-concepts/ml/llm-serving-latency-and-cost" %}}) connects quality to operational budgets.
+- [RAG]({{% relref "/design-concepts/generative-ai/retrieval-augmented-generation" %}}) supplies the evidence chain.
+- [Fine-tuning decisions]({{% relref "/design-concepts/generative-ai/prompting-vs-rag-vs-fine-tuning" %}}) require fair baselines.
+- [Serving and cost]({{% relref "/design-concepts/generative-ai/llm-serving-latency-and-cost" %}}) connects quality to operational budgets.
 
 ## Trade-offs
 
@@ -212,6 +214,8 @@ Online user feedback is valuable but noisy. A user clicking "helpful" does not i
 | Production sampling | Real-world distribution | Privacy controls and delayed labels |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. Two of four relevant passages appear in the top five. What are recall and precision?" closed="true" >}}
 Recall@5 is 2/4 = 0.5. Precision@5 is 2/5 = 0.4. The denominators differ because the metrics ask different questions.

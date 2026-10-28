@@ -1,6 +1,8 @@
 ---
 title: Tool Calling, Workflows & AI Agents
-weight: 14
+weight: 11
+aliases:
+  - /design-concepts/ml/tool-calling-and-agents/
 type: docs
 ---
 
@@ -184,7 +186,7 @@ Treat newly connected tool servers as new data and action boundaries that requir
 
 ## Related Concepts
 
-- [Safety and privacy]({{% relref "/design-concepts/ml/generative-ai-safety" %}}) defines trust boundaries.
+- [Safety and privacy]({{% relref "/design-concepts/generative-ai/generative-ai-safety" %}}) defines trust boundaries.
 - [Saga pattern]({{% relref "/design-concepts/distributed/saga-pattern" %}}) covers explicit compensation.
 - [Job scheduling]({{% relref "/design-concepts/specialized/job-scheduling" %}}) covers leases and recovery.
 
@@ -199,6 +201,8 @@ Treat newly connected tool servers as new data and action boundaries that requir
 | MCP integration | Standardized connectivity | Trust and business policy remain application concerns |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. The model returned a tool name and valid JSON. Should execution begin immediately?" closed="true" >}}
 No. Check the allowlist, argument semantics, caller permissions, budgets, and any required approval before execution.

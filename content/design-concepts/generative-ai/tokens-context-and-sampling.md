@@ -1,6 +1,8 @@
 ---
 title: Tokens, Context Windows & Sampling
-weight: 5
+weight: 2
+aliases:
+  - /design-concepts/ml/tokens-context-and-sampling/
 type: docs
 ---
 
@@ -161,9 +163,9 @@ Long-context models can be valuable, especially for document-wide tasks. Retriev
 
 ## Related Concepts
 
-- [LLM fundamentals]({{% relref "/design-concepts/ml/generative-ai-fundamentals" %}}) explains the generation loop.
-- [RAG ingestion and retrieval]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}) explains passage selection.
-- [Serving, latency, and cost]({{% relref "/design-concepts/ml/llm-serving-latency-and-cost" %}}) connects tokens to operational budgets.
+- [LLM fundamentals]({{% relref "/design-concepts/generative-ai/generative-ai-fundamentals" %}}) explains the generation loop.
+- [RAG ingestion and retrieval]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}) explains passage selection.
+- [Serving, latency, and cost]({{% relref "/design-concepts/generative-ai/llm-serving-latency-and-cost" %}}) connects tokens to operational budgets.
 
 ## Trade-offs
 
@@ -176,6 +178,8 @@ Long-context models can be valuable, especially for document-wide tasks. Retriev
 | Higher-randomness decoding | More varied drafting | Less suitable for tightly constrained answers |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. A 16,000-token window already contains 15,000 input tokens. Can you reserve 2,000 output tokens?" closed="true" >}}
 Not under the shared-window assumption: 15,000 + 2,000 exceeds 16,000 even before a safety margin. Reduce input or output, or use a suitable model. Also check independent API limits and model-specific accounting.

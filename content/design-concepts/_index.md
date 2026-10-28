@@ -21,5 +21,6 @@ toc: false
     {{< card link="specialized" title="Specialized concepts" subtitle="Typeahead autocomplete, GeoHash encoding, QuadTree spatial indexing, and Uber-style location indexing" >}}
     {{< card link="security" title="Security" subtitle="OAuth 2.0, OIDC, JWT structure and validation, API authentication patterns — API keys, HMAC, mTLS, and Bearer tokens" >}}
     {{< card link="data" title="Data Engineering" subtitle="Batch vs streaming, stream processing engines, data warehouses, and Change Data Capture with Debezium" >}}
-    {{< card link="ml" title="AI / ML Systems" subtitle="Generative AI, embeddings, RAG, evaluation, safety, agents, serving, and multimodal concepts, plus recommendation systems and ML platforms" >}}
+    {{< card link="generative-ai" title="Generative AI" subtitle="LLM fundamentals, tokens, retrieval, RAG, evaluation, safety, agents, serving, and multimodal trade-offs" >}}
+    {{< card link="ml" title="AI / ML Systems" subtitle="Recommendation systems, feature stores, and ML platforms" >}}
 {{< /cards >}}

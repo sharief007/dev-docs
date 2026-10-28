@@ -1,6 +1,8 @@
 ---
 title: Retrieval-Augmented Generation (RAG)
-weight: 9
+weight: 6
+aliases:
+  - /design-concepts/ml/retrieval-augmented-generation/
 type: docs
 ---
 
@@ -199,13 +201,13 @@ Test:
 - Malicious instructions embedded in a source.
 - Provider timeout and incomplete output.
 
-Measure evidence retrieval and answer quality separately. See [evaluation and observability]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}).
+Measure evidence retrieval and answer quality separately. See [evaluation and observability]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}).
 
 ## Related Concepts
 
-- [Embeddings]({{% relref "/design-concepts/ml/embeddings-and-semantic-search" %}}) and [full-text search]({{% relref "/design-concepts/storage/full-text-search" %}}) provide retrieval options.
-- [RAG ingestion and retrieval]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}) covers evidence preparation and updates.
-- [Prompt design]({{% relref "/design-concepts/ml/prompt-design-and-structured-outputs" %}}) defines the response contract.
+- [Embeddings]({{% relref "/design-concepts/generative-ai/embeddings-and-semantic-search" %}}) and [full-text search]({{% relref "/design-concepts/storage/full-text-search" %}}) provide retrieval options.
+- [RAG ingestion and retrieval]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}) covers evidence preparation and updates.
+- [Prompt design]({{% relref "/design-concepts/generative-ai/prompt-design-and-structured-outputs" %}}) defines the response contract.
 
 ## Trade-offs
 
@@ -218,6 +220,8 @@ Measure evidence retrieval and answer quality separately. See [evaluation and ob
 | Structured lookup without generation | Exact values and predictable output | Less flexible explanation |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. Does RAG update the model's weights with company documents?" closed="true" >}}
 Ordinary RAG does not. It supplies retrieved text during inference. Changing the indexed policy can change future answers without training the answer model.

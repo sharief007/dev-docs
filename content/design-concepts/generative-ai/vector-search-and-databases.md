@@ -1,10 +1,12 @@
 ---
 title: Vector Search & Vector Databases
-weight: 8
+weight: 5
+aliases:
+  - /design-concepts/ml/vector-search-and-databases/
 type: docs
 ---
 
-The ExampleCo assistant can compare a question with ten passages instantly. A year later, it searches two million passages, and a full scan becomes too expensive under peak traffic. Someone proposes a vector database. Another engineer asks, "Do we need a new database, or just a better index?"
+The ExampleCo assistant can compare a question with ten passages instantly. The planning corpus used throughout this track is 100,000 documents and 50 chunks each: **five million passages**, queried at a **30 questions/s** peak. A full scan becomes too expensive at that load. Someone proposes a vector database. Another engineer asks, "Do we need a new database, or just a better index?"
 
 **Vector search is a capability. A vector index accelerates that capability. A vector database adds storage and operational features around it.** They are related, but they are not interchangeable terms.
 
@@ -12,17 +14,17 @@ The ExampleCo assistant can compare a question with ten passages instantly. A ye
 
 An exact search calculates the distance to every eligible vector and sorts or selects the nearest results.
 
-For **2 million vectors** of **768 float32 values**:
+For ExampleCo's **5 million vectors** of **768 float32 values**:
 
 ```text
-Raw vector storage = 2,000,000 * 768 * 4 bytes
-                   = 6,144,000,000 bytes
-                   = 6.144 GB, using decimal units
+Raw vector storage = 5,000,000 * 768 * 4 bytes
+                   = 15,360,000,000 bytes
+                   = 15.36 GB, using decimal units
 ```
 
-That excludes text, metadata, database overhead, replicas, and the index.
+That excludes text, metadata, database overhead, replicas, and the index. The [case-study estimate]({{% relref "/system-design/rag-document-assistant/high-level-design" %}}) adds about 10 GB of chunk text and 2.5 GB of chunk metadata. **15.36 GB is not the database size.**
 
-A full scan does approximately `2,000,000 * 768 = 1.536 billion` coordinate comparisons per query. Hardware and optimized libraries matter greatly, but the multiplication explains why an index can become attractive.
+A full scan does approximately `5,000,000 * 768 = 3.84 billion` coordinate comparisons per query. Hardware and optimized libraries matter greatly, but the multiplication explains why an index can become attractive.
 
 ## Exact vs Approximate Nearest Neighbors
 
@@ -52,13 +54,28 @@ flowchart TD
 
 The diagram is conceptual. Engines integrate filtering into graph search in different ways; some filter before, during, or after candidate generation.
 
-Useful tuning concepts:
+Three knobs appear in almost every HNSW API, even when the vendor renames them:
 
-- **Connectivity:** More links can improve navigation but require more memory and build work.
-- **Construction effort:** More thorough graph construction can improve quality at higher ingestion cost.
-- **Search effort:** Exploring more candidates can improve recall but increase latency.
+| Parameter | What it controls | What you pay | ExampleCo starting point |
+|-----------|------------------|--------------|--------------------------|
+| `M` | Maximum links stored per node | Memory and build time. More links usually navigate better. | 16. Move toward 32-64 only if measured recall misses the gate. |
+| `efConstruction` | Candidate-list size while inserting a node | Slower ingestion and full rebuilds, usually a better graph | 128-200. Daily ingestion is only 1,500 documents, so this cost shows up on a 5-million rebuild, not on a normal edit. |
+| `efSearch` | Candidate-list size at query time | Query latency. Changing it does not require a rebuild. | 64-128. Raise it until filtered recall stops improving inside the latency budget. |
 
-Parameter names and defaults vary by implementation. There is no universal latency or recall guarantee for "using HNSW."
+These are planning defaults, not universal optima. There is no latency or recall guarantee for "using HNSW."
+
+A lower-bound memory sketch, not a vendor quote:
+
+```text
+One direction of int64 neighbor IDs ≈ 5,000,000 * M * 8 bytes
+M = 16 => 640 MB
+```
+
+Real graphs store links in both directions and across layers, on top of the 15.36 GB of vectors. Measure the resident set before buying hardware. Do not multiply by a blog-post factor and call it capacity.
+
+`efSearch` also changes meaning once a filter is applied. If the nearest graph neighbors belong to another tenant or an inactive version, a small `efSearch` followed by a post-filter returns an empty page even though permitted passages exist. The engine must apply the filter during traversal, or the query must over-fetch until it has enough permitted hits, with a hard cap so a rare permission set cannot scan the corpus. Dropping the filter to "get results" is an authorization bug.
+
+At this size, start in the existing relational database with a vector index. A dedicated vector service is justified when measured contention, filtered recall, or an operational feature requires it — not because the raw vectors are 15.36 GB.
 
 ## What Must Be Stored?
 
@@ -157,9 +174,9 @@ Do not report only an unfiltered single-query benchmark when production traffic 
 
 ## Related Concepts
 
-- [Embeddings and semantic search]({{% relref "/design-concepts/ml/embeddings-and-semantic-search" %}}) covers representation and similarity.
+- [Embeddings and semantic search]({{% relref "/design-concepts/generative-ai/embeddings-and-semantic-search" %}}) covers representation and similarity.
 - [Database indexes]({{% relref "/design-concepts/storage/database-indexes" %}}) explains the general index trade-off.
-- [RAG ingestion]({{% relref "/design-concepts/ml/rag-ingestion-and-retrieval" %}}) covers source lifecycle.
+- [RAG ingestion]({{% relref "/design-concepts/generative-ai/rag-ingestion-and-retrieval" %}}) covers source lifecycle.
 
 ## Trade-offs
 
@@ -173,6 +190,8 @@ Do not report only an unfiltered single-query benchmark when production traffic 
 
 ## Test Your Understanding
 
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
+
 {{< details title="1. Is a vector database required for RAG?" closed="true" >}}
 No. RAG requires retrieving evidence, which can use keyword search, relational queries, exact vector comparisons, or other methods. A vector database is one implementation choice.
 {{< /details >}}
@@ -182,11 +201,11 @@ No. It measures recovery of exact geometric neighbors under a specific test. Tho
 {{< /details >}}
 
 {{< details title="3. Why does filtering the global top ten sometimes return no results?" closed="true" >}}
-All ten may be forbidden even though permitted relevant passages exist farther down the global ranking. Use filtered search or an appropriate bounded fallback, not weaker authorization.
+All ten may be forbidden even though permitted relevant passages exist farther down the global ranking. Raise `efSearch` or use filter-aware traversal, with a hard cap, rather than post-filtering a tiny global top-k. Do not weaken authorization to fill the page.
 {{< /details >}}
 
-{{< details title="4. Does the 6.144 GB estimate include the HNSW index?" closed="true" >}}
-No. It includes only 2 million vectors, 768 float32 values each. Graph links, text, metadata, database overhead, replicas, and spare capacity add more.
+{{< details title="4. Does the 15.36 GB estimate include the HNSW index?" closed="true" >}}
+No. It includes only 5 million vectors, 768 float32 values each. Graph links, text, metadata, database overhead, replicas, and spare capacity add more. At `M = 16`, one direction of int64 neighbor IDs is already about 640 MB, and a real graph stores more.
 {{< /details >}}
 
 {{< details title="5. Why does an exact vector search still need semantic evaluation?" closed="true" >}}

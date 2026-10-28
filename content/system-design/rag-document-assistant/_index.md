@@ -32,7 +32,7 @@ ExampleCo and all policy rules, prices, and capacity numbers in this case study 
 - Multi-region active-active writes.
 - Legal interpretation or unreviewed changes to official policy.
 
-These are intentional boundaries. The [tool-calling]({{% relref "/design-concepts/ml/tool-calling-and-agents" %}}) and [multimodal]({{% relref "/design-concepts/ml/multimodal-generative-ai" %}}) concepts describe possible later extensions, not hidden requirements for version one.
+These are intentional boundaries. The [tool-calling]({{% relref "/design-concepts/generative-ai/tool-calling-and-agents" %}}) and [multimodal]({{% relref "/design-concepts/generative-ai/multimodal-generative-ai" %}}) concepts describe possible later extensions, not hidden requirements for version one.
 
 ## Non-Functional Requirements
 
@@ -54,6 +54,8 @@ These are intentional boundaries. The [tool-calling]({{% relref "/design-concept
 These are design targets to validate with load tests and evaluation, not achieved benchmark claims.
 
 An eligible request is authenticated, valid, and within its tenant quota. Provider failures, internal overload, and internal deadlines count against availability. A correct `unsupported` result is a valid domain result, but cannot be used to hide operational failures; evidence coverage is measured separately.
+
+A timely `409 source_changed` is also a valid consistency result. It does not count against the 99.9% target. A timeout or authorization outage while revalidating still does. A timely `422 provider_refused` is a classified provider decision, not missing evidence and not an outage. Track refusal rate on the safety dashboard. `502`, `503`, and `504` count against availability.
 
 ### The Access-Consistency Boundary
 

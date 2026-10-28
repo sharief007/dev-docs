@@ -1,6 +1,8 @@
 ---
 title: RAG Ingestion, Retrieval Quality & Freshness
-weight: 10
+weight: 7
+aliases:
+  - /design-concepts/ml/rag-ingestion-and-retrieval/
 type: docs
 ---
 
@@ -97,7 +99,15 @@ These counts are illustrative. They should be selected using evaluation and late
 
 ## Hybrid Search and Rank Fusion
 
-Keyword and vector search are complementary. To combine ranked lists without adding incomparable raw scores, one option is **reciprocal rank fusion (RRF)**:
+Keyword retrieval in this design means **BM25** over an inverted index, not a bag of ad hoc string matches. [Full-text search]({{% relref "/design-concepts/storage/full-text-search" %}}) derives the formula. The working form is:
+
+```text
+BM25(term, passage) = IDF(term) * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * passageLength / averageLength))
+```
+
+`k1` defaults to about 1.2 and saturates repeated terms. `b` defaults to about 0.75 and down-ranks long passages. BM25 wins when the question depends on a policy ID such as `LV-2026-A`, a section title, a negation, or a rare literal that an embedding smooths away. It loses paraphrases such as "holiday allowance" for "annual leave."
+
+Do not add a BM25 score to a cosine score. The scales are not probabilities and are not comparable. Combine ranked lists instead. One standard method is **reciprocal rank fusion (RRF)**:
 
 ```text
 RRF(document) = sum over result lists of 1 / (c + rank)
@@ -109,11 +119,15 @@ This is a ranking heuristic, not a probability. The constant and candidate depth
 
 ## Reranking: Spend More Work on Fewer Candidates
 
-A **reranker** examines a query and candidate passage together to estimate relevance. It can notice relationships that a single precomputed embedding misses.
+The vector index is a **bi-encoder**. It embeds the question and each passage separately, stores the passage vectors, and compares them at query time. That is cheap enough to run over five million chunks, and it is why approximate search exists. It cannot look at the question and a passage in the same forward pass, so it blurs exceptions, negation, and "which of these fifty chunks is actually about Region A."
 
-- Retrieval cheaply narrows a large corpus.
-- Reranking spends more computation on a small shortlist.
+A **cross-encoder** reranker reads the question and one candidate together and emits a relevance score. It sees token-level interaction, which is why it is the usual second stage. It cannot be precomputed for every future question, so it runs only on a shortlist.
+
+- Bi-encoder retrieval cheaply narrows a large corpus.
+- Cross-encoder reranking spends more computation on that shortlist.
 - Context selection removes duplication and preserves evidence coverage.
+
+Budget the shortlist against the product deadline, not against a demo. ExampleCo's answer target is p99 under 10 seconds, with a 12-second request deadline, and generation still has to fit. If an unbatched rerank pass were 20 ms, 50 passages would cost about 1 second before generation; a batched reranker is the production shape, and 20 ms is a planning assumption, not a benchmark. Cap the shortlist. Authorize current sources **before** their text reaches the reranker.
 
 A reranker cannot recover a passage that never entered its candidate set. It also does not grant authorization or prove factual support.
 
@@ -182,9 +196,10 @@ Track extraction failures, job retries, activation lag, active-version mismatch,
 
 ## Related Concepts
 
-- [Vector search]({{% relref "/design-concepts/ml/vector-search-and-databases" %}}) covers index and filter behavior.
-- [RAG]({{% relref "/design-concepts/ml/retrieval-augmented-generation" %}}) separates ingestion from answering.
-- [Evaluation]({{% relref "/design-concepts/ml/generative-ai-evaluation" %}}) measures evidence and answer quality.
+- [Vector search]({{% relref "/design-concepts/generative-ai/vector-search-and-databases" %}}) covers index and filter behavior.
+- [Full-text search]({{% relref "/design-concepts/storage/full-text-search" %}}) covers the inverted index and BM25.
+- [RAG]({{% relref "/design-concepts/generative-ai/retrieval-augmented-generation" %}}) separates ingestion from answering.
+- [Evaluation]({{% relref "/design-concepts/generative-ai/generative-ai-evaluation" %}}) measures evidence and answer quality.
 
 ## Trade-offs
 
@@ -198,6 +213,8 @@ Track extraction failures, job retries, activation lag, active-version mismatch,
 | Immutable versions with activation | Reader-visible consistency | More lifecycle state and cleanup |
 
 ## Test Your Understanding
+
+Try answering before expanding. Explain the missing assumption, not just the vocabulary.
 
 {{< details title="1. The upload API returned success. Why is the document not searchable yet?" closed="true" >}}
 Upload can mean durable receipt, not completed extraction, embedding, indexing, or activation. Expose processing state rather than treating every accepted upload as immediately queryable.
