@@ -30,4 +30,5 @@ New designs follow the shared framework template (`_TEMPLATE.md`) in this folder
     {{< card link="google-maps" title="Google Maps / Navigation" subtitle="Road-network graph, A* routing, map tiles, real-time traffic, ETA" >}}
     {{< card link="file-storage" title="Dropbox / Google Drive" subtitle="Chunking, content-addressed dedup, delta sync, conflict resolution" >}}
     {{< card link="payment-system" title="Payment System" subtitle="Idempotency, double-entry ledger, saga/outbox, reconciliation" >}}
+    {{< card link="rag-document-assistant" title="RAG Document Assistant" subtitle="Current permitted evidence, token and cost estimates, hybrid retrieval, version activation, checked citations, and 30 understanding questions" >}}
 {{< /cards >}}
